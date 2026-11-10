@@ -18,7 +18,7 @@ import {
   useEdgesState,
   useNodesState,
 } from "@xyflow/react";
-import { createWorkflow } from "@/lib/api";
+import { createWorkflow, createWorkflowVersion } from "@/lib/api";
 import type { NodeType, WorkflowDefinition, WorkflowNode } from "@/lib/types";
 
 type EditorNodeData = {
@@ -28,6 +28,7 @@ type EditorNodeData = {
 };
 
 type Props = {
+  workflowId?: string;
   initialDefinition?: WorkflowDefinition;
   onCancel: () => void;
   onSaved: (workflowId: string) => Promise<void> | void;
@@ -87,12 +88,14 @@ function nextNodeId(type: NodeType, nodes: Node<EditorNodeData>[]): string {
   return `${type}-${counter}`;
 }
 
-export function WorkflowEditor({ initialDefinition, onCancel, onSaved }: Props) {
+export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSaved }: Props) {
   const graph = useMemo(() => initialGraph(initialDefinition), [initialDefinition]);
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<EditorNodeData>>(graph.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges);
   const [instance, setInstance] = useState<ReactFlowInstance<Node<EditorNodeData>, Edge> | null>(null);
-  const [workflowName, setWorkflowName] = useState(initialDefinition ? `${initialDefinition.name} copy` : "Untitled workflow");
+  const [workflowName, setWorkflowName] = useState(
+    initialDefinition ? (workflowId ? initialDefinition.name : `${initialDefinition.name} copy`) : "Untitled workflow",
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [configText, setConfigText] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -182,7 +185,9 @@ export function WorkflowEditor({ initialDefinition, onCancel, onSaved }: Props) 
         })),
         edges: edges.map((edge) => ({ source: edge.source, target: edge.target })),
       };
-      const created = await createWorkflow(definition, "Created with the visual workflow editor");
+      const created = workflowId
+        ? await createWorkflowVersion(workflowId, definition)
+        : await createWorkflow(definition, "Created with the visual workflow editor");
       await onSaved(created.id);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
@@ -193,7 +198,7 @@ export function WorkflowEditor({ initialDefinition, onCancel, onSaved }: Props) 
     <section className="editor-shell">
       <div className="editor-toolbar">
         <div><p className="section-label">Visual builder</p><input className="workflow-name-input" value={workflowName} onChange={(event) => setWorkflowName(event.target.value)} aria-label="Workflow name" /></div>
-        <div className="toolbar-actions"><button className="secondary-button" onClick={onCancel}>Hủy</button><button className="primary-button" onClick={saveWorkflow} disabled={saving}>{saving ? "Đang lưu…" : "Lưu workflow mới"}</button></div>
+        <div className="toolbar-actions"><button className="secondary-button" onClick={onCancel}>Hủy</button><button className="primary-button" onClick={saveWorkflow} disabled={saving}>{saving ? "Đang lưu…" : workflowId ? "Lưu version mới" : "Lưu workflow mới"}</button></div>
       </div>
       {error && <div className="error-banner editor-error">{error}</div>}
       <div className="editor-layout">

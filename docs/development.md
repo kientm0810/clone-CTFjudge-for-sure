@@ -57,11 +57,13 @@ Open <http://localhost:3000>, then:
 
 The local dashboard also includes a small n8n-style builder:
 
-1. Click **Workflow trống** to start with Input and Output, or **Sửa dưới dạng bản sao** to clone the selected workflow.
+1. Click **Workflow trống** to start with Input and Output, or **Sửa & tạo version** to edit the selected workflow.
 2. Drag Input, Agent, Database, or Output nodes from the palette onto the canvas.
 3. Connect the right handle of an upstream node to the left handle of the next node.
 4. Select a node to edit its name, Agent prompt, or full config JSON.
-5. Click **Lưu workflow mới**. Definitions remain immutable, so the editor currently saves a new workflow rather than replacing an existing version.
+5. Click **Lưu workflow mới** for a new workflow, or **Lưu version mới** when editing an existing workflow. Definitions remain immutable and the new version becomes active.
+
+The sidebar lists immutable versions. **Rollback** changes the active version pointer without deleting newer versions. A later edit always uses `max(version) + 1`, so saving after a rollback never overwrites history.
 
 The UI uses the asynchronous API, Redis, Celery, PostgreSQL, and Ollama; it does not simulate execution in the browser.
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { createWorkflow, getRun, getWorkflow, listWorkflows, startRun } from "@/lib/api";
-import type { WorkflowDefinition, WorkflowDetail, WorkflowRun, WorkflowSummary } from "@/lib/types";
+import { activateWorkflowVersion, createWorkflow, getRun, getWorkflow, listWorkflows, listWorkflowVersions, startRun } from "@/lib/api";
+import type { WorkflowDefinition, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionSummary } from "@/lib/types";
 import { ComparisonResult } from "./ComparisonResult";
 import { WorkflowCanvas } from "./WorkflowCanvas";
 import { WorkflowEditor } from "./WorkflowEditor";
@@ -130,13 +130,27 @@ export function WorkflowDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorSource, setEditorSource] = useState<WorkflowDefinition | undefined>();
+  const [editorWorkflowId, setEditorWorkflowId] = useState<string | undefined>();
+  const [versions, setVersions] = useState<WorkflowVersionSummary[]>([]);
 
   async function selectWorkflow(id: string) {
     setError(null);
-    const detail = await getWorkflow(id);
+    const [detail, history] = await Promise.all([getWorkflow(id), listWorkflowVersions(id)]);
     setSelected(detail);
+    setVersions(history);
     setInputs(JSON.stringify(sampleInputs(detail.definition), null, 2));
     setRun(null);
+  }
+
+  async function activateVersion(version: number) {
+    if (!selected) return;
+    setBusy(true); setError(null);
+    try {
+      await activateWorkflowVersion(selected.id, version);
+      await refreshWorkflows(selected.id);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally { setBusy(false); }
   }
 
   async function refreshWorkflows(preferredId?: string) {
@@ -191,19 +205,27 @@ export function WorkflowDashboard() {
       </header>
       {error && <div className="error-banner">{error}</div>}
       {editorOpen ? <WorkflowEditor
+        workflowId={editorWorkflowId}
         initialDefinition={editorSource}
         onCancel={() => setEditorOpen(false)}
-        onSaved={async (workflowId) => { setEditorOpen(false); setEditorSource(undefined); await refreshWorkflows(workflowId); }}
+        onSaved={async (workflowId) => { setEditorOpen(false); setEditorSource(undefined); setEditorWorkflowId(undefined); await refreshWorkflows(workflowId); }}
       /> : <section className="workspace">
         <aside className="sidebar">
           <div className="sidebar-title"><h2>Workflows</h2><button className="icon-button" onClick={() => refreshWorkflows()} title="Làm mới">↻</button></div>
           <button className="primary-button full" onClick={createRagDemo} disabled={busy}>+ Tạo workflow RAG</button>
-          <button className="secondary-button full editor-button" onClick={() => { setEditorSource(undefined); setEditorOpen(true); }}>+ Workflow trống</button>
-          <button className="secondary-button full editor-button" disabled={!selected} onClick={() => { setEditorSource(selected?.definition); setEditorOpen(true); }}>Sửa dưới dạng bản sao</button>
+          <button className="secondary-button full editor-button" onClick={() => { setEditorWorkflowId(undefined); setEditorSource(undefined); setEditorOpen(true); }}>+ Workflow trống</button>
+          <button className="secondary-button full editor-button" disabled={!selected} onClick={() => { setEditorWorkflowId(selected?.id); setEditorSource(selected?.definition); setEditorOpen(true); }}>Sửa & tạo version</button>
           <div className="workflow-list">
             {workflows.map((workflow) => <button key={workflow.id} className={`workflow-item ${selected?.id === workflow.id ? "selected" : ""}`} onClick={() => selectWorkflow(workflow.id)}><span>{workflow.name}</span><small>v{workflow.current_version}</small></button>)}
             {!workflows.length && <p className="muted">Chưa có workflow.</p>}
           </div>
+          {!!versions.length && <div className="version-history">
+            <h3>Version history</h3>
+            {versions.map((version) => <div className={`version-item ${version.is_current ? "current" : ""}`} key={version.id}>
+              <div><strong>v{version.version}</strong><small>{new Date(version.created_at).toLocaleString("vi-VN")}</small></div>
+              {version.is_current ? <span>ACTIVE</span> : <button disabled={busy} onClick={() => activateVersion(version.version)}>Rollback</button>}
+            </div>)}
+          </div>}
           <div className="legend"><h3>Node types</h3><span><i className="dot input" />Input</span><span><i className="dot agent" />Agent</span><span><i className="dot database" />Database</span><span><i className="dot output" />Output</span></div>
         </aside>
         <div className="main-panel">

@@ -1,4 +1,4 @@
-import type { WorkflowDefinition, WorkflowDetail, WorkflowRun, WorkflowSummary } from "./types";
+import type { WorkflowDefinition, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8400";
 
@@ -23,6 +23,23 @@ export function createWorkflow(definition: WorkflowDefinition, description: stri
     method: "POST",
     body: JSON.stringify({ definition, description }),
   });
+}
+
+export const listWorkflowVersions = (workflowId: string) =>
+  request<WorkflowVersionSummary[]>(`/workflows/${workflowId}/versions`);
+
+export const getWorkflowVersion = (workflowId: string, version: number) =>
+  request<WorkflowVersionDetail>(`/workflows/${workflowId}/versions/${version}`);
+
+export function createWorkflowVersion(workflowId: string, definition: WorkflowDefinition) {
+  return request<WorkflowDetail>(`/workflows/${workflowId}/versions`, {
+    method: "POST",
+    body: JSON.stringify({ definition }),
+  });
+}
+
+export function activateWorkflowVersion(workflowId: string, version: number) {
+  return request<WorkflowDetail>(`/workflows/${workflowId}/versions/${version}/activate`, { method: "POST" });
 }
 
 export function startRun(workflowId: string, inputs: Record<string, unknown>) {

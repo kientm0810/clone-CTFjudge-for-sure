@@ -11,6 +11,10 @@ class WorkflowCreate(BaseModel):
     description: str | None = None
 
 
+class WorkflowVersionCreate(BaseModel):
+    definition: WorkflowDefinition
+
+
 class WorkflowSummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -23,6 +27,20 @@ class WorkflowSummary(BaseModel):
 
 
 class WorkflowDetail(WorkflowSummary):
+    definition: WorkflowDefinition
+
+
+class WorkflowVersionSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    workflow_id: str
+    version: int
+    created_at: datetime
+    is_current: bool = False
+
+
+class WorkflowVersionDetail(WorkflowVersionSummary):
     definition: WorkflowDefinition
 
 

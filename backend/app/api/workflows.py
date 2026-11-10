@@ -4,7 +4,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
-from app.schemas.persistence import RunCreate, RunSummary, WorkflowCreate, WorkflowDetail, WorkflowSummary
+from app.models.workflow import Workflow
+from app.schemas.persistence import (
+    RunCreate,
+    RunSummary,
+    WorkflowCreate,
+    WorkflowDetail,
+    WorkflowSummary,
+    WorkflowVersionCreate,
+    WorkflowVersionDetail,
+    WorkflowVersionSummary,
+)
 from app.schemas.workflow import WorkflowDefinition, WorkflowRunRequest, WorkflowRunResult
 from app.services.llm_service import LLMService
 from app.services.vector_service import PgVectorService
@@ -73,6 +83,94 @@ async def get_workflow(workflow_id: str, session: SessionDependency) -> Workflow
     stored = await WorkflowStore(session).get_workflow(workflow_id)
     if stored is None:
         raise HTTPException(status_code=404, detail="Workflow not found")
+    workflow, version = stored
+    return WorkflowDetail(
+        id=workflow.id,
+        name=workflow.name,
+        description=workflow.description,
+        current_version=workflow.current_version,
+        created_at=workflow.created_at,
+        updated_at=workflow.updated_at,
+        definition=WorkflowDefinition.model_validate(version.definition),
+    )
+
+
+@router.get("/{workflow_id}/versions", response_model=list[WorkflowVersionSummary])
+async def list_workflow_versions(
+    workflow_id: str,
+    session: SessionDependency,
+) -> list[WorkflowVersionSummary]:
+    stored = await WorkflowStore(session).list_versions(workflow_id)
+    if stored is None:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    workflow, versions = stored
+    return [
+        WorkflowVersionSummary(
+            id=version.id,
+            workflow_id=version.workflow_id,
+            version=version.version,
+            created_at=version.created_at,
+            is_current=version.version == workflow.current_version,
+        )
+        for version in versions
+    ]
+
+
+@router.get("/{workflow_id}/versions/{version_number}", response_model=WorkflowVersionDetail)
+async def get_workflow_version(
+    workflow_id: str,
+    version_number: int,
+    session: SessionDependency,
+) -> WorkflowVersionDetail:
+    store = WorkflowStore(session)
+    version = await store.get_version(workflow_id, version_number)
+    if version is None:
+        raise HTTPException(status_code=404, detail="Workflow version not found")
+    workflow = await session.get(Workflow, workflow_id)
+    return WorkflowVersionDetail(
+        id=version.id,
+        workflow_id=version.workflow_id,
+        version=version.version,
+        created_at=version.created_at,
+        is_current=bool(workflow and workflow.current_version == version.version),
+        definition=WorkflowDefinition.model_validate(version.definition),
+    )
+
+
+@router.post("/{workflow_id}/versions", response_model=WorkflowDetail, status_code=status.HTTP_201_CREATED)
+async def create_workflow_version(
+    workflow_id: str,
+    payload: WorkflowVersionCreate,
+    session: SessionDependency,
+) -> WorkflowDetail:
+    try:
+        WorkflowValidator.validate(payload.definition)
+    except WorkflowError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    stored = await WorkflowStore(session).create_version(workflow_id, payload.definition)
+    if stored is None:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    workflow, version = stored
+    return WorkflowDetail(
+        id=workflow.id,
+        name=workflow.name,
+        description=workflow.description,
+        current_version=workflow.current_version,
+        created_at=workflow.created_at,
+        updated_at=workflow.updated_at,
+        definition=WorkflowDefinition.model_validate(version.definition),
+    )
+
+
+@router.post("/{workflow_id}/versions/{version_number}/activate", response_model=WorkflowDetail)
+async def activate_workflow_version(
+    workflow_id: str,
+    version_number: int,
+    session: SessionDependency,
+) -> WorkflowDetail:
+    stored = await WorkflowStore(session).activate_version(workflow_id, version_number)
+    if stored is None:
+        raise HTTPException(status_code=404, detail="Workflow version not found")
     workflow, version = stored
     return WorkflowDetail(
         id=workflow.id,

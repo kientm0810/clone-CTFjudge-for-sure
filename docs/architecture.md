@@ -32,10 +32,11 @@ Student input -> Student parser agent -----------------+-> Database(search)
 ## Persisted execution lifecycle
 
 1. `POST /workflows` validates and stores an immutable workflow version.
-2. `POST /workflows/{id}/runs` creates a pending run and enqueues it in Redis.
-3. The Celery worker executes nodes sequentially and records each node's input, output, status, and timestamps.
-4. `GET /runs/{id}` exposes live progress; `GET /runs/{id}/result` exposes the completed result.
-5. Failed or completed runs can be reset and queued again through `POST /runs/{id}/retry`.
+2. `POST /workflows/{id}/versions` appends an immutable version; activating an older version only moves the workflow's current-version pointer.
+3. `POST /workflows/{id}/runs` creates a pending run and enqueues it in Redis.
+4. The Celery worker executes nodes sequentially and records each node's input, output, status, and timestamps.
+5. `GET /runs/{id}` exposes live progress; `GET /runs/{id}/result` exposes the completed result.
+6. Failed or completed runs can be reset and queued again through `POST /runs/{id}/retry`.
 
 ## Storage
 

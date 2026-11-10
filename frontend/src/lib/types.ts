@@ -27,6 +27,16 @@ export type WorkflowSummary = {
 
 export type WorkflowDetail = WorkflowSummary & { definition: WorkflowDefinition };
 
+export type WorkflowVersionSummary = {
+  id: string;
+  workflow_id: string;
+  version: number;
+  created_at: string;
+  is_current: boolean;
+};
+
+export type WorkflowVersionDetail = WorkflowVersionSummary & { definition: WorkflowDefinition };
+
 export type NodeRun = {
   node_id: string;
   node_type: NodeType;
