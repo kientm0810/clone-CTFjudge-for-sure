@@ -1,0 +1,117 @@
+{
+  "name": "Golden and student comparison",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "golden-input",
+      "type": "input",
+      "name": "Golden Input",
+      "config": {
+        "input_key": "golden",
+        "document_type": "golden_solution"
+      }
+    },
+    {
+      "id": "golden-parser",
+      "type": "agent",
+      "name": "Golden Parser",
+      "config": {
+        "model": "ollama/qwen2.5:3b",
+        "prompt": "Split the golden solution into semantic chunks. Preserve meaning and return JSON only with a chunks array. Each chunk must contain chunk_id, document_id, content, chunk_index, start_offset, end_offset, and metadata."
+      }
+    },
+    {
+      "id": "golden-index",
+      "type": "database",
+      "name": "Golden Vector Index",
+      "config": {
+        "operation": "upsert",
+        "collection": "comparison-{{run_id}}",
+        "embedding_model": "ollama/nomic-embed-text"
+      }
+    },
+    {
+      "id": "student-input",
+      "type": "input",
+      "name": "Student Input",
+      "config": {
+        "input_key": "student",
+        "document_type": "student_submission"
+      }
+    },
+    {
+      "id": "student-parser",
+      "type": "agent",
+      "name": "Student Parser",
+      "config": {
+        "model": "ollama/qwen2.5:3b",
+        "prompt": "Split the student submission into semantic chunks. Return JSON only with a chunks array. Each chunk must contain chunk_id, document_id, content, chunk_index, start_offset, end_offset, and metadata."
+      }
+    },
+    {
+      "id": "golden-search",
+      "type": "database",
+      "name": "Golden Similarity Search",
+      "config": {
+        "operation": "search",
+        "collection": "comparison-{{run_id}}",
+        "embedding_model": "ollama/nomic-embed-text",
+        "top_k": 5,
+        "score_threshold": 0.4
+      }
+    },
+    {
+      "id": "comparison-agent",
+      "type": "agent",
+      "name": "Comparison Judge",
+      "config": {
+        "model": "ollama/qwen2.5:3b",
+        "temperature": 0.0,
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "comparisons": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "student_chunk_id": {"type": "string"},
+                  "classification": {
+                    "type": "string",
+                    "enum": ["exact_match", "paraphrase", "partial_match", "additional_valid_approach", "contradiction", "incorrect", "irrelevant", "no_match"]
+                  },
+                  "matched_golden_chunk_ids": {"type": "array", "items": {"type": "string"}},
+                  "score": {"type": "number", "minimum": 0, "maximum": 1},
+                  "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+                  "explanation": {"type": "string"},
+                  "missing_concepts": {"type": "array", "items": {"type": "string"}}
+                },
+                "required": ["student_chunk_id", "classification", "matched_golden_chunk_ids", "score", "confidence", "explanation", "missing_concepts"]
+              }
+            }
+          },
+          "required": ["comparisons"]
+        },
+        "prompt": "For every student chunk, compare it with the retrieved golden candidates. Distinguish similarity from correctness. Return JSON only with classification, matched_golden_chunk_ids, score, confidence, explanation, and missing_concepts."
+      }
+    },
+    {
+      "id": "report",
+      "type": "output",
+      "name": "Comparison Report",
+      "config": {
+        "format": "comparison_report"
+      }
+    }
+  ],
+  "edges": [
+    {"source": "golden-input", "target": "golden-parser"},
+    {"source": "golden-parser", "target": "golden-index"},
+    {"source": "golden-index", "target": "golden-search"},
+    {"source": "student-input", "target": "student-parser"},
+    {"source": "student-parser", "target": "golden-search"},
+    {"source": "golden-search", "target": "comparison-agent"},
+    {"source": "comparison-agent", "target": "report"}
+  ]
+}
+

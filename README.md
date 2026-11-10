@@ -1,6 +1,28 @@
 # CTFJudge: LLM as a Judge for Offensive Security Agents
 This is the official repository for CTFJudge from "Towards Effective Offensive Security LLM Agents: Hyperparameter Tuning, LLM as a Judge, and a Lightweight CTF Benchmark" (AAAI'26) [[paper](https://arxiv.org/abs/2508.05674)].
 
+> This repository is being extended with a Docker-based visual workflow MVP. The original evaluation scripts remain available at the repository root while the new implementation is developed under `backend/` and `frontend/`.
+
+## Workflow MVP
+
+The new architecture provides four extensible node types: Input, Agent, Database, and Output. Its first workflow chunks a golden solution and a student submission, indexes the golden chunks in pgvector, retrieves relevant evidence, and asks a configurable judge model for a structured comparison.
+
+```bash
+copy .env.example .env
+docker compose up --build
+```
+
+- UI: `http://localhost:3000`
+- API docs: `http://localhost:8400/docs`
+- Architecture: [`docs/architecture.md`](docs/architecture.md)
+- Example workflow: [`examples/simple-comparison-workflow.json`](examples/simple-comparison-workflow.json)
+
+The default development provider is local Ollama: `ollama/qwen2.5:3b` for chat and `ollama/nomic-embed-text` for embeddings. Docker reaches the host Ollama server through `http://host.docker.internal:11434`.
+
+Workflow definitions and immutable versions are stored in PostgreSQL. Runs execute asynchronously through Redis and Celery, with each node's status, input, output, and error persisted for inspection.
+
+To test without writing API payloads, open `http://localhost:3000`, create the Ollama demo workflow, edit its input JSON, and run it. The dashboard polls the persisted run and displays the graph status plus per-node artifacts.
+
 For CTFTiny benchmark, please refer to [CTFTiny Official Repository](https://github.com/NYU-LLM-CTF/CTFTiny/tree/main).
 
 ## Overview

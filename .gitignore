@@ -1,0 +1,15 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+.next/
+coverage/
+data/uploads/*
+data/artifacts/*
+!data/uploads/.gitkeep
+!data/artifacts/.gitkeep
+
