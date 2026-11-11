@@ -77,6 +77,33 @@ def build_ctfjudge_report(
     }
 
 
+def build_similarity_report(
+    value: Any,
+    retrieval_results: list[dict[str, Any]] | None = None,
+    golden_chunks: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Build a compact similarity-only report without the CTFJudge rubric."""
+    if not isinstance(value, dict):
+        raise ValueError("Similarity report input must be an object")
+    comparisons = _ground_comparisons(value.get("comparisons"), retrieval_results)
+    scores = [normalize_score(item.get("score")) for item in comparisons]
+    vector_scores = [
+        max(
+            (normalize_score(match.get("similarity_score")) for match in item.get("matched_golden", [])),
+            default=0.0,
+        )
+        for item in comparisons
+    ]
+    return {
+        "report_type": "similarity",
+        "summary": str(value.get("summary", "")),
+        "summary_score": round(sum(scores) / len(scores), 3) if scores else 0.0,
+        "similarity_score": round(sum(vector_scores) / len(vector_scores), 3) if vector_scores else 0.0,
+        "golden_chunks": golden_chunks or [],
+        "comparisons": comparisons,
+    }
+
+
 def normalize_score(value: Any) -> float:
     try:
         score = float(value)

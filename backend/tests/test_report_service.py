@@ -1,6 +1,6 @@
 import pytest
 
-from app.services.report_service import build_ctfjudge_report
+from app.services.report_service import build_ctfjudge_report, build_similarity_report
 
 
 def test_build_ctfjudge_report_calculates_weighted_score() -> None:
@@ -82,3 +82,23 @@ def test_report_grounds_each_student_chunk_and_normalizes_ai_score() -> None:
         "content": "Golden evidence",
         "similarity_score": 0.88,
     }]
+
+
+def test_similarity_report_has_no_ctfjudge_rubric() -> None:
+    report = build_similarity_report(
+        {
+            "summary": "Hai đoạn tương đồng.",
+            "competency_matrix": {"technical_accuracy": "Good"},
+            "comparisons": [
+                {"student_chunk_id": "student-0", "score": 0.8},
+                {"student_chunk_id": "student-1", "score": 0.4},
+            ],
+        },
+        golden_chunks=[{"chunk_id": "golden-0", "content": "Expected evidence"}],
+    )
+
+    assert report["report_type"] == "similarity"
+    assert report["summary_score"] == 0.6
+    assert report["golden_chunks"][0]["chunk_id"] == "golden-0"
+    assert "competency_matrix" not in report
+    assert "overall_score" not in report

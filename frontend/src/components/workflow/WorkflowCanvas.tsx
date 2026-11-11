@@ -10,6 +10,7 @@ type Props = {
   definition?: WorkflowDefinition;
   nodeStatuses?: Record<string, string>;
   onSaveLayout?: (positions: NodePositions) => Promise<void>;
+  readOnly?: boolean;
 };
 
 function graphNodes(
@@ -32,7 +33,7 @@ function graphNodes(
   }));
 }
 
-export function WorkflowCanvas({ definition, nodeStatuses = {}, onSaveLayout }: Props) {
+export function WorkflowCanvas({ definition, nodeStatuses = {}, onSaveLayout, readOnly = false }: Props) {
   const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowFlowNode>([]);
   const [instance, setInstance] = useState<ReactFlowInstance<WorkflowFlowNode, Edge> | null>(null);
   const [layoutChanged, setLayoutChanged] = useState(false);
@@ -85,20 +86,21 @@ export function WorkflowCanvas({ definition, nodeStatuses = {}, onSaveLayout }: 
         edges={edges}
         nodeTypes={workflowNodeTypes}
         nodesConnectable={false}
+        nodesDraggable={!readOnly}
         onNodesChange={handleNodesChange}
         onInit={setInstance}
         fitView
       >
         <Background gap={22} size={1} />
-        <MiniMap pannable zoomable />
+        {!readOnly && <MiniMap pannable zoomable />}
         <Controls showInteractive={false} />
-        <Panel position="top-right" className="graph-toolbar">
+        {!readOnly && <Panel position="top-right" className="graph-toolbar">
           <span>Kéo node để chỉnh vị trí</span>
           <button type="button" onClick={autoArrange}>Sắp xếp tự động</button>
           {onSaveLayout && <button type="button" onClick={saveLayout} disabled={!layoutChanged || saving}>
             {saving ? "Đang lưu…" : "Lưu bố cục"}
           </button>}
-        </Panel>
+        </Panel>}
       </ReactFlow> : <div className="empty-canvas">Chọn hoặc tạo một workflow để xem graph.</div>}
     </div>
   );

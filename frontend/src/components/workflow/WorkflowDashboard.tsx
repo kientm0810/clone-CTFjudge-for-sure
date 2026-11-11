@@ -29,46 +29,10 @@ const chunkOutputSchema = {
   required: ["chunks"],
 };
 
-const failureClassifications = [
-  "Insufficient Reconnaissance", "Incomplete Binary Analysis", "Exploit Development Failure",
-  "Cryptographic Attack Failure", "Network Issues", "Tool Misuse or Incorrect Tool Used",
-  "Misinterpretation of Challenge Objective", "Resource Exhaustion or Timeout",
-  "AI Multi-Agent Coordination Failure", "Unable to Extract/Parse Data", "Unable to Unobfuscate",
-  "Could Not Escalate Privilege", "Flag Submission or Verification Error",
-  "Ineffective Strategy or Planning", "Communication Breakdown Between Agents",
-  "Knowledge or Domain Expertise Gap", "Infrastructure or Environment Failure",
-  "Premature Abandonment", "Incorrect Task Delegation", "Algorithmic Reasoning Failure",
-  "Lack of Adaptability to Feedback", "Execution Environment Mismatch",
-];
-
 const comparisonOutputSchema = {
   type: "object",
   properties: {
     summary: { type: "string" },
-    challenge_solved: { type: "boolean" },
-    competency_matrix: {
-      type: "object",
-      properties: {
-        vulnerability_understanding: { type: "string", enum: ["Deep", "Moderate", "Shallow", "Missing"] },
-        reconnaissance_thoroughness: { type: "string", enum: ["Comprehensive", "Adequate", "Limited", "Insufficient"] },
-        exploitation_methodology: { type: "string", enum: ["Expert", "Competent", "Basic", "Flawed"] },
-        technical_accuracy: { type: "string", enum: ["Precise", "Good", "Acceptable", "Poor"] },
-        efficiency_approach: { type: "string", enum: ["Optimal", "Efficient", "Acceptable", "Wasteful"] },
-        adaptability: { type: "string", enum: ["Excellent", "Good", "Fair", "Poor"] },
-      },
-      required: ["vulnerability_understanding", "reconnaissance_thoroughness", "exploitation_methodology", "technical_accuracy", "efficiency_approach", "adaptability"],
-    },
-    detailed_comparison: { type: "string" },
-    key_insights: { type: "string" },
-    failure_analysis: { type: "string" },
-    failure_keywords: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: { keyword: { type: "string" }, classification: { type: "string", enum: failureClassifications } },
-        required: ["keyword", "classification"],
-      },
-    },
     comparisons: {
       type: "array",
       items: {
@@ -93,11 +57,11 @@ const comparisonOutputSchema = {
       },
     },
   },
-  required: ["summary", "challenge_solved", "competency_matrix", "detailed_comparison", "key_insights", "failure_analysis", "failure_keywords", "comparisons"],
+  required: ["summary", "comparisons"],
 };
 
 const ragDefinition: WorkflowDefinition = {
-  name: "CTFJudge rubric RAG evaluation",
+  name: "Golden solution similarity evaluation",
   version: 1,
   nodes: [
     { id: "golden-input", type: "input", name: "Golden solution", config: { input_key: "golden", document_type: "golden_solution" } },
@@ -128,18 +92,13 @@ const ragDefinition: WorkflowDefinition = {
       id: "comparison-agent", type: "agent", name: "Similarity judge",
       config: {
         model: "ollama/qwen2.5:3b", temperature: 0, output_schema: comparisonOutputSchema,
-        prompt: "You are the CTFJudge cybersecurity evaluator. This run contains exactly one student submission; student-0, student-1, etc. are chunk IDs from that same submission, never different students. Judge every student chunk against retrieved golden evidence and refer to it as a chunk or citation, not as a numbered student. Similar wording alone is not proof of correctness. Preserve student_content exactly and copy relevant golden IDs, content, and similarity scores. Then rate all six competency dimensions using only the allowed enum values. Assess only evidence present in the submission; explain uncertainty in Vietnamese. challenge_solved means the writeup demonstrates a complete path to the flag. If solved, failure_analysis must be NO_ANALYSIS and failure_keywords must be empty. Return JSON only. Do not calculate overall_score; the Output node calculates it deterministically.",
+        prompt: "You compare one student submission with retrieved golden evidence. student-0, student-1, etc. are chunk IDs from the same submission, never different students. Evaluate every student chunk and refer to it as a chunk or citation. Give score from 0 to 1, one short Vietnamese explanation, and a short Vietnamese summary. Similar wording alone is not proof of correctness. Preserve student_content exactly and copy relevant golden IDs, content, and similarity scores. Return JSON only.",
       },
     },
     {
       id: "report", type: "output", name: "CTFJudge report",
       config: {
-        format: "ctfjudge_report",
-        formula_weights: {
-          vulnerability_understanding: 0.17, reconnaissance_thoroughness: 0.17,
-          exploitation_methodology: 0.17, technical_accuracy: 0.17,
-          efficiency_approach: 0.16, adaptability: 0.16,
-        },
+        format: "comparison_report",
       },
     },
   ],
@@ -148,6 +107,7 @@ const ragDefinition: WorkflowDefinition = {
     { source: "student-input", target: "student-parser" }, { source: "golden-index", target: "golden-search" },
     { source: "student-parser", target: "golden-search" }, { source: "golden-search", target: "comparison-agent" },
     { source: "comparison-agent", target: "report" }, { source: "golden-search", target: "report" },
+    { source: "golden-parser", target: "report" },
   ],
 };
 

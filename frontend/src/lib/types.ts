@@ -110,9 +110,12 @@ export type ChunkComparison = {
 };
 
 export type ComparisonReport = {
+  report_type?: "similarity" | "ctfjudge";
   summary_score?: number;
+  similarity_score?: number;
   overall_score?: number;
   summary: string;
+  golden_chunks?: Array<{ chunk_id: string; content: string; chunk_index?: number }>;
   comparisons: ChunkComparison[];
   challenge_solved?: boolean;
   competency_matrix?: Record<string, string>;

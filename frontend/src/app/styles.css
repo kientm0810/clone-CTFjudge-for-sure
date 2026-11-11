@@ -188,6 +188,65 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
 .prod-empty p { color: #8ca5ad; line-height: 1.6; }
 .primary-link { display: inline-block; min-height: 40px; margin-top: 10px; border: 1px solid #2cb899; border-radius: 9px; padding: 10px 14px; background: #176c5c; color: #effcf9; font-size: 12px; font-weight: 750; text-decoration: none; }
 .inline-error { color: #f0a6ad !important; font-size: 11px; }
+
+.prod-workflow .canvas { height: 290px; }
+.workflow-progress { margin-top: 16px; }
+.progress-summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.progress-summary div { display: grid; gap: 3px; }
+.progress-summary strong { color: #dcebed; font-size: 13px; }
+.progress-summary span { color: #78949e; font-size: 11px; }
+.progress-summary b { color: #65d6c0; font-size: 18px; font-variant-numeric: tabular-nums; }
+.progress-track, .score-bar { height: 7px; margin-top: 9px; overflow: hidden; border-radius: 999px; background: #142831; }
+.progress-track span, .score-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #238b76, #65d6c0); transition: width .25s ease; }
+.workflow-progress ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 7px; margin: 14px 0 0; padding: 0; list-style: none; }
+.workflow-progress li { display: flex; min-width: 0; align-items: center; gap: 8px; border: 1px solid #29434d; border-radius: 8px; padding: 8px; background: #09181e; }
+.workflow-progress li > span { display: grid; flex: 0 0 24px; height: 24px; place-items: center; border-radius: 50%; background: #1a3039; color: #89a5ad; font-size: 10px; font-weight: 800; }
+.workflow-progress li div { display: grid; min-width: 0; gap: 2px; }
+.workflow-progress li strong { overflow: hidden; color: #b8cbd0; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.workflow-progress li small { color: #6f8992; font-size: 9px; }
+.workflow-progress li.progress-running { border-color: #b9893e; background: #241f14; }
+.workflow-progress li.progress-running > span { background: #765725; color: #ffe0a3; }
+.workflow-progress li.progress-completed { border-color: #286c5d; }
+.workflow-progress li.progress-completed > span { background: #185747; color: #a8f1dd; }
+.workflow-progress li.progress-failed { border-color: #7a4149; background: #29181c; }
+
+.similarity-report { display: grid; gap: 16px; margin-top: 14px; }
+.similarity-report > section { border: 1px solid #29434d; border-radius: 12px; padding: 16px; background: #09181e; }
+.result-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.result-section-heading > div { display: flex; align-items: center; gap: 9px; }
+.result-section-heading span { display: grid; width: 26px; height: 26px; place-items: center; border-radius: 7px; background: #15372f; color: #65d6c0; font-size: 10px; font-weight: 850; }
+.result-section-heading h3 { margin: 0; font-size: 14px; }
+.result-section-heading small { color: #7f9ba4; font-size: 10px; }
+.golden-chunk-list { display: grid; gap: 7px; }
+.golden-chunk-list article { display: grid; grid-template-columns: 76px 1fr; gap: 10px; border: 1px solid #203942; border-radius: 8px; padding: 10px; background: #071318; }
+.golden-chunk-list strong { color: #65d6c0; font-family: ui-monospace, monospace; font-size: 10px; }
+.golden-chunk-list p { margin: 0; color: #c1d1d5; font-size: 12px; line-height: 1.55; }
+.score-primary { display: flex; align-items: center; gap: 14px; }
+.score-primary > strong { color: #65d6c0; font-size: clamp(32px, 6vw, 48px); font-variant-numeric: tabular-nums; line-height: 1; }
+.score-primary div { display: grid; gap: 3px; }
+.score-primary b { font-size: 13px; }
+.score-primary span, .ai-score-note { color: #809ba4; font-size: 10px; }
+.ai-score-note { margin: 9px 0 0; }
+.ai-score-note strong { color: #dcebed; }
+.student-chunk-section .comparison-list { margin-top: 0; }
+.comparison-item { padding: 14px; }
+.comparison-item > header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.comparison-item > header div { display: flex; align-items: baseline; gap: 8px; }
+.comparison-item > header div span { color: #dbe9ec; font-size: 12px; font-weight: 750; }
+.comparison-item > header div strong { color: #728f98; font-family: ui-monospace, monospace; font-size: 9px; }
+.chunk-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 11px; }
+.chunk-pair > div { border: 1px solid #29434d; border-radius: 8px; padding: 11px; background: #071318; }
+.chunk-pair > div.best-match { border-color: #2b685b; background: #0b211e; }
+.chunk-pair small { color: #78949e; font-size: 9px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.chunk-pair p { margin: 7px 0 0; color: #c3d3d7; font-size: 12px; line-height: 1.55; }
+.chunk-reason { margin: 10px 0 0; color: #8fa8af; font-size: 11px; line-height: 1.55; }
+.chunk-reason strong { color: #bcd0d5; }
+.more-matches { margin-top: 10px; }
+.more-matches summary { color: #65cbb4; font-size: 10px; cursor: pointer; }
+.more-matches p { display: grid; gap: 4px; margin: 7px 0 0; border-left: 2px solid #2b675a; padding: 7px 9px; color: #9eb4ba; font-size: 10px; }
+.result-empty { display: grid; min-height: 130px; place-content: center; gap: 6px; border: 1px dashed #31505b; border-radius: 10px; color: #89a4ad; text-align: center; }
+.result-empty strong { color: #cbdadd; font-size: 13px; }
+.result-empty span { font-size: 11px; }
 .classification { border: 1px solid #34535e; border-radius: 999px; padding: 3px 7px; color: #9eb8c0; }
 .student-content { margin: 10px 0 6px; color: #e0ecef; font-size: 13px; line-height: 1.5; }
 .explanation { margin: 0; color: #8da7af; font-size: 11px; line-height: 1.5; }
@@ -353,6 +412,8 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
   .prod-header { flex-direction: column; }
   .deployment-badge { width: 100%; min-width: 0; }
   .chunk-scores { grid-template-columns: 1fr; }
+  .chunk-pair { grid-template-columns: 1fr; }
+  .golden-chunk-list article { grid-template-columns: 1fr; }
   .panel-actions { align-items: flex-end; flex-direction: column; }
 }
 

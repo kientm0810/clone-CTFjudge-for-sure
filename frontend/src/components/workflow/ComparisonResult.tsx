@@ -1,14 +1,14 @@
 import type { ComparisonReport, WorkflowRun } from "@/lib/types";
 
 const labels: Record<string, string> = {
-  exact_match: "Trùng khớp", paraphrase: "Tương đồng", partial_match: "Khớp một phần",
-  additional_valid_approach: "Cách làm hợp lệ khác", contradiction: "Mâu thuẫn",
-  incorrect: "Không chính xác", irrelevant: "Không liên quan", no_match: "Không tìm thấy",
-};
-const competencyLabels: Record<string, string> = {
-  vulnerability_understanding: "Hiểu lỗ hổng", reconnaissance_thoroughness: "Reconnaissance",
-  exploitation_methodology: "Phương pháp khai thác", technical_accuracy: "Độ chính xác kỹ thuật",
-  efficiency_approach: "Hiệu quả tiếp cận", adaptability: "Khả năng thích nghi",
+  exact_match: "Trùng khớp",
+  paraphrase: "Tương đồng",
+  partial_match: "Khớp một phần",
+  additional_valid_approach: "Cách làm hợp lệ khác",
+  contradiction: "Mâu thuẫn",
+  incorrect: "Không chính xác",
+  irrelevant: "Không liên quan",
+  no_match: "Không tìm thấy",
 };
 
 function boundedScore(value: unknown): number {
@@ -38,23 +38,41 @@ function tone(classification: string): string {
 
 export function ComparisonResult({ run }: { run: WorkflowRun | null }) {
   const report = extractReport(run);
-  if (!report) return <pre>{run?.result ? JSON.stringify(run.result, null, 2) : "Kết quả sẽ xuất hiện tại đây."}</pre>;
-  const score = boundedScore(report.overall_score ?? report.summary_score ?? 0);
-  return <div className="comparison-report">
-    <div className="report-summary"><div className="score-ring"><strong>{Math.round(score * 100)}</strong><span>%</span></div><div><small className="score-caption">Điểm AI gợi ý cho toàn bài</small><p>{report.summary || "Đã hoàn tất phân tích."}</p>{typeof report.challenge_solved === "boolean" && <span className={`solved-badge ${report.challenge_solved ? "solved" : "unsolved"}`}>{report.challenge_solved ? "SOLVED" : "NOT SOLVED"}</span>}</div></div>
-    {report.competency_matrix && <div className="competency-grid">{Object.entries(report.competency_matrix).map(([key, rating]) => { const detail = report.formula_breakdown?.[key]; return <article className="competency-item" key={key}><span>{competencyLabels[key] ?? key}</span><strong>{rating}</strong>{detail && <small>{Math.round(boundedScore(detail.score) * 100)}% · trọng số {Math.round(detail.weight * 100)}%</small>}</article>; })}</div>}
-    {(report.detailed_comparison || report.key_insights) && <div className="judge-notes">{report.detailed_comparison && <div><h4>Đánh giá tổng quan</h4><p>{report.detailed_comparison}</p></div>}{report.key_insights && <div><h4>Nhận xét chính</h4><p>{report.key_insights}</p></div>}</div>}
-    {report.challenge_solved === false && report.failure_analysis && <div className="failure-panel"><h4>Phân tích phần còn thiếu</h4><p>{report.failure_analysis}</p></div>}
-    <div className="comparison-list">{report.comparisons.map((item, index) => {
-      const aiScore = boundedScore(item.score);
-      const vectorScore = Math.max(0, ...(item.matched_golden ?? []).map((match) => boundedScore(match.similarity_score)));
-      return <article className={`comparison-item comparison-${tone(item.classification)}`} key={`${item.student_chunk_id}-${index}`}>
-        <div className="comparison-heading"><span>Trích dẫn · {item.student_chunk_id}</span><span className="classification">{labels[item.classification] ?? item.classification}</span></div>
-        <p className="student-content">“{item.student_content}”</p>
-        <div className="chunk-scores"><div><span>Độ giống vector cao nhất</span><strong>{Math.round(vectorScore * 100)}%</strong></div><div><span>Điểm AI gợi ý</span><strong>{Math.round(aiScore * 100)}%</strong></div></div>
-        <p className="explanation">{item.explanation}</p>
-        {!!item.matched_golden?.length ? <div className="golden-citations"><h4>Đối chiếu với golden solution</h4>{item.matched_golden.map((match) => <blockquote key={match.chunk_id}><div><strong>{match.chunk_id}</strong>{typeof match.similarity_score === "number" && <span>{Math.round(boundedScore(match.similarity_score) * 100)}% tương đồng</span>}</div><p>{match.content}</p></blockquote>)}</div> : <p className="no-evidence">Không tìm thấy đoạn golden đủ tương đồng.</p>}
-      </article>;
-    })}</div>
+  if (!report) {
+    if (run?.status === "FAILED") return <div className="result-empty error"><strong>Không thể tạo báo cáo</strong><span>{run.error}</span></div>;
+    return <div className="result-empty"><strong>Chưa có kết quả</strong><span>Nhập hai bài và bấm “Chấm bài” để bắt đầu.</span></div>;
+  }
+
+  const similarity = boundedScore(report.similarity_score ?? report.summary_score ?? 0);
+  const aiScore = boundedScore(report.summary_score ?? report.overall_score ?? 0);
+  return <div className="similarity-report">
+    <section className="golden-chunk-section">
+      <div className="result-section-heading"><div><span>01</span><h3>Golden solution được tách thành</h3></div><small>{report.golden_chunks?.length ?? 0} chunks</small></div>
+      <div className="golden-chunk-list">{report.golden_chunks?.map((chunk) => <article key={chunk.chunk_id}><strong>{chunk.chunk_id}</strong><p>{chunk.content}</p></article>)}{!report.golden_chunks?.length && <p className="no-evidence">Workflow chưa trả về golden chunks.</p>}</div>
+    </section>
+
+    <section className="score-overview">
+      <div className="result-section-heading"><div><span>02</span><h3>Mức độ giống của bài sinh viên</h3></div></div>
+      <div className="score-primary"><strong>{Math.round(similarity * 100)}%</strong><div><b>Tương đồng tổng thể</b><span>Trung bình vector match tốt nhất của từng student chunk</span></div></div>
+      <div className="score-bar" aria-label={`Tương đồng tổng thể ${Math.round(similarity * 100)} phần trăm`}><span style={{ width: `${similarity * 100}%` }} /></div>
+      <p className="ai-score-note">Điểm AI gợi ý: <strong>{Math.round(aiScore * 100)}%</strong></p>
+    </section>
+
+    <section className="student-chunk-section">
+      <div className="result-section-heading"><div><span>03</span><h3>Đối chiếu từng student chunk</h3></div><small>{report.comparisons.length} chunks</small></div>
+      <div className="comparison-list">{report.comparisons.map((item, index) => {
+        const best = item.matched_golden?.[0];
+        const extra = item.matched_golden?.slice(1) ?? [];
+        return <article className={`comparison-item comparison-${tone(item.classification)}`} key={`${item.student_chunk_id}-${index}`}>
+          <header><div><span>Chunk {index + 1}</span><strong>{item.student_chunk_id}</strong></div><span className="classification">{labels[item.classification] ?? item.classification}</span></header>
+          <div className="chunk-pair">
+            <div><small>Bài sinh viên</small><p>{item.student_content}</p></div>
+            <div className="best-match"><small>{best ? `Golden gần nhất · ${Math.round(boundedScore(best.similarity_score) * 100)}%` : "Golden gần nhất"}</small><p>{best?.content ?? "Không tìm thấy golden chunk đủ tương đồng."}</p></div>
+          </div>
+          <p className="chunk-reason"><strong>Nhận xét:</strong> {item.explanation}</p>
+          {!!extra.length && <details className="more-matches"><summary>Xem thêm {extra.length} golden chunks liên quan</summary>{extra.map((match) => <p key={match.chunk_id}><strong>{match.chunk_id} · {Math.round(boundedScore(match.similarity_score) * 100)}%</strong>{match.content}</p>)}</details>}
+        </article>;
+      })}</div>
+    </section>
   </div>;
 }

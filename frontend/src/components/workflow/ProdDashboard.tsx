@@ -6,6 +6,8 @@ import { getDeployment, getRun, startDeploymentRun } from "@/lib/api";
 import type { WorkflowDeployment, WorkflowRun } from "@/lib/types";
 import { ComparisonResult } from "./ComparisonResult";
 import { RuntimeInputs } from "./RuntimeInputs";
+import { WorkflowCanvas } from "./WorkflowCanvas";
+import { WorkflowProgress } from "./WorkflowProgress";
 
 function emptyInputs(deployment: WorkflowDeployment): string {
   return JSON.stringify(Object.fromEntries(
@@ -62,8 +64,17 @@ export function ProdDashboard() {
         <div className="card-heading"><div><p className="section-label">Bước 1</p><h2>Nhập bài cần chấm</h2><p className="card-help">Mỗi lần chạy chỉ chấm một bài sinh viên. Dữ liệu vector tạm của golden solution sẽ tự xóa khi hoàn tất.</p></div><button className="primary-button" onClick={gradeSubmission} disabled={busy}>{busy ? "Đang chấm…" : "Chấm bài"}</button></div>
         <RuntimeInputs definition={deployment.definition} value={inputs} onChange={setInputs} />
       </section>
-      <section className="prod-result card" aria-live="polite">
-        <div className="card-heading"><div><p className="section-label">Bước 2</p><h2>Kết quả cho bài làm này</h2><p className="card-help">Điểm AI là gợi ý; hãy đọc trích dẫn golden và giải thích trước khi quyết định điểm chính thức.</p></div>{run && <span className={`mini-status run-${run.status.toLowerCase()}`}>{run.status}</span>}</div>
+      <section className="prod-workflow card">
+        <div className="card-heading"><div><p className="section-label">Bước 2</p><h2>Workflow đang thực thi</h2><p className="card-help">Theo dõi hệ thống đang đọc dữ liệu, tạo vector, tìm evidence hay tổng hợp kết quả.</p></div>{run && <span className={`mini-status run-${run.status.toLowerCase()}`}>{run.status}</span>}</div>
+        <WorkflowProgress definition={deployment.definition} run={run} />
+        <WorkflowCanvas
+          definition={deployment.definition}
+          nodeStatuses={Object.fromEntries((run?.node_runs ?? []).map((node) => [node.node_id, node.status]))}
+          readOnly
+        />
+      </section>
+      <section className="prod-result card">
+        <div className="card-heading"><div><p className="section-label">Bước 3</p><h2>Kết quả đối chiếu</h2><p className="card-help">Golden chunks → mức tương đồng toàn bài → đối chiếu từng student chunk.</p></div></div>
         <ComparisonResult run={run} />
       </section>
     </main>
