@@ -44,6 +44,17 @@ class WorkflowVersionDetail(WorkflowVersionSummary):
     definition: WorkflowDefinition
 
 
+class WorkflowDeploymentDetail(BaseModel):
+    environment: str
+    workflow_id: str
+    workflow_name: str
+    workflow_version_id: str
+    version_number: int
+    published_at: datetime
+    updated_at: datetime
+    definition: WorkflowDefinition
+
+
 class RunCreate(BaseModel):
     inputs: dict[str, Any] = Field(default_factory=dict)
 

@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from datetime import datetime, timezone
 from typing import Any
 
@@ -11,6 +12,7 @@ from app.nodes.base import NodeResult
 from app.schemas.workflow import NodeDefinition, WorkflowDefinition
 from app.services.llm_service import LLMService
 from app.services.vector_service import PgVectorService
+from app.services.run_cleanup import owned_vector_collections
 from app.workflow.context import WorkflowServices
 from app.workflow.executor import WorkflowExecutor
 from app.workers.celery_app import celery_app
@@ -18,6 +20,17 @@ from app.workers.celery_app import celery_app
 
 def utc_now() -> datetime:
     return datetime.now(timezone.utc)
+
+
+logger = logging.getLogger(__name__)
+
+
+async def cleanup_run_vectors(session: AsyncSession, run_id: str) -> int:
+    node_runs = list(
+        await session.scalars(select(NodeRun).where(NodeRun.workflow_run_id == run_id))
+    )
+    collections = owned_vector_collections(run_id, node_runs)
+    return await PgVectorService().delete_collections(collections)
 
 
 def completion_time(started_at: datetime | None) -> datetime:
@@ -123,11 +136,16 @@ async def _run_workflow(run_id: str) -> dict[str, Any]:
             run.completed_at = completion_time(run.started_at)
             await session.commit()
             raise
-
-        serialized = result.model_dump(mode="json")
-        run.status = "COMPLETED"
-        run.result = serialized
-        run.completed_at = completion_time(run.started_at)
-        await session.commit()
-        return serialized
+        else:
+            serialized = result.model_dump(mode="json")
+            run.status = "COMPLETED"
+            run.result = serialized
+            run.completed_at = completion_time(run.started_at)
+            await session.commit()
+            return serialized
+        finally:
+            try:
+                await cleanup_run_vectors(session, run.id)
+            except Exception:
+                logger.exception("Could not clean vector data for run %s", run.id)
 

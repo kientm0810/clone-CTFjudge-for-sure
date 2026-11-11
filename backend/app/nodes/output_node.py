@@ -15,7 +15,23 @@ class OutputNode(BaseNode):
         value = next(iter(inputs.values())) if len(inputs) == 1 else inputs
         if definition.config.get("format") == "ctfjudge_report":
             try:
-                value = build_ctfjudge_report(value, definition.config.get("formula_weights"))
+                report_value = value
+                retrieval_results = None
+                if len(inputs) > 1:
+                    report_value = next(
+                        (item for item in inputs.values() if isinstance(item, dict) and "competency_matrix" in item),
+                        None,
+                    )
+                    retrieval_source = next(
+                        (item for item in inputs.values() if isinstance(item, dict) and "retrieval_results" in item),
+                        None,
+                    )
+                    retrieval_results = retrieval_source.get("retrieval_results") if retrieval_source else None
+                value = build_ctfjudge_report(
+                    report_value,
+                    definition.config.get("formula_weights"),
+                    retrieval_results=retrieval_results,
+                )
             except ValueError as exc:
                 raise NodeExecutionError(definition.id, str(exc)) from exc
         return NodeResult(value=value)

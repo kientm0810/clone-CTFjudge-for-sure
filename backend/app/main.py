@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
+from app.api.deployments import router as deployments_router
 from app.api.providers import router as providers_router
 from app.api.runs import router as runs_router
 from app.api.vectors import router as vectors_router
@@ -33,6 +34,7 @@ app.add_middleware(
 )
 
 app.include_router(health_router)
+app.include_router(deployments_router)
 app.include_router(providers_router)
 app.include_router(workflows_router)
 app.include_router(runs_router)

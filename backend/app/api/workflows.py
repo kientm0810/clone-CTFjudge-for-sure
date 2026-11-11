@@ -11,6 +11,7 @@ from app.schemas.persistence import (
     RunSummary,
     WorkflowCreate,
     WorkflowDetail,
+    WorkflowDeploymentDetail,
     WorkflowSummary,
     WorkflowVersionCreate,
     WorkflowVersionDetail,
@@ -29,6 +30,20 @@ from app.services.workflow_store import WorkflowStore
 
 router = APIRouter(prefix="/workflows", tags=["workflows"])
 SessionDependency = Annotated[AsyncSession, Depends(get_session)]
+
+
+def deployment_detail(stored) -> WorkflowDeploymentDetail:
+    deployment, workflow, version = stored
+    return WorkflowDeploymentDetail(
+        environment=deployment.environment,
+        workflow_id=workflow.id,
+        workflow_name=workflow.name,
+        workflow_version_id=version.id,
+        version_number=version.version,
+        published_at=deployment.published_at,
+        updated_at=deployment.updated_at,
+        definition=WorkflowDefinition.model_validate(version.definition),
+    )
 
 
 @router.post("/validate")
@@ -116,6 +131,14 @@ async def get_workflow(workflow_id: str, session: SessionDependency) -> Workflow
     )
 
 
+@router.post("/{workflow_id}/publish", response_model=WorkflowDeploymentDetail)
+async def publish_workflow(workflow_id: str, session: SessionDependency) -> WorkflowDeploymentDetail:
+    stored = await WorkflowStore(session).publish(workflow_id, "prod")
+    if stored is None:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    return deployment_detail(stored)
+
+
 @router.get("/{workflow_id}/versions", response_model=list[WorkflowVersionSummary])
 async def list_workflow_versions(
     workflow_id: str,
@@ -175,6 +198,11 @@ async def delete_workflow_version(
         raise HTTPException(
             status_code=409,
             detail="Không thể xóa version đang ACTIVE. Hãy rollback sang version khác trước.",
+        )
+    if await store.is_version_deployed(version.id):
+        raise HTTPException(
+            status_code=409,
+            detail="Không thể xóa version đang được publish. Hãy publish một version khác trước.",
         )
 
     runs = await store.list_version_runs_with_nodes(version.id)

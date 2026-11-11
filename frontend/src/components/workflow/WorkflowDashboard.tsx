@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { activateWorkflowVersion, createWorkflow, createWorkflowVersion, deleteRun, deleteWorkflow as deleteWorkflowApi, deleteWorkflowVersion, getRun, getWorkflow, getWorkflowVersion, listWorkflowRuns, listWorkflows, listWorkflowVersions, retryRun, startRun } from "@/lib/api";
-import type { RunHistoryItem, WorkflowDefinition, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionSummary } from "@/lib/types";
+import { activateWorkflowVersion, createWorkflow, createWorkflowVersion, deleteRun, deleteWorkflow as deleteWorkflowApi, deleteWorkflowVersion, getDeployment, getRun, getWorkflow, getWorkflowVersion, listWorkflowRuns, listWorkflows, listWorkflowVersions, publishWorkflow, retryRun, startRun } from "@/lib/api";
+import type { RunHistoryItem, WorkflowDefinition, WorkflowDeployment, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionSummary } from "@/lib/types";
 import { ComparisonResult } from "./ComparisonResult";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { RunHistory } from "./RunHistory";
@@ -128,7 +128,7 @@ const ragDefinition: WorkflowDefinition = {
       id: "comparison-agent", type: "agent", name: "Similarity judge",
       config: {
         model: "ollama/qwen2.5:3b", temperature: 0, output_schema: comparisonOutputSchema,
-        prompt: "You are the CTFJudge cybersecurity evaluator. Judge every student chunk against retrieved golden evidence. Similar wording alone is not proof of correctness. Preserve student_content exactly and copy relevant golden IDs, content, and similarity scores. Then rate all six competency dimensions using only the allowed enum values. Assess only evidence present in the submission; explain uncertainty in Vietnamese. challenge_solved means the writeup demonstrates a complete path to the flag. If solved, failure_analysis must be NO_ANALYSIS and failure_keywords must be empty. Return JSON only. Do not calculate overall_score; the Output node calculates it deterministically.",
+        prompt: "You are the CTFJudge cybersecurity evaluator. This run contains exactly one student submission; student-0, student-1, etc. are chunk IDs from that same submission, never different students. Judge every student chunk against retrieved golden evidence and refer to it as a chunk or citation, not as a numbered student. Similar wording alone is not proof of correctness. Preserve student_content exactly and copy relevant golden IDs, content, and similarity scores. Then rate all six competency dimensions using only the allowed enum values. Assess only evidence present in the submission; explain uncertainty in Vietnamese. challenge_solved means the writeup demonstrates a complete path to the flag. If solved, failure_analysis must be NO_ANALYSIS and failure_keywords must be empty. Return JSON only. Do not calculate overall_score; the Output node calculates it deterministically.",
       },
     },
     {
@@ -147,7 +147,7 @@ const ragDefinition: WorkflowDefinition = {
     { source: "golden-input", target: "golden-parser" }, { source: "golden-parser", target: "golden-index" },
     { source: "student-input", target: "student-parser" }, { source: "golden-index", target: "golden-search" },
     { source: "student-parser", target: "golden-search" }, { source: "golden-search", target: "comparison-agent" },
-    { source: "comparison-agent", target: "report" },
+    { source: "comparison-agent", target: "report" }, { source: "golden-search", target: "report" },
   ],
 };
 
@@ -191,6 +191,7 @@ export function WorkflowDashboard() {
   const [runDefinition, setRunDefinition] = useState<WorkflowDefinition | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const [deployment, setDeployment] = useState<WorkflowDeployment | null>(null);
 
   async function selectWorkflow(id: string) {
     setError(null);
@@ -232,9 +233,22 @@ export function WorkflowDashboard() {
 
   useEffect(() => {
     refreshWorkflows().catch((reason) => setError(String(reason)));
+    getDeployment("prod").then(setDeployment).catch(() => setDeployment(null));
     // Initial data load only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function publishSelected() {
+    if (!selected) return;
+    setBusy(true); setError(null);
+    try {
+      const published = await publishWorkflow(selected.id);
+      setDeployment(published);
+      setNotice(`Đã publish workflow ${published.workflow_id.slice(0, 8)} · version ${published.version_number} lên prod.`);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally { setBusy(false); }
+  }
 
   async function createRagDemo() {
     setBusy(true); setError(null);
@@ -437,7 +451,7 @@ export function WorkflowDashboard() {
         </aside>
         <div className="main-panel">
           <WorkflowJourney hasWorkflow={Boolean(selected)} hasRun={Boolean(run)} runCompleted={run?.status === "COMPLETED"} />
-          <div className="panel-heading"><div><p className="section-label">Workflow graph</p><h2>{selected?.name ?? "No workflow selected"}</h2></div>{run && <code className="run-id">run {run.id.slice(0, 8)}</code>}</div>
+          <div className="panel-heading"><div><p className="section-label">Workflow graph</p><h2>{selected?.name ?? "No workflow selected"}</h2>{selected && <p className="publish-state">{deployment?.workflow_id === selected.id && deployment.version_number === selected.current_version ? `Đang ở PROD · ID ${selected.id.slice(0, 8)} · v${selected.current_version}` : "Bản cấu hình này chưa được publish lên PROD"}</p>}</div><div className="panel-actions">{run && <code className="run-id">run {run.id.slice(0, 8)}</code>}<button className="primary-button" onClick={publishSelected} disabled={busy || !selected}>Publish lên prod</button></div></div>
           <WorkflowCanvas
             definition={runDefinition ?? selected?.definition}
             nodeStatuses={nodeStatuses}

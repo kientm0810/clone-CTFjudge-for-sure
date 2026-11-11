@@ -38,6 +38,17 @@ export type WorkflowVersionSummary = {
 
 export type WorkflowVersionDetail = WorkflowVersionSummary & { definition: WorkflowDefinition };
 
+export type WorkflowDeployment = {
+  environment: string;
+  workflow_id: string;
+  workflow_name: string;
+  workflow_version_id: string;
+  version_number: number;
+  published_at: string;
+  updated_at: string;
+  definition: WorkflowDefinition;
+};
+
 export type OllamaModel = {
   name: string;
   model?: string;

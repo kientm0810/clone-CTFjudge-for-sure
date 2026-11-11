@@ -41,3 +41,44 @@ def test_build_ctfjudge_report_rejects_unknown_rating() -> None:
                 }
             }
         )
+
+
+def test_report_grounds_each_student_chunk_and_normalizes_ai_score() -> None:
+    matrix = {
+        "vulnerability_understanding": "Deep",
+        "reconnaissance_thoroughness": "Adequate",
+        "exploitation_methodology": "Competent",
+        "technical_accuracy": "Precise",
+        "efficiency_approach": "Efficient",
+        "adaptability": "Fair",
+    }
+    report = build_ctfjudge_report(
+        {
+            "competency_matrix": matrix,
+            "comparisons": [{
+                "student_chunk_id": "student-0",
+                "student_content": "hallucinated",
+                "classification": "partial_match",
+                "score": 5,
+                "explanation": "Đúng một phần.",
+            }],
+        },
+        retrieval_results=[{
+            "student_chunk_id": "student-0",
+            "student_content": "Nội dung thật của sinh viên.",
+            "candidates": [{
+                "golden_chunk_id": "golden-2",
+                "content": "Golden evidence",
+                "similarity_score": 0.88,
+            }],
+        }],
+    )
+
+    comparison = report["comparisons"][0]
+    assert comparison["student_content"] == "Nội dung thật của sinh viên."
+    assert comparison["score"] == 0.5
+    assert comparison["matched_golden"] == [{
+        "chunk_id": "golden-2",
+        "content": "Golden evidence",
+        "similarity_score": 0.88,
+    }]

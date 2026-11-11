@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@xyflow/react/dist/style.css";
 import "./styles.css";
+import { AppNav } from "@/components/workflow/AppNav";
 
 export const metadata: Metadata = {
   title: "CTFJudge Workflow",
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="vi" suppressHydrationWarning>
-      <body>{children}</body>
+      <body><AppNav />{children}</body>
     </html>
   );
 }

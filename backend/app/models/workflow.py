@@ -45,6 +45,22 @@ class WorkflowVersion(Base):
     runs: Mapped[list["WorkflowRun"]] = relationship(back_populates="workflow_version")
 
 
+class WorkflowDeployment(Base):
+    __tablename__ = "workflow_deployments"
+
+    environment: Mapped[str] = mapped_column(String(32), primary_key=True)
+    workflow_id: Mapped[str] = mapped_column(
+        ForeignKey("workflows.id", ondelete="CASCADE"), index=True
+    )
+    workflow_version_id: Mapped[str] = mapped_column(
+        ForeignKey("workflow_versions.id", ondelete="CASCADE"), index=True
+    )
+    published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now
+    )
+
+
 class WorkflowRun(Base):
     __tablename__ = "workflow_runs"
 

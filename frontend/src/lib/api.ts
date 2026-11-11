@@ -1,4 +1,4 @@
-import type { OllamaModel, RunHistoryItem, VectorCollection, WorkflowDefinition, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
+import type { OllamaModel, RunHistoryItem, VectorCollection, WorkflowDefinition, WorkflowDeployment, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8400";
 
@@ -61,6 +61,20 @@ export function createWorkflowVersion(workflowId: string, definition: WorkflowDe
 
 export function activateWorkflowVersion(workflowId: string, version: number) {
   return request<WorkflowDetail>(`/workflows/${workflowId}/versions/${version}/activate`, { method: "POST" });
+}
+
+export function publishWorkflow(workflowId: string) {
+  return request<WorkflowDeployment>(`/workflows/${workflowId}/publish`, { method: "POST" });
+}
+
+export const getDeployment = (environment = "prod") =>
+  request<WorkflowDeployment>(`/deployments/${environment}`);
+
+export function startDeploymentRun(environment: string, inputs: Record<string, unknown>) {
+  return request<WorkflowRun>(`/deployments/${environment}/runs`, {
+    method: "POST",
+    body: JSON.stringify({ inputs }),
+  });
 }
 
 export function startRun(workflowId: string, inputs: Record<string, unknown>) {

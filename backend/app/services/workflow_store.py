@@ -2,7 +2,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.workflow import NodeRun, Workflow, WorkflowRun, WorkflowVersion
+from app.models.workflow import NodeRun, Workflow, WorkflowDeployment, WorkflowRun, WorkflowVersion
 from app.schemas.persistence import WorkflowCreate
 from app.schemas.workflow import WorkflowDefinition
 
@@ -136,6 +136,57 @@ class WorkflowStore:
         await self.session.commit()
         await self.session.refresh(run)
         return run
+
+    async def create_run_for_version(self, version_id: str, inputs: dict) -> WorkflowRun | None:
+        version = await self.session.get(WorkflowVersion, version_id)
+        if version is None:
+            return None
+        run = WorkflowRun(
+            workflow_version_id=version.id,
+            status="PENDING",
+            runtime_inputs=inputs,
+        )
+        self.session.add(run)
+        await self.session.commit()
+        await self.session.refresh(run)
+        return run
+
+    async def publish(self, workflow_id: str, environment: str = "prod"):
+        stored = await self.get_workflow(workflow_id)
+        if stored is None:
+            return None
+        workflow, version = stored
+        deployment = await self.session.get(WorkflowDeployment, environment)
+        if deployment is None:
+            deployment = WorkflowDeployment(environment=environment)
+            self.session.add(deployment)
+        deployment.workflow_id = workflow.id
+        deployment.workflow_version_id = version.id
+        deployment.published_at = func.now()
+        deployment.updated_at = func.now()
+        await self.session.commit()
+        await self.session.refresh(deployment)
+        return deployment, workflow, version
+
+    async def get_deployment(self, environment: str = "prod"):
+        row = (
+            await self.session.execute(
+                select(WorkflowDeployment, Workflow, WorkflowVersion)
+                .join(Workflow, Workflow.id == WorkflowDeployment.workflow_id)
+                .join(WorkflowVersion, WorkflowVersion.id == WorkflowDeployment.workflow_version_id)
+                .where(WorkflowDeployment.environment == environment)
+            )
+        ).first()
+        return (row[0], row[1], row[2]) if row else None
+
+    async def is_version_deployed(self, version_id: str) -> bool:
+        return bool(
+            await self.session.scalar(
+                select(WorkflowDeployment.environment).where(
+                    WorkflowDeployment.workflow_version_id == version_id
+                )
+            )
+        )
 
     async def list_runs(
         self,
