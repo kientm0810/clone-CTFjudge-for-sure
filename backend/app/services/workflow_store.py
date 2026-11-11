@@ -129,6 +129,25 @@ class WorkflowStore:
         await self.session.refresh(run)
         return run
 
+    async def list_runs(
+        self,
+        workflow_id: str,
+        limit: int = 50,
+    ) -> list[tuple[WorkflowRun, WorkflowVersion]] | None:
+        workflow_exists = await self.session.scalar(
+            select(Workflow.id).where(Workflow.id == workflow_id)
+        )
+        if workflow_exists is None:
+            return None
+        rows = await self.session.execute(
+            select(WorkflowRun, WorkflowVersion)
+            .join(WorkflowVersion, WorkflowRun.workflow_version_id == WorkflowVersion.id)
+            .where(WorkflowVersion.workflow_id == workflow_id)
+            .order_by(WorkflowRun.created_at.desc())
+            .limit(limit)
+        )
+        return [(row[0], row[1]) for row in rows]
+
     async def get_run(self, run_id: str, include_nodes: bool = False) -> WorkflowRun | None:
         statement = select(WorkflowRun).where(WorkflowRun.id == run_id)
         if include_nodes:
@@ -143,5 +162,9 @@ class WorkflowStore:
         run.started_at = None
         run.completed_at = None
         run.celery_task_id = None
+        await self.session.commit()
+
+    async def delete_run(self, run: WorkflowRun) -> None:
+        await self.session.delete(run)
         await self.session.commit()
 

@@ -62,6 +62,11 @@ class RunSummary(BaseModel):
     created_at: datetime
 
 
+class RunHistoryItem(RunSummary):
+    workflow_id: str
+    version_number: int
+
+
 class NodeRunDetail(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

@@ -65,6 +65,10 @@ The local dashboard also includes a small n8n-style builder:
 
 The sidebar lists immutable versions. **Rollback** changes the active version pointer without deleting newer versions. A later edit always uses `max(version) + 1`, so saving after a rollback never overwrites history.
 
+## Run history
+
+Each workflow keeps its execution history across versions. The dashboard can reopen an old result, its original immutable graph, and node trace; retry a terminal run with the same inputs/version; or delete it. Deleting a run also removes vector collections whose names contain that run ID; shared collections are intentionally preserved.
+
 The UI uses the asynchronous API, Redis, Celery, PostgreSQL, and Ollama; it does not simulate execution in the browser.
 
 Run backend tests in Docker:

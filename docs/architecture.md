@@ -37,6 +37,7 @@ Student input -> Student parser agent -----------------+-> Database(search)
 4. The Celery worker executes nodes sequentially and records each node's input, output, status, and timestamps.
 5. `GET /runs/{id}` exposes live progress; `GET /runs/{id}/result` exposes the completed result.
 6. Failed or completed runs can be reset and queued again through `POST /runs/{id}/retry`.
+7. `GET /workflows/{id}/runs` lists executions across workflow versions. Terminal runs can be deleted through `DELETE /runs/{id}`; run-scoped vector collections are cleaned with them.
 
 ## Storage
 

@@ -7,6 +7,7 @@ from app.database import get_session
 from app.models.workflow import Workflow
 from app.schemas.persistence import (
     RunCreate,
+    RunHistoryItem,
     RunSummary,
     WorkflowCreate,
     WorkflowDetail,
@@ -200,4 +201,23 @@ async def start_workflow_run(
     await session.commit()
     await session.refresh(run)
     return RunSummary.model_validate(run)
+
+
+@router.get("/{workflow_id}/runs", response_model=list[RunHistoryItem])
+async def list_workflow_runs(
+    workflow_id: str,
+    session: SessionDependency,
+    limit: int = 50,
+) -> list[RunHistoryItem]:
+    rows = await WorkflowStore(session).list_runs(workflow_id, min(max(limit, 1), 200))
+    if rows is None:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    return [
+        RunHistoryItem(
+            **RunSummary.model_validate(run).model_dump(),
+            workflow_id=workflow_id,
+            version_number=version.version,
+        )
+        for run, version in rows
+    ]
 

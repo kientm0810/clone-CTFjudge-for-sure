@@ -165,3 +165,17 @@ class PgVectorService:
                 )
         return results
 
+    async def delete_collections(self, collections: set[str]) -> int:
+        if not collections:
+            return 0
+        await self.initialize()
+        deleted = 0
+        async with self.engine.begin() as connection:
+            for collection in collections:
+                result = await connection.execute(
+                    text("DELETE FROM vector_chunks WHERE collection_name = :collection"),
+                    {"collection": collection},
+                )
+                deleted += int(result.rowcount or 0)
+        return deleted
+

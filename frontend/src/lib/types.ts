@@ -62,6 +62,11 @@ export type WorkflowRun = {
   node_runs?: NodeRun[];
 };
 
+export type RunHistoryItem = WorkflowRun & {
+  workflow_id: string;
+  version_number: number;
+};
+
 export type GoldenMatch = {
   chunk_id: string;
   content: string;

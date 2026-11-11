@@ -1,4 +1,4 @@
-import type { WorkflowDefinition, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
+import type { RunHistoryItem, WorkflowDefinition, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8400";
 
@@ -50,4 +50,19 @@ export function startRun(workflowId: string, inputs: Record<string, unknown>) {
 }
 
 export const getRun = (runId: string) => request<WorkflowRun>(`/runs/${runId}`);
+
+export const listWorkflowRuns = (workflowId: string) =>
+  request<RunHistoryItem[]>(`/workflows/${workflowId}/runs`);
+
+export function retryRun(runId: string) {
+  return request<WorkflowRun>(`/runs/${runId}/retry`, { method: "POST" });
+}
+
+export async function deleteRun(runId: string): Promise<void> {
+  const response = await fetch(`${API_URL}/runs/${runId}`, { method: "DELETE" });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({ detail: response.statusText }));
+    throw new Error(typeof payload.detail === "string" ? payload.detail : JSON.stringify(payload.detail));
+  }
+}
 

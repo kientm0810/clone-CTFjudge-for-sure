@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { activateWorkflowVersion, createWorkflow, getRun, getWorkflow, listWorkflows, listWorkflowVersions, startRun } from "@/lib/api";
-import type { WorkflowDefinition, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionSummary } from "@/lib/types";
+import { activateWorkflowVersion, createWorkflow, deleteRun, getRun, getWorkflow, getWorkflowVersion, listWorkflowRuns, listWorkflows, listWorkflowVersions, retryRun, startRun } from "@/lib/api";
+import type { RunHistoryItem, WorkflowDefinition, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionSummary } from "@/lib/types";
 import { ComparisonResult } from "./ComparisonResult";
+import { RunHistory } from "./RunHistory";
 import { WorkflowCanvas } from "./WorkflowCanvas";
 import { WorkflowEditor } from "./WorkflowEditor";
 
@@ -132,14 +133,18 @@ export function WorkflowDashboard() {
   const [editorSource, setEditorSource] = useState<WorkflowDefinition | undefined>();
   const [editorWorkflowId, setEditorWorkflowId] = useState<string | undefined>();
   const [versions, setVersions] = useState<WorkflowVersionSummary[]>([]);
+  const [runHistory, setRunHistory] = useState<RunHistoryItem[]>([]);
+  const [runDefinition, setRunDefinition] = useState<WorkflowDefinition | null>(null);
 
   async function selectWorkflow(id: string) {
     setError(null);
-    const [detail, history] = await Promise.all([getWorkflow(id), listWorkflowVersions(id)]);
+    const [detail, history, runs] = await Promise.all([getWorkflow(id), listWorkflowVersions(id), listWorkflowRuns(id)]);
     setSelected(detail);
     setVersions(history);
+    setRunHistory(runs);
     setInputs(JSON.stringify(sampleInputs(detail.definition), null, 2));
     setRun(null);
+    setRunDefinition(null);
   }
 
   async function activateVersion(version: number) {
@@ -178,16 +183,66 @@ export function WorkflowDashboard() {
 
   async function runWorkflow() {
     if (!selected) return;
-    setBusy(true); setError(null); setRun(null);
+    setBusy(true); setError(null); setRun(null); setRunDefinition(null);
     try {
       const parsedInputs = JSON.parse(inputs) as Record<string, unknown>;
-      let current = await startRun(selected.id, parsedInputs);
+      const current = await startRun(selected.id, parsedInputs);
+      await watchRun(current.id);
+      setRunHistory(await listWorkflowRuns(selected.id));
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally { setBusy(false); }
+  }
+
+  async function watchRun(runId: string) {
+    let current = await getRun(runId);
+    setRun(current);
+    for (let attempt = 0; attempt < 180; attempt += 1) {
+      if (["COMPLETED", "FAILED", "CANCELLED"].includes(current.status)) return;
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      current = await getRun(runId);
       setRun(current);
-      for (let attempt = 0; attempt < 180; attempt += 1) {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        current = await getRun(current.id); setRun(current);
-        if (["COMPLETED", "FAILED", "CANCELLED"].includes(current.status)) break;
+    }
+  }
+
+  async function openRun(runId: string) {
+    setError(null);
+    try {
+      const historyItem = runHistory.find((item) => item.id === runId);
+      const [detail, version] = await Promise.all([
+        getRun(runId),
+        historyItem && selected ? getWorkflowVersion(selected.id, historyItem.version_number) : Promise.resolve(null),
+      ]);
+      setRun(detail);
+      setRunDefinition(version?.definition ?? null);
+    }
+    catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }
+  }
+
+  async function retryHistoricalRun(runId: string) {
+    if (!selected) return;
+    setBusy(true); setError(null);
+    try {
+      await retryRun(runId);
+      const historyItem = runHistory.find((item) => item.id === runId);
+      if (historyItem) {
+        const version = await getWorkflowVersion(selected.id, historyItem.version_number);
+        setRunDefinition(version.definition);
       }
+      await watchRun(runId);
+      setRunHistory(await listWorkflowRuns(selected.id));
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally { setBusy(false); }
+  }
+
+  async function deleteHistoricalRun(runId: string) {
+    if (!selected || !window.confirm(`Xóa run ${runId.slice(0, 8)} và vector data riêng của run này?`)) return;
+    setBusy(true); setError(null);
+    try {
+      await deleteRun(runId);
+      if (run?.id === runId) { setRun(null); setRunDefinition(null); }
+      setRunHistory(await listWorkflowRuns(selected.id));
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally { setBusy(false); }
@@ -230,7 +285,7 @@ export function WorkflowDashboard() {
         </aside>
         <div className="main-panel">
           <div className="panel-heading"><div><p className="section-label">Workflow graph</p><h2>{selected?.name ?? "No workflow selected"}</h2></div>{run && <code className="run-id">run {run.id.slice(0, 8)}</code>}</div>
-          <WorkflowCanvas definition={selected?.definition} nodeStatuses={nodeStatuses} />
+          <WorkflowCanvas definition={runDefinition ?? selected?.definition} nodeStatuses={nodeStatuses} />
           <div className="execution-grid">
             <section className="card">
               <div className="card-heading"><div><p className="section-label">Runtime</p><h2>Golden & student input</h2></div><button className="primary-button" onClick={runWorkflow} disabled={busy || !selected}>{busy ? "Đang chạy…" : "▶ Run workflow"}</button></div>
@@ -248,6 +303,14 @@ export function WorkflowDashboard() {
               {(run?.node_runs ?? []).length === 0 && <div className="empty-trace">Chạy workflow để xem trace của từng node.</div>}
             </div>
           </section>
+          <RunHistory
+            runs={runHistory}
+            selectedRunId={run?.id}
+            busy={busy}
+            onOpen={openRun}
+            onRetry={retryHistoricalRun}
+            onDelete={deleteHistoricalRun}
+          />
         </div>
       </section>}
     </>
