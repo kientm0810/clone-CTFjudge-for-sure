@@ -53,3 +53,5 @@ which lets an upsert/search pair share an isolated collection for each execution
 
 The output node returns its single upstream artifact. When multiple edges enter it, values are keyed by upstream node ID.
 
+`format: "ctfjudge_report"` applies the original CTFJudge rating-to-score mapping and the default `17/17/17/17/16/16` competency weights. The upstream Agent supplies qualitative ratings; the Output node calculates `overall_score` and `formula_breakdown` deterministically, so changing the judge model does not change the scoring formula.
+

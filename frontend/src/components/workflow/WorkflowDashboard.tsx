@@ -26,10 +26,46 @@ const chunkOutputSchema = {
   required: ["chunks"],
 };
 
+const failureClassifications = [
+  "Insufficient Reconnaissance", "Incomplete Binary Analysis", "Exploit Development Failure",
+  "Cryptographic Attack Failure", "Network Issues", "Tool Misuse or Incorrect Tool Used",
+  "Misinterpretation of Challenge Objective", "Resource Exhaustion or Timeout",
+  "AI Multi-Agent Coordination Failure", "Unable to Extract/Parse Data", "Unable to Unobfuscate",
+  "Could Not Escalate Privilege", "Flag Submission or Verification Error",
+  "Ineffective Strategy or Planning", "Communication Breakdown Between Agents",
+  "Knowledge or Domain Expertise Gap", "Infrastructure or Environment Failure",
+  "Premature Abandonment", "Incorrect Task Delegation", "Algorithmic Reasoning Failure",
+  "Lack of Adaptability to Feedback", "Execution Environment Mismatch",
+];
+
 const comparisonOutputSchema = {
   type: "object",
   properties: {
-    summary_score: { type: "number", minimum: 0, maximum: 1 }, summary: { type: "string" },
+    summary: { type: "string" },
+    challenge_solved: { type: "boolean" },
+    competency_matrix: {
+      type: "object",
+      properties: {
+        vulnerability_understanding: { type: "string", enum: ["Deep", "Moderate", "Shallow", "Missing"] },
+        reconnaissance_thoroughness: { type: "string", enum: ["Comprehensive", "Adequate", "Limited", "Insufficient"] },
+        exploitation_methodology: { type: "string", enum: ["Expert", "Competent", "Basic", "Flawed"] },
+        technical_accuracy: { type: "string", enum: ["Precise", "Good", "Acceptable", "Poor"] },
+        efficiency_approach: { type: "string", enum: ["Optimal", "Efficient", "Acceptable", "Wasteful"] },
+        adaptability: { type: "string", enum: ["Excellent", "Good", "Fair", "Poor"] },
+      },
+      required: ["vulnerability_understanding", "reconnaissance_thoroughness", "exploitation_methodology", "technical_accuracy", "efficiency_approach", "adaptability"],
+    },
+    detailed_comparison: { type: "string" },
+    key_insights: { type: "string" },
+    failure_analysis: { type: "string" },
+    failure_keywords: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: { keyword: { type: "string" }, classification: { type: "string", enum: failureClassifications } },
+        required: ["keyword", "classification"],
+      },
+    },
     comparisons: {
       type: "array",
       items: {
@@ -54,11 +90,11 @@ const comparisonOutputSchema = {
       },
     },
   },
-  required: ["summary_score", "summary", "comparisons"],
+  required: ["summary", "challenge_solved", "competency_matrix", "detailed_comparison", "key_insights", "failure_analysis", "failure_keywords", "comparisons"],
 };
 
 const ragDefinition: WorkflowDefinition = {
-  name: "Golden solution RAG comparison",
+  name: "CTFJudge rubric RAG evaluation",
   version: 1,
   nodes: [
     { id: "golden-input", type: "input", name: "Golden solution", config: { input_key: "golden", document_type: "golden_solution" } },
@@ -89,10 +125,20 @@ const ragDefinition: WorkflowDefinition = {
       id: "comparison-agent", type: "agent", name: "Similarity judge",
       config: {
         model: "ollama/qwen2.5:3b", temperature: 0, output_schema: comparisonOutputSchema,
-        prompt: "Judge every student chunk against its retrieved golden candidates. Similar wording alone is not proof of correctness. Preserve student_content exactly. Put only genuinely relevant candidates in matched_golden and copy their IDs, content, and similarity scores. Classify each chunk, assign score from 0 to 1, explain briefly in Vietnamese, then calculate summary_score as the average. Return JSON only.",
+        prompt: "You are the CTFJudge cybersecurity evaluator. Judge every student chunk against retrieved golden evidence. Similar wording alone is not proof of correctness. Preserve student_content exactly and copy relevant golden IDs, content, and similarity scores. Then rate all six competency dimensions using only the allowed enum values. Assess only evidence present in the submission; explain uncertainty in Vietnamese. challenge_solved means the writeup demonstrates a complete path to the flag. If solved, failure_analysis must be NO_ANALYSIS and failure_keywords must be empty. Return JSON only. Do not calculate overall_score; the Output node calculates it deterministically.",
       },
     },
-    { id: "report", type: "output", name: "Comparison report", config: { format: "comparison_report" } },
+    {
+      id: "report", type: "output", name: "CTFJudge report",
+      config: {
+        format: "ctfjudge_report",
+        formula_weights: {
+          vulnerability_understanding: 0.17, reconnaissance_thoroughness: 0.17,
+          exploitation_methodology: 0.17, technical_accuracy: 0.17,
+          efficiency_approach: 0.16, adaptability: 0.16,
+        },
+      },
+    },
   ],
   edges: [
     { source: "golden-input", target: "golden-parser" }, { source: "golden-parser", target: "golden-index" },
@@ -174,7 +220,7 @@ export function WorkflowDashboard() {
   async function createRagDemo() {
     setBusy(true); setError(null);
     try {
-      const created = await createWorkflow(ragDefinition, "RAG comparison sử dụng Ollama và pgvector");
+      const created = await createWorkflow(ragDefinition, "CTFJudge rubric evaluation sử dụng Ollama và pgvector");
       await refreshWorkflows(created.id);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
@@ -267,7 +313,7 @@ export function WorkflowDashboard() {
       /> : <section className="workspace">
         <aside className="sidebar">
           <div className="sidebar-title"><h2>Workflows</h2><button className="icon-button" onClick={() => refreshWorkflows()} title="Làm mới">↻</button></div>
-          <button className="primary-button full" onClick={createRagDemo} disabled={busy}>+ Tạo workflow RAG</button>
+          <button className="primary-button full" onClick={createRagDemo} disabled={busy}>+ Tạo CTFJudge RAG</button>
           <button className="secondary-button full editor-button" onClick={() => { setEditorWorkflowId(undefined); setEditorSource(undefined); setEditorOpen(true); }}>+ Workflow trống</button>
           <button className="secondary-button full editor-button" disabled={!selected} onClick={() => { setEditorWorkflowId(selected?.id); setEditorSource(selected?.definition); setEditorOpen(true); }}>Sửa & tạo version</button>
           <div className="workflow-list">
@@ -292,7 +338,7 @@ export function WorkflowDashboard() {
               <textarea value={inputs} onChange={(event) => setInputs(event.target.value)} spellCheck={false} />
             </section>
             <section className="card result-card">
-              <div className="card-heading"><div><p className="section-label">Result</p><h2>Similarity report</h2></div>{run && <span className={`mini-status run-${run.status.toLowerCase()}`}>{run.status}</span>}</div>
+              <div className="card-heading"><div><p className="section-label">Result</p><h2>CTFJudge report</h2></div>{run && <span className={`mini-status run-${run.status.toLowerCase()}`}>{run.status}</span>}</div>
               <ComparisonResult run={run} />
             </section>
           </div>

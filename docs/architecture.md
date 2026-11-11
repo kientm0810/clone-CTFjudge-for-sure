@@ -27,6 +27,7 @@ Student input -> Student parser agent -----------------+-> Database(search)
 - Node implementations call services through `WorkflowContext`.
 - Model and vector implementations can be replaced without changing the executor.
 - Database collections can use `{{run_id}}` so vectors from concurrent submissions stay isolated.
+- CTFJudge qualitative ratings come from the judge model, while the Output node owns deterministic weighted-score calculation.
 - Redis/Celery is the asynchronous execution boundary. Workflow, run, and per-node execution state are persisted in PostgreSQL. A synchronous endpoint remains available for development and tests.
 
 ## Persisted execution lifecycle

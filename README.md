@@ -7,6 +7,8 @@ This is the official repository for CTFJudge from "Towards Effective Offensive S
 
 The new architecture provides four extensible node types: Input, Agent, Database, and Output. Its first workflow chunks a golden solution and a student submission, indexes the golden chunks in pgvector, retrieves relevant evidence, and asks a configurable judge model for a structured comparison.
 
+The CTFJudge RAG template also restores the original six-dimension cybersecurity rubric. The model selects qualitative ratings and explains evidence; the Output node deterministically applies the configured `17/17/17/17/16/16` weights to calculate the final score.
+
 ```bash
 copy .env.example .env
 docker compose up --build

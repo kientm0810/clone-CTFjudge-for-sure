@@ -71,6 +71,10 @@ Each workflow keeps its execution history across versions. The dashboard can reo
 
 The UI uses the asynchronous API, Redis, Celery, PostgreSQL, and Ollama; it does not simulate execution in the browser.
 
+## CTFJudge rubric template
+
+Click **Tạo CTFJudge RAG** to create the complete golden-solution evaluation workflow. Its judge returns chunk evidence, six qualitative competency ratings, solved/failure analysis, and key insights. The final Output node—not the model—maps ratings to numeric values and calculates the weighted overall score.
+
 Run backend tests in Docker:
 
 ```bash

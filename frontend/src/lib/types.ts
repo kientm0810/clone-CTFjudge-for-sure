@@ -83,8 +83,16 @@ export type ChunkComparison = {
 };
 
 export type ComparisonReport = {
-  summary_score: number;
+  summary_score?: number;
+  overall_score?: number;
   summary: string;
   comparisons: ChunkComparison[];
+  challenge_solved?: boolean;
+  competency_matrix?: Record<string, string>;
+  formula_breakdown?: Record<string, { rating: string; score: number; weight: number; weighted_score: number }>;
+  detailed_comparison?: string;
+  key_insights?: string;
+  failure_analysis?: string;
+  failure_keywords?: Array<{ keyword: string; classification: string }>;
 };
 
