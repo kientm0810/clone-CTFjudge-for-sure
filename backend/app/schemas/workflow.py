@@ -11,11 +11,17 @@ class NodeType(StrEnum):
     OUTPUT = "output"
 
 
+class NodePosition(BaseModel):
+    x: float
+    y: float
+
+
 class NodeDefinition(BaseModel):
     id: str = Field(min_length=1)
     type: NodeType
     name: str | None = None
     config: dict[str, Any] = Field(default_factory=dict)
+    position: NodePosition | None = None
 
 
 class EdgeDefinition(BaseModel):

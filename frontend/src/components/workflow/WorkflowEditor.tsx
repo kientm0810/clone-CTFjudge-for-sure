@@ -7,12 +7,8 @@ import {
   Connection,
   Controls,
   Edge,
-  Handle,
   MiniMap,
-  Node,
   NodeMouseHandler,
-  NodeProps,
-  Position,
   ReactFlow,
   ReactFlowInstance,
   useEdgesState,
@@ -23,12 +19,7 @@ import type { NodeType, OllamaModel, VectorCollection, WorkflowDefinition, Workf
 import { ConfirmDialog } from "./ConfirmDialog";
 import { NodeConfigForm, validateNodeConfig } from "./NodeConfigForm";
 import { EditorJourney } from "./WorkflowGuide";
-
-type EditorNodeData = {
-  label: string;
-  nodeType: NodeType;
-  config: Record<string, unknown>;
-};
+import { savedOrDefaultPosition, WorkflowFlowNode, workflowNodeTypes } from "./WorkflowNodeCard";
 
 type Props = {
   workflowId?: string;
@@ -36,19 +27,6 @@ type Props = {
   onCancel: () => void;
   onSaved: (workflowId: string) => Promise<void> | void;
 };
-
-function BuilderNode({ data, selected }: NodeProps<Node<EditorNodeData>>) {
-  return (
-    <div className={`builder-node builder-${data.nodeType} ${selected ? "builder-selected" : ""}`}>
-      {data.nodeType !== "input" && <Handle id="input" type="target" position={Position.Left} />}
-      <small>{data.nodeType}</small>
-      <strong>{data.label}</strong>
-      {data.nodeType !== "output" && <Handle id="output" type="source" position={Position.Right} />}
-    </div>
-  );
-}
-
-const editorNodeTypes = { workflowNode: BuilderNode };
 
 const palette: { type: NodeType; label: string; hint: string }[] = [
   { type: "input", label: "Input", hint: "Cửa nhận dữ liệu đầu vào" },
@@ -64,7 +42,7 @@ const defaultConfigs: Record<NodeType, Record<string, unknown>> = {
   output: { format: "json" },
 };
 
-function initialGraph(definition?: WorkflowDefinition): { nodes: Node<EditorNodeData>[]; edges: Edge[] } {
+function initialGraph(definition?: WorkflowDefinition): { nodes: WorkflowFlowNode[]; edges: Edge[] } {
   const source = definition ?? {
     name: "Untitled workflow",
     version: 1,
@@ -77,7 +55,7 @@ function initialGraph(definition?: WorkflowDefinition): { nodes: Node<EditorNode
   return {
     nodes: source.nodes.map((node, index) => ({
       id: node.id,
-      position: { x: 80 + (index % 4) * 220, y: 70 + Math.floor(index / 4) * 150 },
+      position: savedOrDefaultPosition(node, index),
       data: { label: node.name ?? node.id, nodeType: node.type, config: structuredClone(node.config) },
       type: "workflowNode",
     })),
@@ -85,7 +63,7 @@ function initialGraph(definition?: WorkflowDefinition): { nodes: Node<EditorNode
   };
 }
 
-function nextNodeId(type: NodeType, nodes: Node<EditorNodeData>[]): string {
+function nextNodeId(type: NodeType, nodes: WorkflowFlowNode[]): string {
   let counter = 1;
   while (nodes.some((node) => node.id === `${type}-${counter}`)) counter += 1;
   return `${type}-${counter}`;
@@ -93,9 +71,9 @@ function nextNodeId(type: NodeType, nodes: Node<EditorNodeData>[]): string {
 
 export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSaved }: Props) {
   const graph = useMemo(() => initialGraph(initialDefinition), [initialDefinition]);
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<EditorNodeData>>(graph.nodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState<WorkflowFlowNode>(graph.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges);
-  const [instance, setInstance] = useState<ReactFlowInstance<Node<EditorNodeData>, Edge> | null>(null);
+  const [instance, setInstance] = useState<ReactFlowInstance<WorkflowFlowNode, Edge> | null>(null);
   const [workflowName, setWorkflowName] = useState(
     initialDefinition ? (workflowId ? initialDefinition.name : `${initialDefinition.name} copy`) : "Untitled workflow",
   );
@@ -157,7 +135,7 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
     });
   }
 
-  function updateSelected(updater: (node: Node<EditorNodeData>) => Node<EditorNodeData>) {
+  function updateSelected(updater: (node: WorkflowFlowNode) => WorkflowFlowNode) {
     if (!selectedId) return;
     setNodes((current) => current.map((node) => node.id === selectedId ? updater(node) : node));
   }
@@ -181,7 +159,7 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
     setDeleteNodeOpen(false);
   }
 
-  const onNodeClick: NodeMouseHandler<Node<EditorNodeData>> = (_, node) => setSelectedId(node.id);
+  const onNodeClick: NodeMouseHandler<WorkflowFlowNode> = (_, node) => setSelectedId(node.id);
 
   async function saveWorkflow() {
     setSaving(true); setError(null);
@@ -198,6 +176,7 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
           type: node.data.nodeType,
           name: node.data.label,
           config: node.data.config,
+          position: node.position,
         })),
         edges: edges.map((edge) => ({ source: edge.source, target: edge.target })),
       };
@@ -249,7 +228,7 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
           <ReactFlow
             nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange}
             onConnect={onConnect} onNodeClick={onNodeClick} onPaneClick={() => setSelectedId(null)} onInit={setInstance}
-            nodeTypes={editorNodeTypes} fitView deleteKeyCode={["Backspace", "Delete"]}
+            nodeTypes={workflowNodeTypes} fitView deleteKeyCode={["Backspace", "Delete"]}
           >
             <Background gap={22} size={1} /><MiniMap pannable zoomable /><Controls />
           </ReactFlow>

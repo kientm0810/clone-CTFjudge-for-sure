@@ -24,6 +24,21 @@ def test_validator_returns_topological_order() -> None:
     assert WorkflowValidator.validate(workflow) == ["input", "agent", "output"]
 
 
+def test_workflow_keeps_saved_node_position() -> None:
+    workflow = WorkflowDefinition.model_validate(
+        {
+            "name": "positioned",
+            "nodes": [
+                {"id": "input", "type": "input", "position": {"x": 125, "y": 240}},
+                {"id": "output", "type": "output", "position": {"x": 460.5, "y": 240}},
+            ],
+            "edges": [{"source": "input", "target": "output"}],
+        }
+    )
+
+    assert workflow.model_dump(mode="json")["nodes"][0]["position"] == {"x": 125.0, "y": 240.0}
+
+
 def test_validator_rejects_cycle() -> None:
     workflow = WorkflowDefinition.model_validate(
         {

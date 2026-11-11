@@ -5,6 +5,7 @@ export type WorkflowNode = {
   type: NodeType;
   name?: string;
   config: Record<string, unknown>;
+  position?: { x: number; y: number };
 };
 
 export type WorkflowEdge = { source: string; target: string };

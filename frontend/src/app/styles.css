@@ -109,6 +109,8 @@ main { min-height: 100vh; padding: 24px; }
 .react-flow__node.status-running { box-shadow: 0 0 0 3px rgba(242, 170, 76, .2), 0 10px 30px rgba(0, 0, 0, .28); }
 .react-flow__node.status-completed { background: #0e2a25; }
 .react-flow__node.status-failed { border-color: #f26c6c !important; background: #2a1619; }
+.canvas .react-flow__node { min-width: 0; border: 0; padding: 0; background: transparent; box-shadow: none; }
+.canvas .react-flow__minimap { border: 1px solid #29434d; border-radius: 7px; background: #0b1b21; }
 .execution-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
 .card, .node-runs, .run-history { min-width: 0; border: 1px solid #203741; border-radius: 13px; padding: 15px; background: rgba(10, 23, 29, .8); }
 .card textarea { width: 100%; min-height: 170px; margin-top: 13px; resize: vertical; border: 1px solid #27434e; border-radius: 9px; outline: 0; padding: 12px; background: #071217; color: #cfe5eb; font-family: "Cascadia Code", Consolas, monospace; font-size: 12px; line-height: 1.55; }
@@ -229,6 +231,9 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
 .builder-database { border-color: #30c69b; }
 .builder-output { border-color: #f2aa4c; }
 .builder-selected { box-shadow: 0 0 0 3px rgba(101, 214, 192, .18), 0 10px 30px rgba(0, 0, 0, .28); }
+.builder-node.status-running { box-shadow: 0 0 0 3px rgba(242, 170, 76, .24), 0 10px 30px rgba(0, 0, 0, .28); }
+.builder-node.status-completed { background: #0e2a25; }
+.builder-node.status-failed { border-color: #f26c6c; background: #2a1619; }
 .builder-node .react-flow__handle { width: 11px; height: 11px; border: 2px solid #d3e8ed; background: #173b47; }
 .builder-node .react-flow__handle-left { left: -6px; }
 .builder-node .react-flow__handle-right { right: -6px; }

@@ -1,30 +1,24 @@
 "use client";
 
-import { Background, Controls, Edge, Node, ReactFlow } from "@xyflow/react";
+import { Background, Controls, Edge, MiniMap, ReactFlow } from "@xyflow/react";
 import type { WorkflowDefinition } from "@/lib/types";
+import { savedOrDefaultPosition, WorkflowFlowNode, workflowNodeTypes } from "./WorkflowNodeCard";
 
 type Props = { definition?: WorkflowDefinition; nodeStatuses?: Record<string, string> };
 
 export function WorkflowCanvas({ definition, nodeStatuses = {} }: Props) {
   const workflowNodes = definition?.nodes ?? [];
-  const depthById = Object.fromEntries(workflowNodes.map((node) => [node.id, 0]));
-  for (let pass = 0; pass < workflowNodes.length; pass += 1) {
-    for (const edge of definition?.edges ?? []) {
-      depthById[edge.target] = Math.max(depthById[edge.target] ?? 0, (depthById[edge.source] ?? 0) + 1);
-    }
-  }
-  const layerIndexes: Record<number, number> = {};
-  const nodes: Node[] = workflowNodes.map((node) => {
-    const depth = depthById[node.id] ?? 0;
-    const row = layerIndexes[depth] ?? 0;
-    layerIndexes[depth] = row + 1;
-    return {
+  const nodes: WorkflowFlowNode[] = workflowNodes.map((node, index) => ({
     id: node.id,
-    position: { x: 40 + depth * 220, y: 45 + row * 145 },
-    data: { label: node.name ?? node.id },
-    className: `flow-${node.type} status-${(nodeStatuses[node.id] ?? "idle").toLowerCase()}`,
-    };
-  });
+    position: savedOrDefaultPosition(node, index),
+    data: {
+      label: node.name ?? node.id,
+      nodeType: node.type,
+      config: node.config,
+      status: nodeStatuses[node.id] ?? "idle",
+    },
+    type: "workflowNode",
+  }));
   const edges: Edge[] = (definition?.edges ?? []).map((edge, index) => ({
     id: `edge-${index}-${edge.source}-${edge.target}`,
     source: edge.source,
@@ -34,11 +28,19 @@ export function WorkflowCanvas({ definition, nodeStatuses = {} }: Props) {
 
   return (
     <div className="canvas">
-      {nodes.length ? <ReactFlow nodes={nodes} edges={edges} fitView>
+      {nodes.length ? <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={workflowNodeTypes}
+        nodesDraggable={false}
+        nodesConnectable={false}
+        elementsSelectable={false}
+        fitView
+      >
         <Background gap={22} size={1} />
-        <Controls />
+        <MiniMap pannable zoomable />
+        <Controls showInteractive={false} />
       </ReactFlow> : <div className="empty-canvas">Chọn hoặc tạo một workflow để xem graph.</div>}
     </div>
   );
 }
-
