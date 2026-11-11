@@ -158,6 +158,38 @@ async def get_workflow_version(
     )
 
 
+@router.delete("/{workflow_id}/versions/{version_number}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_workflow_version(
+    workflow_id: str,
+    version_number: int,
+    session: SessionDependency,
+) -> None:
+    store = WorkflowStore(session)
+    workflow = await session.get(Workflow, workflow_id)
+    if workflow is None:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    version = await store.get_version(workflow_id, version_number)
+    if version is None:
+        raise HTTPException(status_code=404, detail="Workflow version not found")
+    if workflow.current_version == version_number:
+        raise HTTPException(
+            status_code=409,
+            detail="Không thể xóa version đang ACTIVE. Hãy rollback sang version khác trước.",
+        )
+
+    runs = await store.list_version_runs_with_nodes(version.id)
+    if any(run.status in {"PENDING", "RUNNING"} for run in runs):
+        raise HTTPException(
+            status_code=409,
+            detail="Version đang có workflow chạy. Hãy đợi chạy xong rồi mới xóa.",
+        )
+    collections = set().union(
+        *(owned_vector_collections(run.id, run.node_runs) for run in runs),
+    ) if runs else set()
+    await PgVectorService().delete_collections(collections)
+    await store.delete_version(version.id)
+
+
 @router.post("/{workflow_id}/versions", response_model=WorkflowDetail, status_code=status.HTTP_201_CREATED)
 async def create_workflow_version(
     workflow_id: str,

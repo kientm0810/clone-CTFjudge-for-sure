@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { activateWorkflowVersion, createWorkflow, deleteRun, deleteWorkflow as deleteWorkflowApi, getRun, getWorkflow, getWorkflowVersion, listWorkflowRuns, listWorkflows, listWorkflowVersions, retryRun, startRun } from "@/lib/api";
+import { activateWorkflowVersion, createWorkflow, createWorkflowVersion, deleteRun, deleteWorkflow as deleteWorkflowApi, deleteWorkflowVersion, getRun, getWorkflow, getWorkflowVersion, listWorkflowRuns, listWorkflows, listWorkflowVersions, retryRun, startRun } from "@/lib/api";
 import type { RunHistoryItem, WorkflowDefinition, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionSummary } from "@/lib/types";
 import { ComparisonResult } from "./ComparisonResult";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -173,7 +173,8 @@ function formatTime(value?: string | null): string {
 
 type DeleteTarget =
   | { kind: "workflow"; id: string; name: string }
-  | { kind: "run"; id: string; name: string };
+  | { kind: "run"; id: string; name: string }
+  | { kind: "version"; workflowId: string; version: number; name: string };
 
 export function WorkflowDashboard() {
   const [workflows, setWorkflows] = useState<WorkflowSummary[]>([]);
@@ -339,6 +340,26 @@ export function WorkflowDashboard() {
     } finally { setBusy(false); }
   }
 
+  async function saveWorkflowLayout(positions: Record<string, { x: number; y: number }>) {
+    if (!selected) return;
+    setBusy(true); setError(null);
+    try {
+      const definition: WorkflowDefinition = {
+        ...selected.definition,
+        nodes: selected.definition.nodes.map((node) => ({
+          ...node,
+          position: positions[node.id] ?? node.position,
+        })),
+      };
+      await createWorkflowVersion(selected.id, definition);
+      await refreshWorkflows(selected.id);
+      setNotice("Đã lưu bố cục thành một version mới.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+      throw reason;
+    } finally { setBusy(false); }
+  }
+
   async function confirmDelete() {
     if (!deleteTarget) return;
     const target = deleteTarget;
@@ -348,8 +369,12 @@ export function WorkflowDashboard() {
         await deleteWorkflowApi(target.id);
         await refreshWorkflows();
         setNotice(`Đã xóa workflow “${target.name}” và dữ liệu riêng của nó.`);
-      } else {
+      } else if (target.kind === "run") {
         await performDeleteRun(target.id);
+      } else {
+        await deleteWorkflowVersion(target.workflowId, target.version);
+        await refreshWorkflows(target.workflowId);
+        setNotice(`Đã xóa version ${target.version} và lịch sử chạy thuộc version đó.`);
       }
       setDeleteTarget(null);
     } catch (reason) {
@@ -398,14 +423,26 @@ export function WorkflowDashboard() {
             <h3>Version history</h3>
             {versions.map((version) => <div className={`version-item ${version.is_current ? "current" : ""}`} key={version.id}>
               <div><strong>v{version.version}</strong><small>{new Date(version.created_at).toLocaleString("vi-VN")}</small></div>
-              {version.is_current ? <span>ACTIVE</span> : <button disabled={busy} onClick={() => activateVersion(version.version)}>Rollback</button>}
+              <div className="version-actions">
+                {version.is_current ? <span>ACTIVE</span> : <button disabled={busy} onClick={() => activateVersion(version.version)}>Rollback</button>}
+                <button
+                  className="delete-version"
+                  disabled={busy || version.is_current}
+                  title={version.is_current ? "Rollback sang version khác trước khi xóa" : `Xóa version ${version.version}`}
+                  onClick={() => selected && setDeleteTarget({ kind: "version", workflowId: selected.id, version: version.version, name: `version ${version.version}` })}
+                >Xóa</button>
+              </div>
             </div>)}
           </div>}
         </aside>
         <div className="main-panel">
           <WorkflowJourney hasWorkflow={Boolean(selected)} hasRun={Boolean(run)} runCompleted={run?.status === "COMPLETED"} />
           <div className="panel-heading"><div><p className="section-label">Workflow graph</p><h2>{selected?.name ?? "No workflow selected"}</h2></div>{run && <code className="run-id">run {run.id.slice(0, 8)}</code>}</div>
-          <WorkflowCanvas definition={runDefinition ?? selected?.definition} nodeStatuses={nodeStatuses} />
+          <WorkflowCanvas
+            definition={runDefinition ?? selected?.definition}
+            nodeStatuses={nodeStatuses}
+            onSaveLayout={!runDefinition && selected ? saveWorkflowLayout : undefined}
+          />
           <NodeGuide />
           <div className="execution-grid">
             <section className="card">
@@ -436,11 +473,13 @@ export function WorkflowDashboard() {
       </section>}
       <ConfirmDialog
         open={Boolean(deleteTarget)}
-        title={deleteTarget?.kind === "workflow" ? `Xóa workflow “${deleteTarget.name}”?` : `Xóa ${deleteTarget?.name ?? "lần chạy này"}?`}
+        title={deleteTarget?.kind === "workflow" ? `Xóa workflow “${deleteTarget.name}”?` : `Xóa ${deleteTarget?.name ?? "mục này"}?`}
         description={deleteTarget?.kind === "workflow"
           ? "Workflow, toàn bộ version, lịch sử chạy và dữ liệu vector riêng sẽ bị xóa. Thao tác này không thể hoàn tác."
-          : "Kết quả chạy và dữ liệu vector riêng của lần chạy này sẽ bị xóa. Workflow vẫn được giữ lại."}
-        confirmLabel={deleteTarget?.kind === "workflow" ? "Xóa workflow" : "Xóa lần chạy"}
+          : deleteTarget?.kind === "version"
+            ? "Version, các lần chạy và dữ liệu vector riêng thuộc version này sẽ bị xóa. Workflow và version ACTIVE vẫn được giữ lại."
+            : "Kết quả chạy và dữ liệu vector riêng của lần chạy này sẽ bị xóa. Workflow vẫn được giữ lại."}
+        confirmLabel={deleteTarget?.kind === "workflow" ? "Xóa workflow" : deleteTarget?.kind === "version" ? "Xóa version" : "Xóa lần chạy"}
         busy={busy}
         onCancel={() => setDeleteTarget(null)}
         onConfirm={confirmDelete}

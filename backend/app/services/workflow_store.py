@@ -94,6 +94,14 @@ class WorkflowStore:
             )
         )
 
+    async def list_version_runs_with_nodes(self, version_id: str) -> list[WorkflowRun]:
+        result = await self.session.scalars(
+            select(WorkflowRun)
+            .where(WorkflowRun.workflow_version_id == version_id)
+            .options(selectinload(WorkflowRun.node_runs))
+        )
+        return list(result.unique())
+
     async def activate_version(
         self,
         workflow_id: str,
@@ -184,5 +192,9 @@ class WorkflowStore:
 
     async def delete_workflow(self, workflow_id: str) -> None:
         await self.session.execute(delete(Workflow).where(Workflow.id == workflow_id))
+        await self.session.commit()
+
+    async def delete_version(self, version_id: str) -> None:
+        await self.session.execute(delete(WorkflowVersion).where(WorkflowVersion.id == version_id))
         await self.session.commit()
 

@@ -44,6 +44,14 @@ export const listWorkflowVersions = (workflowId: string) =>
 export const getWorkflowVersion = (workflowId: string, version: number) =>
   request<WorkflowVersionDetail>(`/workflows/${workflowId}/versions/${version}`);
 
+export async function deleteWorkflowVersion(workflowId: string, version: number): Promise<void> {
+  const response = await fetch(`${API_URL}/workflows/${workflowId}/versions/${version}`, { method: "DELETE" });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({ detail: response.statusText }));
+    throw new Error(typeof payload.detail === "string" ? payload.detail : JSON.stringify(payload.detail));
+  }
+}
+
 export function createWorkflowVersion(workflowId: string, definition: WorkflowDefinition) {
   return request<WorkflowDetail>(`/workflows/${workflowId}/versions`, {
     method: "POST",

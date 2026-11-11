@@ -19,7 +19,7 @@ import type { NodeType, OllamaModel, VectorCollection, WorkflowDefinition, Workf
 import { ConfirmDialog } from "./ConfirmDialog";
 import { NodeConfigForm, validateNodeConfig } from "./NodeConfigForm";
 import { EditorJourney } from "./WorkflowGuide";
-import { savedOrDefaultPosition, WorkflowFlowNode, workflowNodeTypes } from "./WorkflowNodeCard";
+import { savedOrTopologicalPosition, topologicalPositions, WorkflowFlowNode, workflowNodeTypes } from "./WorkflowNodeCard";
 
 type Props = {
   workflowId?: string;
@@ -52,10 +52,11 @@ function initialGraph(definition?: WorkflowDefinition): { nodes: WorkflowFlowNod
     ],
     edges: [{ source: "input-1", target: "output-1" }],
   };
+  const autoPositions = topologicalPositions(source);
   return {
-    nodes: source.nodes.map((node, index) => ({
+    nodes: source.nodes.map((node) => ({
       id: node.id,
-      position: savedOrDefaultPosition(node, index),
+      position: savedOrTopologicalPosition(node, source, autoPositions),
       data: { label: node.name ?? node.id, nodeType: node.type, config: structuredClone(node.config) },
       type: "workflowNode",
     })),
