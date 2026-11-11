@@ -179,3 +179,29 @@ class PgVectorService:
                 deleted += int(result.rowcount or 0)
         return deleted
 
+    async def list_collections(self) -> list[dict[str, Any]]:
+        await self.initialize()
+        async with self.engine.connect() as connection:
+            rows = await connection.execute(
+                text(
+                    """
+                    SELECT collection_name,
+                           COUNT(*) AS chunk_count,
+                           ARRAY_AGG(DISTINCT embedding_model ORDER BY embedding_model) AS embedding_models,
+                           MAX(created_at) AS updated_at
+                    FROM vector_chunks
+                    GROUP BY collection_name
+                    ORDER BY collection_name
+                    """
+                )
+            )
+            return [
+                {
+                    "name": row.collection_name,
+                    "chunk_count": int(row.chunk_count),
+                    "embedding_models": list(row.embedding_models or []),
+                    "updated_at": row.updated_at,
+                }
+                for row in rows
+            ]
+

@@ -1,4 +1,4 @@
-import type { RunHistoryItem, WorkflowDefinition, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
+import type { OllamaModel, RunHistoryItem, VectorCollection, WorkflowDefinition, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8400";
 
@@ -17,6 +17,11 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const listWorkflows = () => request<WorkflowSummary[]>("/workflows");
 export const getWorkflow = (id: string) => request<WorkflowDetail>(`/workflows/${id}`);
+
+export const listOllamaModels = async () =>
+  (await request<{ models: OllamaModel[] }>("/providers/ollama/models")).models;
+
+export const listVectorCollections = () => request<VectorCollection[]>("/vectors/collections");
 
 export function createWorkflow(definition: WorkflowDefinition, description: string) {
   return request<WorkflowDetail>("/workflows", {

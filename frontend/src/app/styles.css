@@ -145,7 +145,7 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
 .workflow-name-input { width: min(520px, 55vw); margin-top: 5px; border: 0; outline: 0; background: transparent; color: #e6f0f2; font-size: 18px; font-weight: 700; }
 .toolbar-actions, .inspector-actions { display: flex; gap: 8px; }
 .editor-error { margin: 12px 12px 0; }
-.editor-layout { display: grid; grid-template-columns: 190px minmax(0, 1fr) 290px; min-height: 690px; }
+.editor-layout { display: grid; grid-template-columns: 190px minmax(0, 1fr) 350px; min-height: 690px; }
 .node-palette, .node-inspector { padding: 15px; background: #0a181e; }
 .node-palette { border-right: 1px solid #213842; }
 .node-inspector { border-left: 1px solid #213842; }
@@ -175,11 +175,32 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
 .builder-node .react-flow__handle-left::after { left: -2px; content: "IN"; }
 .builder-node .react-flow__handle-right::after { right: -5px; content: "OUT"; }
 .node-inspector label { display: grid; gap: 6px; margin-bottom: 12px; color: #78939c; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-.node-inspector input, .node-inspector textarea { width: 100%; border: 1px solid #294650; border-radius: 8px; outline: 0; padding: 9px; background: #071217; color: #cfe1e5; font-family: inherit; font-size: 12px; line-height: 1.45; text-transform: none; }
-.node-inspector input:focus, .node-inspector textarea:focus { border-color: #339a86; }
+.node-inspector input, .node-inspector textarea, .node-inspector select { width: 100%; border: 1px solid #294650; border-radius: 8px; outline: 0; padding: 9px; background: #071217; color: #cfe1e5; font-family: inherit; font-size: 12px; line-height: 1.45; text-transform: none; }
+.node-inspector input:focus, .node-inspector textarea:focus, .node-inspector select:focus { border-color: #339a86; }
 .node-inspector input:disabled { color: #66828b; }
 .node-inspector textarea { min-height: 115px; resize: vertical; }
 .node-inspector .config-editor { min-height: 245px; font-family: "Cascadia Code", Consolas, monospace; font-size: 10px; }
+.node-inspector input[type="range"] { padding: 4px 0; accent-color: #39b99e; }
+.guided-config { margin: 16px -2px 13px; border-top: 1px solid #1f3942; padding-top: 14px; }
+.guided-field { display: grid; gap: 6px; margin-bottom: 12px; color: #78939c; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.guided-field > small, .config-hint { color: #607d87; font-size: 9px; font-weight: 400; letter-spacing: 0; line-height: 1.45; text-transform: none; }
+.operation-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.operation-toggle button { border: 1px solid #31505b; border-radius: 8px; padding: 9px 5px; background: #0b1c23; color: #7f9ca5; cursor: pointer; font-size: 10px; font-weight: 700; }
+.operation-toggle button.active { border-color: #2e9d86; background: #12342f; color: #79dec4; }
+.config-validation { margin: 10px 0; border: 1px solid #6d3b42; border-radius: 8px; padding: 7px 9px; background: #26181c; }
+.config-validation p { margin: 3px 0; color: #ef9ca4; font-size: 10px; line-height: 1.4; }
+.config-valid { margin: 10px 0; color: #5ecba4; font-size: 10px; }
+.collection-summary { display: grid; max-height: 120px; gap: 5px; overflow: auto; margin-bottom: 12px; }
+.collection-summary span { display: grid; gap: 2px; border: 1px solid #203a43; border-radius: 7px; padding: 7px; color: #65828b; font-size: 9px; }
+.collection-summary strong { color: #9db7be; font-size: 10px; }
+.weight-editor { margin-bottom: 12px; }
+.weight-total { margin-bottom: 10px; border: 1px solid; border-radius: 7px; padding: 7px; font-size: 10px; font-weight: 700; }
+.weight-total.valid { border-color: #286b58; color: #63d4a8; }
+.weight-total.invalid { border-color: #793a41; color: #f38f98; }
+.advanced-config { margin: 12px 0; border: 1px solid #29434d; border-radius: 8px; padding: 9px; background: #09181e; }
+.advanced-config summary { color: #84a2ab; cursor: pointer; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.advanced-config[open] summary { margin-bottom: 11px; }
+.warning-banner { max-width: 1600px; border: 1px solid #725b31; border-radius: 10px; padding: 11px 13px; background: #2a2416; color: #edc779; font-size: 12px; }
 .inspector-actions { justify-content: space-between; }
 .inspector-empty { font-size: 12px; line-height: 1.6; }
 .editor-canvas .react-flow__minimap { border: 1px solid #29434d; border-radius: 7px; background: #0b1b21; }

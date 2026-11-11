@@ -18,8 +18,9 @@ import {
   useEdgesState,
   useNodesState,
 } from "@xyflow/react";
-import { createWorkflow, createWorkflowVersion } from "@/lib/api";
-import type { NodeType, WorkflowDefinition, WorkflowNode } from "@/lib/types";
+import { createWorkflow, createWorkflowVersion, listOllamaModels, listVectorCollections } from "@/lib/api";
+import type { NodeType, OllamaModel, VectorCollection, WorkflowDefinition, WorkflowNode } from "@/lib/types";
+import { NodeConfigForm, validateNodeConfig } from "./NodeConfigForm";
 
 type EditorNodeData = {
   label: string;
@@ -100,11 +101,25 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
   const [configText, setConfigText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [models, setModels] = useState<OllamaModel[]>([]);
+  const [collections, setCollections] = useState<VectorCollection[]>([]);
+  const [metadataWarning, setMetadataWarning] = useState<string | null>(null);
 
   const selectedNode = nodes.find((node) => node.id === selectedId) ?? null;
   useEffect(() => {
     setConfigText(selectedNode ? JSON.stringify(selectedNode.data.config, null, 2) : "");
   }, [selectedNode]);
+
+  useEffect(() => {
+    Promise.allSettled([listOllamaModels(), listVectorCollections()]).then(([modelResult, collectionResult]) => {
+      const warnings: string[] = [];
+      if (modelResult.status === "fulfilled") setModels(modelResult.value);
+      else warnings.push(`Models: ${String(modelResult.reason)}`);
+      if (collectionResult.status === "fulfilled") setCollections(collectionResult.value);
+      else warnings.push(`Collections: ${String(collectionResult.reason)}`);
+      setMetadataWarning(warnings.length ? warnings.join(" · ") : null);
+    });
+  }, []);
 
   const onConnect = (connection: Connection) => {
     if (!connection.source || !connection.target || connection.source === connection.target) return;
@@ -167,13 +182,10 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
   async function saveWorkflow() {
     setSaving(true); setError(null);
     try {
-      let pendingConfig: Record<string, unknown> | null = null;
-      if (selectedNode) {
-        pendingConfig = JSON.parse(configText) as Record<string, unknown>;
-        if (!pendingConfig || typeof pendingConfig !== "object" || Array.isArray(pendingConfig)) {
-          throw new Error("Config phải là JSON object");
-        }
-      }
+      const configErrors = nodes.flatMap((node) =>
+        validateNodeConfig(node.data.nodeType, node.data.config).map((message) => `${node.data.label}: ${message}`),
+      );
+      if (configErrors.length) throw new Error(configErrors.join(" "));
       const definition: WorkflowDefinition = {
         name: workflowName.trim() || "Untitled workflow",
         version: 1,
@@ -181,7 +193,7 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
           id: node.id,
           type: node.data.nodeType,
           name: node.data.label,
-          config: node.id === selectedId && pendingConfig ? pendingConfig : node.data.config,
+          config: node.data.config,
         })),
         edges: edges.map((edge) => ({ source: edge.source, target: edge.target })),
       };
@@ -201,6 +213,7 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
         <div className="toolbar-actions"><button className="secondary-button" onClick={onCancel}>Hủy</button><button className="primary-button" onClick={saveWorkflow} disabled={saving}>{saving ? "Đang lưu…" : workflowId ? "Lưu version mới" : "Lưu workflow mới"}</button></div>
       </div>
       {error && <div className="error-banner editor-error">{error}</div>}
+      {metadataWarning && <div className="warning-banner editor-error">Không tải được metadata động: {metadataWarning}. Bạn vẫn có thể dùng Advanced JSON.</div>}
       <div className="editor-layout">
         <aside className="node-palette">
           <h3>Nodes</h3>
@@ -240,9 +253,19 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
           {selectedNode ? <>
             <label>ID<input value={selectedNode.id} disabled /></label>
             <label>Name<input value={selectedNode.data.label} onChange={(event) => updateSelected((node) => ({ ...node, data: { ...node.data, label: event.target.value } }))} /></label>
-            {selectedNode.data.nodeType === "agent" && <label>Prompt<textarea value={String(selectedNode.data.config.prompt ?? "")} onChange={(event) => updateSelected((node) => ({ ...node, data: { ...node.data, config: { ...node.data.config, prompt: event.target.value } } }))} /></label>}
-            <label>Config JSON<textarea className="config-editor" value={configText} onChange={(event) => setConfigText(event.target.value)} spellCheck={false} /></label>
-            <div className="inspector-actions"><button className="secondary-button" onClick={applyConfigJson}>Apply config</button><button className="danger-button" onClick={deleteSelected}>Xóa node</button></div>
+            <NodeConfigForm
+              type={selectedNode.data.nodeType}
+              config={selectedNode.data.config}
+              models={models}
+              collections={collections}
+              onChange={(config) => updateSelected((node) => ({ ...node, data: { ...node.data, config } }))}
+            />
+            <details className="advanced-config">
+              <summary>Advanced JSON</summary>
+              <label>Config JSON<textarea className="config-editor" value={configText} onChange={(event) => setConfigText(event.target.value)} spellCheck={false} /></label>
+              <button className="secondary-button" onClick={applyConfigJson}>Apply JSON</button>
+            </details>
+            <div className="inspector-actions"><span /><button className="danger-button" onClick={deleteSelected}>Xóa node</button></div>
           </> : <p className="muted inspector-empty">Chọn một node để sửa tên, prompt và config.</p>}
         </aside>
       </div>

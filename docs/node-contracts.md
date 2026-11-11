@@ -42,6 +42,8 @@ Upsert configuration:
 
 Search configuration adds `top_k` and `score_threshold`. Upsert expects an upstream `chunks` list. Search accepts `query_chunks` or `chunks`.
 
+In the visual editor, `Store vectors` maps to `operation: "upsert"` and `Search vectors` maps to `operation: "search"`. Fields that do not apply to the selected operation are hidden from the guided form but remain accessible through Advanced JSON.
+
 The collection name may contain `{{run_id}}`. The Database node replaces it at runtime,
 which lets an upsert/search pair share an isolated collection for each execution:
 

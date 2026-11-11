@@ -37,6 +37,21 @@ export type WorkflowVersionSummary = {
 
 export type WorkflowVersionDetail = WorkflowVersionSummary & { definition: WorkflowDefinition };
 
+export type OllamaModel = {
+  name: string;
+  model?: string;
+  size?: number;
+  capabilities?: string[];
+  details?: { parameter_size?: string; family?: string };
+};
+
+export type VectorCollection = {
+  name: string;
+  chunk_count: number;
+  embedding_models: string[];
+  updated_at?: string | null;
+};
+
 export type NodeRun = {
   node_id: string;
   node_type: NodeType;

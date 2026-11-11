@@ -65,6 +65,10 @@ The local dashboard also includes a small n8n-style builder:
 
 The sidebar lists immutable versions. **Rollback** changes the active version pointer without deleting newer versions. A later edit always uses `max(version) + 1`, so saving after a rollback never overwrites history.
 
+### Guided node configuration
+
+The inspector uses type-specific forms by default. Input, Agent, Database, and Output nodes expose only relevant settings; raw configuration remains available under **Advanced JSON**. Model options come from the connected Ollama instance, and Database collection options come from `GET /vectors/collections`. The editor validates required fields and rubric weight totals before saving.
+
 ## Run history
 
 Each workflow keeps its execution history across versions. The dashboard can reopen an old result, its original immutable graph, and node trace; retry a terminal run with the same inputs/version; or delete it. Deleting a run also removes vector collections whose names contain that run ID; shared collections are intentionally preserved.
