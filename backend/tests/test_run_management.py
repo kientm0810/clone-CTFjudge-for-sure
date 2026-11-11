@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from app.api.runs import _owned_vector_collections
+from app.services.run_cleanup import owned_vector_collections
 
 
 def test_owned_vector_collections_only_returns_run_scoped_collections() -> None:
@@ -12,4 +12,4 @@ def test_owned_vector_collections_only_returns_run_scoped_collections() -> None:
         SimpleNamespace(output_data=None),
     ]
 
-    assert _owned_vector_collections(run_id, node_runs) == {"comparison-run-123"}
+    assert owned_vector_collections(run_id, node_runs) == {"comparison-run-123"}

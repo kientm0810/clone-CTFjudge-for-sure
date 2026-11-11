@@ -20,7 +20,9 @@ import {
 } from "@xyflow/react";
 import { createWorkflow, createWorkflowVersion, listOllamaModels, listVectorCollections } from "@/lib/api";
 import type { NodeType, OllamaModel, VectorCollection, WorkflowDefinition, WorkflowNode } from "@/lib/types";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { NodeConfigForm, validateNodeConfig } from "./NodeConfigForm";
+import { EditorJourney } from "./WorkflowGuide";
 
 type EditorNodeData = {
   label: string;
@@ -49,10 +51,10 @@ function BuilderNode({ data, selected }: NodeProps<Node<EditorNodeData>>) {
 const editorNodeTypes = { workflowNode: BuilderNode };
 
 const palette: { type: NodeType; label: string; hint: string }[] = [
-  { type: "input", label: "Input", hint: "Runtime document" },
-  { type: "agent", label: "Agent", hint: "Model + prompt" },
-  { type: "database", label: "Database", hint: "Vector upsert/search" },
-  { type: "output", label: "Output", hint: "Final result" },
+  { type: "input", label: "Input", hint: "Cửa nhận dữ liệu đầu vào" },
+  { type: "agent", label: "Agent", hint: "Bộ não AI có prompt" },
+  { type: "database", label: "Database", hint: "Cất hoặc tìm vector" },
+  { type: "output", label: "Output", hint: "Đóng gói kết quả cuối" },
 ];
 
 const defaultConfigs: Record<NodeType, Record<string, unknown>> = {
@@ -104,6 +106,7 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
   const [models, setModels] = useState<OllamaModel[]>([]);
   const [collections, setCollections] = useState<VectorCollection[]>([]);
   const [metadataWarning, setMetadataWarning] = useState<string | null>(null);
+  const [deleteNodeOpen, setDeleteNodeOpen] = useState(false);
 
   const selectedNode = nodes.find((node) => node.id === selectedId) ?? null;
   useEffect(() => {
@@ -175,6 +178,7 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
     setNodes((current) => current.filter((node) => node.id !== selectedId));
     setEdges((current) => current.filter((edge) => edge.source !== selectedId && edge.target !== selectedId));
     setSelectedId(null);
+    setDeleteNodeOpen(false);
   }
 
   const onNodeClick: NodeMouseHandler<Node<EditorNodeData>> = (_, node) => setSelectedId(node.id);
@@ -209,14 +213,16 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
   return (
     <section className="editor-shell">
       <div className="editor-toolbar">
-        <div><p className="section-label">Visual builder</p><input className="workflow-name-input" value={workflowName} onChange={(event) => setWorkflowName(event.target.value)} aria-label="Workflow name" /></div>
+        <div><p className="section-label">Trình tạo workflow</p><input className="workflow-name-input" value={workflowName} onChange={(event) => setWorkflowName(event.target.value)} aria-label="Tên workflow" /></div>
         <div className="toolbar-actions"><button className="secondary-button" onClick={onCancel}>Hủy</button><button className="primary-button" onClick={saveWorkflow} disabled={saving}>{saving ? "Đang lưu…" : workflowId ? "Lưu version mới" : "Lưu workflow mới"}</button></div>
       </div>
+      <EditorJourney />
       {error && <div className="error-banner editor-error">{error}</div>}
       {metadataWarning && <div className="warning-banner editor-error">Không tải được metadata động: {metadataWarning}. Bạn vẫn có thể dùng Advanced JSON.</div>}
       <div className="editor-layout">
         <aside className="node-palette">
-          <h3>Nodes</h3>
+          <p className="section-label">Bước 1</p>
+          <h3>Chọn node cần thêm</h3>
           {palette.map((item) => (
             <button
               key={item.type}
@@ -228,7 +234,7 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
               <strong>{item.label}</strong><small>{item.hint}</small>
             </button>
           ))}
-          <p className="palette-help">Kéo node vào canvas hoặc click để thêm. Kéo từ handle bên phải sang handle bên trái để nối.</p>
+          <p className="palette-help"><strong>Cách dễ nhất:</strong> bấm vào node để thêm. Sau đó kéo chấm <b>OUT</b> của node trước tới chấm <b>IN</b> của node sau.</p>
         </aside>
         <div
           className="editor-canvas"
@@ -249,10 +255,15 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
           </ReactFlow>
         </div>
         <aside className="node-inspector">
-          <h3>Node settings</h3>
+          <p className="section-label">Bước 3</p>
+          <h3>Cài đặt node</h3>
           {selectedNode ? <>
-            <label>ID<input value={selectedNode.id} disabled /></label>
-            <label>Name<input value={selectedNode.data.label} onChange={(event) => updateSelected((node) => ({ ...node, data: { ...node.data, label: event.target.value } }))} /></label>
+            <div className={`selected-node-explainer explainer-${selectedNode.data.nodeType}`}>
+              <strong>{selectedNode.data.label}</strong>
+              <span>Bạn đang sửa node {selectedNode.data.nodeType}. Các thay đổi sẽ được lưu khi bấm nút Lưu phía trên.</span>
+            </div>
+            <label>ID node<input value={selectedNode.id} disabled /><small className="config-hint">Tên kỹ thuật để hệ thống phân biệt node này.</small></label>
+            <label>Tên dễ nhớ<input value={selectedNode.data.label} onChange={(event) => updateSelected((node) => ({ ...node, data: { ...node.data, label: event.target.value } }))} /></label>
             <NodeConfigForm
               type={selectedNode.data.nodeType}
               config={selectedNode.data.config}
@@ -261,14 +272,23 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
               onChange={(config) => updateSelected((node) => ({ ...node, data: { ...node.data, config } }))}
             />
             <details className="advanced-config">
-              <summary>Advanced JSON</summary>
+              <summary>Cài đặt nâng cao bằng JSON</summary>
+              <p className="config-hint">Chỉ cần mở phần này khi bạn đã quen với cấu hình kỹ thuật.</p>
               <label>Config JSON<textarea className="config-editor" value={configText} onChange={(event) => setConfigText(event.target.value)} spellCheck={false} /></label>
-              <button className="secondary-button" onClick={applyConfigJson}>Apply JSON</button>
+              <button className="secondary-button" onClick={applyConfigJson}>Áp dụng JSON</button>
             </details>
-            <div className="inspector-actions"><span /><button className="danger-button" onClick={deleteSelected}>Xóa node</button></div>
-          </> : <p className="muted inspector-empty">Chọn một node để sửa tên, prompt và config.</p>}
+            <div className="inspector-actions"><span /><button className="danger-button" onClick={() => setDeleteNodeOpen(true)}>Xóa node</button></div>
+          </> : <div className="inspector-empty"><strong>Hãy chọn một node ở giữa</strong><p>Khi bạn bấm vào node, phần này sẽ giải thích từng ô và cho phép sửa tên, prompt hoặc cách lưu/tìm dữ liệu.</p></div>}
         </aside>
       </div>
+      <ConfirmDialog
+        open={deleteNodeOpen}
+        title={`Xóa node “${selectedNode?.data.label ?? "đã chọn"}”?`}
+        description="Node và tất cả đường nối với node này sẽ bị xóa khỏi sơ đồ. Thay đổi chỉ có hiệu lực sau khi bạn lưu workflow."
+        confirmLabel="Xóa node"
+        onCancel={() => setDeleteNodeOpen(false)}
+        onConfirm={deleteSelected}
+      />
     </section>
   );
 }

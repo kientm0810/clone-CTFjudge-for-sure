@@ -148,6 +148,20 @@ class WorkflowStore:
         )
         return [(row[0], row[1]) for row in rows]
 
+    async def list_all_runs_with_nodes(self, workflow_id: str) -> list[WorkflowRun] | None:
+        workflow_exists = await self.session.scalar(
+            select(Workflow.id).where(Workflow.id == workflow_id)
+        )
+        if workflow_exists is None:
+            return None
+        result = await self.session.scalars(
+            select(WorkflowRun)
+            .join(WorkflowVersion, WorkflowRun.workflow_version_id == WorkflowVersion.id)
+            .where(WorkflowVersion.workflow_id == workflow_id)
+            .options(selectinload(WorkflowRun.node_runs))
+        )
+        return list(result.unique())
+
     async def get_run(self, run_id: str, include_nodes: bool = False) -> WorkflowRun | None:
         statement = select(WorkflowRun).where(WorkflowRun.id == run_id)
         if include_nodes:
@@ -166,5 +180,9 @@ class WorkflowStore:
 
     async def delete_run(self, run: WorkflowRun) -> None:
         await self.session.delete(run)
+        await self.session.commit()
+
+    async def delete_workflow(self, workflow_id: str) -> None:
+        await self.session.execute(delete(Workflow).where(Workflow.id == workflow_id))
         await self.session.commit()
 

@@ -18,6 +18,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const listWorkflows = () => request<WorkflowSummary[]>("/workflows");
 export const getWorkflow = (id: string) => request<WorkflowDetail>(`/workflows/${id}`);
 
+export async function deleteWorkflow(id: string): Promise<void> {
+  const response = await fetch(`${API_URL}/workflows/${id}`, { method: "DELETE" });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({ detail: response.statusText }));
+    throw new Error(typeof payload.detail === "string" ? payload.detail : JSON.stringify(payload.detail));
+  }
+}
+
 export const listOllamaModels = async () =>
   (await request<{ models: OllamaModel[] }>("/providers/ollama/models")).models;
 

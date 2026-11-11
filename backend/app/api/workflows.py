@@ -18,6 +18,7 @@ from app.schemas.persistence import (
 )
 from app.schemas.workflow import WorkflowDefinition, WorkflowRunRequest, WorkflowRunResult
 from app.services.llm_service import LLMService
+from app.services.run_cleanup import owned_vector_collections
 from app.services.vector_service import PgVectorService
 from app.workflow.context import WorkflowServices
 from app.workflow.exceptions import WorkflowError
@@ -77,6 +78,25 @@ async def create_workflow(payload: WorkflowCreate, session: SessionDependency) -
 async def list_workflows(session: SessionDependency) -> list[WorkflowSummary]:
     workflows = await WorkflowStore(session).list_workflows()
     return [WorkflowSummary.model_validate(workflow) for workflow in workflows]
+
+
+@router.delete("/{workflow_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_workflow(workflow_id: str, session: SessionDependency) -> None:
+    store = WorkflowStore(session)
+    runs = await store.list_all_runs_with_nodes(workflow_id)
+    if runs is None:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    if any(run.status in {"PENDING", "RUNNING"} for run in runs):
+        raise HTTPException(
+            status_code=409,
+            detail="Workflow đang chạy. Hãy đợi chạy xong rồi mới xóa.",
+        )
+
+    collections = set().union(
+        *(owned_vector_collections(run.id, run.node_runs) for run in runs),
+    ) if runs else set()
+    await PgVectorService().delete_collections(collections)
+    await store.delete_workflow(workflow_id)
 
 
 @router.get("/{workflow_id}", response_model=WorkflowDetail)

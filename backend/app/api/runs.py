@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
 from app.schemas.persistence import NodeRunDetail, RunDetail, RunSummary
+from app.services.run_cleanup import owned_vector_collections
 from app.services.workflow_store import WorkflowStore
 from app.services.vector_service import PgVectorService
 
@@ -58,18 +59,6 @@ async def retry_run(run_id: str, session: SessionDependency) -> RunSummary:
     return RunSummary.model_validate(run)
 
 
-def _owned_vector_collections(run_id: str, node_runs: list) -> set[str]:
-    collections: set[str] = set()
-    for node_run in node_runs:
-        output = node_run.output_data
-        if not isinstance(output, dict):
-            continue
-        collection = output.get("collection")
-        if isinstance(collection, str) and run_id in collection:
-            collections.add(collection)
-    return collections
-
-
 @router.delete("/{run_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_run(run_id: str, session: SessionDependency) -> None:
     store = WorkflowStore(session)
@@ -79,7 +68,7 @@ async def delete_run(run_id: str, session: SessionDependency) -> None:
     if run.status in {"PENDING", "RUNNING"}:
         raise HTTPException(status_code=409, detail="Active workflow runs cannot be deleted")
 
-    collections = _owned_vector_collections(run.id, run.node_runs)
+    collections = owned_vector_collections(run.id, run.node_runs)
     await PgVectorService().delete_collections(collections)
     await store.delete_run(run)
 

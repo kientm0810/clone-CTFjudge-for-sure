@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { activateWorkflowVersion, createWorkflow, deleteRun, getRun, getWorkflow, getWorkflowVersion, listWorkflowRuns, listWorkflows, listWorkflowVersions, retryRun, startRun } from "@/lib/api";
+import { activateWorkflowVersion, createWorkflow, deleteRun, deleteWorkflow as deleteWorkflowApi, getRun, getWorkflow, getWorkflowVersion, listWorkflowRuns, listWorkflows, listWorkflowVersions, retryRun, startRun } from "@/lib/api";
 import type { RunHistoryItem, WorkflowDefinition, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionSummary } from "@/lib/types";
 import { ComparisonResult } from "./ComparisonResult";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { RunHistory } from "./RunHistory";
+import { RuntimeInputs } from "./RuntimeInputs";
 import { WorkflowCanvas } from "./WorkflowCanvas";
 import { WorkflowEditor } from "./WorkflowEditor";
+import { NodeGuide, WorkflowJourney } from "./WorkflowGuide";
 
 const chunkOutputSchema = {
   type: "object",
@@ -168,6 +171,10 @@ function formatTime(value?: string | null): string {
   return value ? new Date(value).toLocaleTimeString("vi-VN") : "—";
 }
 
+type DeleteTarget =
+  | { kind: "workflow"; id: string; name: string }
+  | { kind: "run"; id: string; name: string };
+
 export function WorkflowDashboard() {
   const [workflows, setWorkflows] = useState<WorkflowSummary[]>([]);
   const [selected, setSelected] = useState<WorkflowDetail | null>(null);
@@ -181,6 +188,8 @@ export function WorkflowDashboard() {
   const [versions, setVersions] = useState<WorkflowVersionSummary[]>([]);
   const [runHistory, setRunHistory] = useState<RunHistoryItem[]>([]);
   const [runDefinition, setRunDefinition] = useState<WorkflowDefinition | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
 
   async function selectWorkflow(id: string) {
     setError(null);
@@ -199,6 +208,7 @@ export function WorkflowDashboard() {
     try {
       await activateWorkflowVersion(selected.id, version);
       await refreshWorkflows(selected.id);
+      setNotice(`Đã đưa version ${version} thành version đang dùng.`);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally { setBusy(false); }
@@ -207,8 +217,16 @@ export function WorkflowDashboard() {
   async function refreshWorkflows(preferredId?: string) {
     const items = await listWorkflows();
     setWorkflows(items);
-    const nextId = preferredId ?? selected?.id ?? items[0]?.id;
+    const candidates = [preferredId, selected?.id, items[0]?.id];
+    const nextId = candidates.find((id) => id && items.some((item) => item.id === id));
     if (nextId) await selectWorkflow(nextId);
+    else {
+      setSelected(null);
+      setVersions([]);
+      setRunHistory([]);
+      setRun(null);
+      setRunDefinition(null);
+    }
   }
 
   useEffect(() => {
@@ -222,6 +240,7 @@ export function WorkflowDashboard() {
     try {
       const created = await createWorkflow(ragDefinition, "CTFJudge rubric evaluation sử dụng Ollama và pgvector");
       await refreshWorkflows(created.id);
+      setNotice("Đã tạo workflow mẫu. Bây giờ bạn có thể kiểm tra sơ đồ rồi chạy thử.");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally { setBusy(false); }
@@ -283,12 +302,56 @@ export function WorkflowDashboard() {
   }
 
   async function deleteHistoricalRun(runId: string) {
-    if (!selected || !window.confirm(`Xóa run ${runId.slice(0, 8)} và vector data riêng của run này?`)) return;
+    if (!selected) return;
+    setDeleteTarget({ kind: "run", id: runId, name: `run ${runId.slice(0, 8)}` });
+  }
+
+  async function performDeleteRun(runId: string) {
+    if (!selected) return;
+    await deleteRun(runId);
+    if (run?.id === runId) { setRun(null); setRunDefinition(null); }
+    setRunHistory(await listWorkflowRuns(selected.id));
+    setNotice(`Đã xóa run ${runId.slice(0, 8)} và dữ liệu vector riêng của run.`);
+  }
+
+  async function editWorkflow(workflowId: string) {
     setBusy(true); setError(null);
     try {
-      await deleteRun(runId);
-      if (run?.id === runId) { setRun(null); setRunDefinition(null); }
-      setRunHistory(await listWorkflowRuns(selected.id));
+      const detail = await getWorkflow(workflowId);
+      setEditorWorkflowId(detail.id);
+      setEditorSource(detail.definition);
+      setEditorOpen(true);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally { setBusy(false); }
+  }
+
+  async function duplicateWorkflow(workflowId: string) {
+    setBusy(true); setError(null);
+    try {
+      const detail = await getWorkflow(workflowId);
+      const definition = { ...detail.definition, name: `${detail.name} - bản sao`, version: 1 };
+      const created = await createWorkflow(definition, `Bản sao của workflow ${detail.name}`);
+      await refreshWorkflows(created.id);
+      setNotice("Đã nhân bản workflow. Bạn có thể sửa bản sao mà không ảnh hưởng bản gốc.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally { setBusy(false); }
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    const target = deleteTarget;
+    setBusy(true); setError(null);
+    try {
+      if (target.kind === "workflow") {
+        await deleteWorkflowApi(target.id);
+        await refreshWorkflows();
+        setNotice(`Đã xóa workflow “${target.name}” và dữ liệu riêng của nó.`);
+      } else {
+        await performDeleteRun(target.id);
+      }
+      setDeleteTarget(null);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally { setBusy(false); }
@@ -301,24 +364,35 @@ export function WorkflowDashboard() {
   return (
     <>
       <header className="app-header">
-        <div><p className="eyebrow">CTFJudge · local workflow lab</p><h1>Golden solution comparison</h1><p className="subtitle">Chunk, vector search và đánh giá writeup bằng Ollama local.</p></div>
+        <div><p className="eyebrow">CTFJudge · phòng chấm bài AI</p><h1>So sánh bài làm với golden solution</h1><p className="subtitle">Tạo quy trình, chạy bằng model local và xem từng câu được đối chiếu như thế nào.</p></div>
         <div className={`status run-${(run?.status ?? "ready").toLowerCase()}`}>{run?.status ?? "READY"}</div>
       </header>
       {error && <div className="error-banner">{error}</div>}
+      {notice && <div className="success-banner" role="status"><span>{notice}</span><button onClick={() => setNotice(null)} aria-label="Đóng thông báo">Đóng</button></div>}
       {editorOpen ? <WorkflowEditor
         workflowId={editorWorkflowId}
         initialDefinition={editorSource}
         onCancel={() => setEditorOpen(false)}
-        onSaved={async (workflowId) => { setEditorOpen(false); setEditorSource(undefined); setEditorWorkflowId(undefined); await refreshWorkflows(workflowId); }}
+        onSaved={async (workflowId) => { setEditorOpen(false); setEditorSource(undefined); setEditorWorkflowId(undefined); await refreshWorkflows(workflowId); setNotice("Đã lưu workflow. Bạn có thể chạy thử ngay bên dưới."); }}
       /> : <section className="workspace">
         <aside className="sidebar">
-          <div className="sidebar-title"><h2>Workflows</h2><button className="icon-button" onClick={() => refreshWorkflows()} title="Làm mới">↻</button></div>
-          <button className="primary-button full" onClick={createRagDemo} disabled={busy}>+ Tạo CTFJudge RAG</button>
-          <button className="secondary-button full editor-button" onClick={() => { setEditorWorkflowId(undefined); setEditorSource(undefined); setEditorOpen(true); }}>+ Workflow trống</button>
-          <button className="secondary-button full editor-button" disabled={!selected} onClick={() => { setEditorWorkflowId(selected?.id); setEditorSource(selected?.definition); setEditorOpen(true); }}>Sửa & tạo version</button>
+          <div className="sidebar-title"><div><p className="section-label">Bước 1</p><h2>Workflow của bạn</h2></div><button className="text-button" onClick={() => refreshWorkflows()} title="Tải lại danh sách">Làm mới</button></div>
+          <p className="sidebar-intro">Chọn một workflow để xem, sửa hoặc chạy. Mỗi workflow giống như một công thức gồm nhiều node.</p>
+          <button className="primary-button full" onClick={createRagDemo} disabled={busy}>Tạo workflow chấm bài mẫu</button>
+          <button className="secondary-button full editor-button" onClick={() => { setEditorWorkflowId(undefined); setEditorSource(undefined); setEditorOpen(true); }}>Tạo workflow trống</button>
           <div className="workflow-list">
-            {workflows.map((workflow) => <button key={workflow.id} className={`workflow-item ${selected?.id === workflow.id ? "selected" : ""}`} onClick={() => selectWorkflow(workflow.id)}><span>{workflow.name}</span><small>v{workflow.current_version}</small></button>)}
-            {!workflows.length && <p className="muted">Chưa có workflow.</p>}
+            {workflows.map((workflow) => <article key={workflow.id} className={`workflow-item ${selected?.id === workflow.id ? "selected" : ""}`}>
+              <button className="workflow-open" onClick={() => selectWorkflow(workflow.id)} aria-current={selected?.id === workflow.id ? "true" : undefined}>
+                <span>{workflow.name}</span><small>Version {workflow.current_version}</small>
+              </button>
+              <div className="workflow-actions" aria-label={`Thao tác với ${workflow.name}`}>
+                <button onClick={() => selectWorkflow(workflow.id)} disabled={busy}>{selected?.id === workflow.id ? "Đang xem" : "Xem"}</button>
+                <button onClick={() => editWorkflow(workflow.id)} disabled={busy}>Sửa</button>
+                <button onClick={() => duplicateWorkflow(workflow.id)} disabled={busy}>Nhân bản</button>
+                <button className="delete" onClick={() => setDeleteTarget({ kind: "workflow", id: workflow.id, name: workflow.name })} disabled={busy}>Xóa</button>
+              </div>
+            </article>)}
+            {!workflows.length && <div className="empty-workflows"><strong>Chưa có workflow</strong><span>Hãy tạo workflow mẫu để chạy thử nhanh nhất.</span></div>}
           </div>
           {!!versions.length && <div className="version-history">
             <h3>Version history</h3>
@@ -327,18 +401,19 @@ export function WorkflowDashboard() {
               {version.is_current ? <span>ACTIVE</span> : <button disabled={busy} onClick={() => activateVersion(version.version)}>Rollback</button>}
             </div>)}
           </div>}
-          <div className="legend"><h3>Node types</h3><span><i className="dot input" />Input</span><span><i className="dot agent" />Agent</span><span><i className="dot database" />Database</span><span><i className="dot output" />Output</span></div>
         </aside>
         <div className="main-panel">
+          <WorkflowJourney hasWorkflow={Boolean(selected)} hasRun={Boolean(run)} runCompleted={run?.status === "COMPLETED"} />
           <div className="panel-heading"><div><p className="section-label">Workflow graph</p><h2>{selected?.name ?? "No workflow selected"}</h2></div>{run && <code className="run-id">run {run.id.slice(0, 8)}</code>}</div>
           <WorkflowCanvas definition={runDefinition ?? selected?.definition} nodeStatuses={nodeStatuses} />
+          <NodeGuide />
           <div className="execution-grid">
             <section className="card">
-              <div className="card-heading"><div><p className="section-label">Runtime</p><h2>Golden & student input</h2></div><button className="primary-button" onClick={runWorkflow} disabled={busy || !selected}>{busy ? "Đang chạy…" : "▶ Run workflow"}</button></div>
-              <textarea value={inputs} onChange={(event) => setInputs(event.target.value)} spellCheck={false} />
+              <div className="card-heading"><div><p className="section-label">Bước 3</p><h2>Dữ liệu cần chấm</h2><p className="card-help">Điền nội dung sau dấu hai chấm, giữ nguyên tên <code>golden</code> và <code>student</code>.</p></div><button className="primary-button" onClick={runWorkflow} disabled={busy || !selected}>{busy ? "Đang chạy…" : "Chạy workflow"}</button></div>
+              <RuntimeInputs definition={selected?.definition} value={inputs} onChange={setInputs} />
             </section>
             <section className="card result-card">
-              <div className="card-heading"><div><p className="section-label">Result</p><h2>CTFJudge report</h2></div>{run && <span className={`mini-status run-${run.status.toLowerCase()}`}>{run.status}</span>}</div>
+              <div className="card-heading"><div><p className="section-label">Bước 4</p><h2>Kết quả chấm bài</h2><p className="card-help">Xem điểm tổng quát trước, sau đó đọc phần so sánh từng câu.</p></div>{run && <span className={`mini-status run-${run.status.toLowerCase()}`}>{run.status}</span>}</div>
               <ComparisonResult run={run} />
             </section>
           </div>
@@ -359,6 +434,17 @@ export function WorkflowDashboard() {
           />
         </div>
       </section>}
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title={deleteTarget?.kind === "workflow" ? `Xóa workflow “${deleteTarget.name}”?` : `Xóa ${deleteTarget?.name ?? "lần chạy này"}?`}
+        description={deleteTarget?.kind === "workflow"
+          ? "Workflow, toàn bộ version, lịch sử chạy và dữ liệu vector riêng sẽ bị xóa. Thao tác này không thể hoàn tác."
+          : "Kết quả chạy và dữ liệu vector riêng của lần chạy này sẽ bị xóa. Workflow vẫn được giữ lại."}
+        confirmLabel={deleteTarget?.kind === "workflow" ? "Xóa workflow" : "Xóa lần chạy"}
+        busy={busy}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+      />
     </>
   );
 }
