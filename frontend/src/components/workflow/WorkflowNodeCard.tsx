@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Handle, Node, NodeProps, Position } from "@xyflow/react";
 import type { NodeType, WorkflowDefinition, WorkflowNode } from "@/lib/types";
 
@@ -101,22 +103,43 @@ function nodeContract(data: WorkflowNodeData): NodeContract {
 }
 
 export function WorkflowNodeCard({ data, selected, isConnectable }: NodeProps<WorkflowFlowNode>) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const status = (data.status ?? "idle").toLowerCase();
   const contract = nodeContract(data);
+  useEffect(() => {
+    if (!detailsOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDetailsOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [detailsOpen]);
   return (
     <div className={`builder-node builder-${data.nodeType} status-${status} ${selected ? "builder-selected" : ""}`}>
       {data.nodeType !== "input" && <Handle id="input" type="target" position={Position.Left} isConnectable={isConnectable} />}
       <small>{data.nodeType}</small>
       <strong title={data.label}>{data.label}</strong>
-      <span className="node-info-cue" aria-hidden="true">i</span>
-      <aside className="node-contract-tooltip" role="tooltip">
-        <strong>{data.label}</strong>
-        <p>{contract.purpose}</p>
-        <section><b>INPUT THỰC TẾ</b>{contract.inputs.map((field) => <div className="node-contract-field" key={field.name}><span><code>{field.name}</code><em>{field.type}</em></span>{field.detail && <small>{field.detail}</small>}</div>)}</section>
-        <p><b>Node dùng input thế nào?</b><br />{contract.use}</p>
-        <section><b>OUTPUT</b>{contract.outputs.map((field) => <div className="node-contract-field" key={field.name}><span><code>{field.name}</code><em>{field.type}</em></span>{field.detail && <small>{field.detail}</small>}</div>)}</section>
-        <small>Chọn node để chỉnh Input mapping và cấu hình.</small>
-      </aside>
+      <button
+        type="button"
+        className="node-info-cue"
+        aria-label={`Xem input và output của ${data.label}`}
+        aria-haspopup="dialog"
+        aria-expanded={detailsOpen}
+        onClick={(event) => { event.stopPropagation(); setDetailsOpen(true); }}
+      >i</button>
+      {detailsOpen && typeof document !== "undefined" && createPortal(
+        <div className="node-details-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDetailsOpen(false); }}>
+          <section className="node-details-dialog" role="dialog" aria-modal="true" aria-labelledby={`node-details-title-${data.id}`}>
+            <header><div><small>{data.nodeType} · CẤU TRÚC DỮ LIỆU</small><h2 id={`node-details-title-${data.id}`}>{data.label}</h2></div><button type="button" onClick={() => setDetailsOpen(false)} aria-label="Đóng phần giải thích">Đóng</button></header>
+            <p className="node-details-purpose">{contract.purpose}</p>
+            <section><h3>Input node nhận</h3>{contract.inputs.map((field) => <div className="node-contract-field" key={field.name}><span><code>{field.name}</code><em>{field.type}</em></span>{field.detail && <small>{field.detail}</small>}</div>)}</section>
+            <section><h3>Cách node xử lý input</h3><p>{contract.use}</p></section>
+            <section><h3>Output node trả về</h3>{contract.outputs.map((field) => <div className="node-contract-field" key={field.name}><span><code>{field.name}</code><em>{field.type}</em></span>{field.detail && <small>{field.detail}</small>}</div>)}</section>
+            <footer>Dữ liệu này được lấy từ input mapping và cấu hình hiện tại của node.</footer>
+          </section>
+        </div>,
+        document.body,
+      )}
       {data.nodeType !== "output" && <Handle id="output" type="source" position={Position.Right} isConnectable={isConnectable} />}
     </div>
   );
