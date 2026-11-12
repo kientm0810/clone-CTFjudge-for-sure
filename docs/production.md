@@ -57,7 +57,7 @@ docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --no-build
 ```bash
 docker compose --env-file .env.prod -f docker-compose.prod.yml ps
 docker compose --env-file .env.prod -f docker-compose.prod.yml logs --tail=100 api worker web caddy
-curl http://localhost/api/health
+curl http://YOUR_SERVER_IP/api/health
 ```
 
 From another machine, open the value configured in `SITE_ADDRESS`. API documentation is available at `/api/docs`.

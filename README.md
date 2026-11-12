@@ -22,6 +22,192 @@ docker compose up --build
 
 The default development provider is local Ollama: `ollama/qwen2.5:3b` for chat and `ollama/nomic-embed-text` for embeddings. Docker reaches the host Ollama server through `http://host.docker.internal:11434`.
 
+## Production quick start: Ubuntu server + Ollama
+
+The steps below install Ollama directly on the host and run the rest of CTFJudge with Docker Compose. They are intended for a fresh Ubuntu 22.04/24.04 server. Run them in order.
+
+Recommended minimum for the complete stack with `qwen2.5:3b` is 4 vCPU, 16 GB RAM, and 60 GB disk. CPU-only inference works but is slower than GPU inference.
+
+### 1. Install Git and Docker
+
+```bash
+sudo apt update
+sudo apt install -y ca-certificates curl git
+
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+sudo tee /etc/apt/sources.list.d/docker.sources >/dev/null <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo systemctl enable --now docker
+sudo usermod -aG docker "$USER"
+```
+
+Log out of SSH and reconnect so the Docker group change takes effect, then verify:
+
+```bash
+docker --version
+docker compose version
+docker run --rm hello-world
+```
+
+### 2. Install and configure Ollama
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+sudo systemctl enable --now ollama
+ollama --version
+```
+
+Ollama binds to `127.0.0.1` by default. The application runs in containers, so make Ollama listen on the host interfaces and limit CPU/RAM concurrency:
+
+```bash
+sudo systemctl edit ollama
+```
+
+Paste this override, save, and exit:
+
+```ini
+[Service]
+Environment="OLLAMA_HOST=0.0.0.0:11434"
+Environment="OLLAMA_NUM_PARALLEL=1"
+Environment="OLLAMA_MAX_LOADED_MODELS=1"
+Environment="OLLAMA_KEEP_ALIVE=5m"
+Environment="OLLAMA_CONTEXT_LENGTH=4096"
+```
+
+Reload and verify Ollama:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart ollama
+sudo systemctl status ollama --no-pager
+curl http://localhost:11434/api/tags
+```
+
+Do not create a public firewall rule for port `11434`. Only the application containers need to reach this port through the Docker host gateway.
+
+### 3. Download the default models
+
+```bash
+ollama pull qwen2.5:3b
+ollama pull nomic-embed-text
+ollama list
+```
+
+Optional smoke tests:
+
+```bash
+ollama run qwen2.5:3b "Reply with exactly: model ready"
+
+curl http://localhost:11434/api/embed \
+  -H "Content-Type: application/json" \
+  -d '{"model":"nomic-embed-text","input":"embedding test"}'
+```
+
+### 4. Clone the repository
+
+```bash
+git clone https://github.com/kientm0810/clone-CTFjudge-for-sure.git
+cd clone-CTFjudge-for-sure
+```
+
+When updating an existing installation, use `git pull` instead.
+
+### 5. Create the production environment
+
+```bash
+cp .env.prod.example .env.prod
+nano .env.prod
+```
+
+At minimum, replace these values:
+
+```env
+APP_SECRET_KEY=replace-with-a-long-random-secret
+POSTGRES_PASSWORD=replace-with-a-strong-database-password
+
+# Use the server IP for initial HTTP deployment.
+SITE_ADDRESS=http://YOUR_SERVER_IP
+CORS_ORIGINS=http://YOUR_SERVER_IP
+API_ROOT_PATH=/api
+
+DEFAULT_CHAT_MODEL=ollama/qwen2.5:3b
+DEFAULT_EMBEDDING_MODEL=ollama/nomic-embed-text
+OLLAMA_BASE_URL=http://host.docker.internal:11434
+```
+
+Generate a suitable application secret with:
+
+```bash
+openssl rand -hex 32
+```
+
+If a domain already points to this server, use the domain without `http://` so Caddy can provision HTTPS automatically:
+
+```env
+SITE_ADDRESS=judge.example.com
+CORS_ORIGINS=https://judge.example.com
+```
+
+### 6. Start CTFJudge
+
+```bash
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+```
+
+Only Caddy publishes host ports `80` and `443`. PostgreSQL, Redis, Next.js, and the API remain inside the Compose network.
+
+### 7. Verify the services
+
+```bash
+docker compose --env-file .env.prod -f docker-compose.prod.yml ps
+docker compose --env-file .env.prod -f docker-compose.prod.yml logs --tail=100 api worker web caddy
+curl http://YOUR_SERVER_IP/api/health
+```
+
+Then open:
+
+- Application: the value configured in `SITE_ADDRESS`
+- API documentation: `<SITE_ADDRESS>/api/docs`
+
+The cloud firewall should allow inbound TCP `80` and `443` only. Ports `3000`, `8400`, `5432`, `6379`, and `11434` must not be public.
+
+### 8. Update or restart later
+
+```bash
+git pull
+docker compose --env-file .env.prod -f docker-compose.prod.yml up -d --build
+```
+
+Useful operational commands:
+
+```bash
+# Follow application logs
+docker compose --env-file .env.prod -f docker-compose.prod.yml logs -f api worker web caddy
+
+# Follow Ollama logs
+journalctl -u ollama -f
+
+# Restart the application without deleting data
+docker compose --env-file .env.prod -f docker-compose.prod.yml restart
+
+# Stop the application without deleting data
+docker compose --env-file .env.prod -f docker-compose.prod.yml down
+```
+
+Never use `docker compose down -v` during a normal update because `-v` deletes PostgreSQL and other persistent volumes. More production notes and build troubleshooting are available in [`docs/production.md`](docs/production.md).
+
 Open the **AI Models** tab to register another OpenAI-compatible chat endpoint. Enter the full `/v1/chat/completions` URL and the model identifier expected by that server, save it, then use **Test connection**. Enabled registered models appear automatically in every Agent node dropdown. Requests are sent as JSON directly from the API service; no temporary payload file is created.
 
 Workflow definitions and immutable versions are stored in PostgreSQL. Runs execute asynchronously through Redis and Celery, with each node's status, input, output, and error persisted for inspection.
