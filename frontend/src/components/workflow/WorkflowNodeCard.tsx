@@ -172,6 +172,7 @@ export function WorkflowNodeCard({ id, data, selected, isConnectable }: NodeProp
             <header><div><small>{data.nodeType} · CẤU TRÚC DỮ LIỆU</small><h2>{data.label}</h2></div><button type="button" onClick={() => setPreviewOpen(false)} aria-label="Đóng phần giải thích">Đóng</button></header>
             <WorkflowNodeContract data={data} />
           </section>
+        ,
         document.body,
       )}
       {data.nodeType !== "output" && <Handle id="output" type="source" position={Position.Right} isConnectable={isConnectable} />}
