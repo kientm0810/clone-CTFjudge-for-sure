@@ -26,6 +26,7 @@ async def get_session() -> AsyncIterator[AsyncSession]:
 
 async def init_database() -> None:
     # Importing registers all ORM tables on Base.metadata.
+    from app.models import provider as _provider_models  # noqa: F401
     from app.models import workflow as _workflow_models  # noqa: F401
 
     async with engine.begin() as connection:

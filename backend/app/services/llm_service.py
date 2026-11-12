@@ -30,6 +30,14 @@ def _ollama_model_name(model: str) -> str:
     return model.split("/", 1)[1] if "/" in model else model
 
 
+def _is_registered_model(model: str) -> bool:
+    return model.startswith("registered/")
+
+
+def _registered_model_id(model: str) -> str:
+    return model.split("/", 1)[1]
+
+
 class OllamaClient:
     def __init__(
         self,
@@ -90,6 +98,70 @@ class OllamaClient:
         return response.json().get("models", [])
 
 
+class OpenAICompatibleClient:
+    def __init__(
+        self,
+        *,
+        endpoint_url: str,
+        api_key: str | None = None,
+        additional_headers: dict[str, str] | None = None,
+        timeout: float = 180,
+        client: httpx.AsyncClient | None = None,
+    ) -> None:
+        self.endpoint_url = endpoint_url
+        self.timeout = timeout
+        self.headers = {"Content-Type": "application/json; charset=utf-8", **(additional_headers or {})}
+        if api_key:
+            self.headers["Authorization"] = f"Bearer {api_key}"
+        self._client = client
+
+    async def chat(
+        self,
+        *,
+        prompt: str,
+        model: str,
+        temperature: float,
+        output_schema: dict[str, Any] | None = None,
+        supports_json_schema: bool = False,
+    ) -> Any:
+        payload: dict[str, Any] = {
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": temperature,
+            "stream": False,
+        }
+        if output_schema and supports_json_schema:
+            payload["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {"name": "node_output", "schema": output_schema},
+            }
+        if self._client is not None:
+            response = await self._client.post(self.endpoint_url, json=payload, headers=self.headers)
+        else:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.post(self.endpoint_url, json=payload, headers=self.headers)
+        response.raise_for_status()
+        data = response.json()
+        choices = data.get("choices")
+        if not isinstance(choices, list) or not choices:
+            raise ValueError("OpenAI-compatible endpoint returned no choices")
+        content = choices[0].get("message", {}).get("content", "")
+        return _parse_model_output(content)
+
+
+async def get_registered_model(model_reference: str):
+    from app.database import SessionLocal
+    from app.models.provider import AIModelConnection
+
+    async with SessionLocal() as session:
+        connection = await session.get(AIModelConnection, _registered_model_id(model_reference))
+        if connection is None:
+            raise ValueError(f"Registered model does not exist: {model_reference}")
+        if not connection.enabled:
+            raise ValueError(f"Registered model is disabled: {connection.name}")
+        return connection
+
+
 class LLMService:
     def __init__(self, ollama: OllamaClient | None = None) -> None:
         self.ollama = ollama or OllamaClient()
@@ -111,6 +183,21 @@ class LLMService:
                 model=selected_model,
                 temperature=selected_temperature,
                 output_schema=output_schema,
+            )
+
+        if _is_registered_model(selected_model):
+            connection = await get_registered_model(selected_model)
+            return await OpenAICompatibleClient(
+                endpoint_url=connection.endpoint_url,
+                api_key=connection.api_key,
+                additional_headers=connection.additional_headers,
+                timeout=connection.timeout_seconds,
+            ).chat(
+                prompt=prompt,
+                model=connection.model_name,
+                temperature=selected_temperature,
+                output_schema=output_schema,
+                supports_json_schema=connection.supports_json_schema,
             )
 
         from litellm import acompletion

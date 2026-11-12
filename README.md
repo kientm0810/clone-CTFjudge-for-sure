@@ -21,6 +21,8 @@ docker compose up --build
 
 The default development provider is local Ollama: `ollama/qwen2.5:3b` for chat and `ollama/nomic-embed-text` for embeddings. Docker reaches the host Ollama server through `http://host.docker.internal:11434`.
 
+Open the **AI Models** tab to register another OpenAI-compatible chat endpoint. Enter the full `/v1/chat/completions` URL and the model identifier expected by that server, save it, then use **Test connection**. Enabled registered models appear automatically in every Agent node dropdown. Requests are sent as JSON directly from the API service; no temporary payload file is created.
+
 Workflow definitions and immutable versions are stored in PostgreSQL. Runs execute asynchronously through Redis and Celery, with each node's status, input, output, and error persisted for inspection.
 
 To test without writing API payloads, open `http://localhost:3000`, create the Ollama demo workflow, edit its input JSON, and run it. The dashboard polls the persisted run and displays the graph status plus per-node artifacts.

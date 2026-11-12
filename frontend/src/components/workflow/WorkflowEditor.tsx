@@ -15,8 +15,8 @@ import {
   useEdgesState,
   useNodesState,
 } from "@xyflow/react";
-import { createWorkflow, createWorkflowVersion, listOllamaModels, listVectorCollections } from "@/lib/api";
-import type { NodeType, OllamaModel, VectorCollection, WorkflowDefinition, WorkflowNode } from "@/lib/types";
+import { createWorkflow, createWorkflowVersion, listAIModelOptions, listVectorCollections } from "@/lib/api";
+import type { AIModelOption, NodeType, VectorCollection, WorkflowDefinition, WorkflowNode } from "@/lib/types";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { NodeConfigForm, validateNodeConfig } from "./NodeConfigForm";
 import { NodeInputMapping } from "./NodeInputMapping";
@@ -109,7 +109,7 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
   const [configText, setConfigText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [models, setModels] = useState<OllamaModel[]>([]);
+  const [models, setModels] = useState<AIModelOption[]>([]);
   const [collections, setCollections] = useState<VectorCollection[]>([]);
   const [metadataWarning, setMetadataWarning] = useState<string | null>(null);
   const [deleteNodeOpen, setDeleteNodeOpen] = useState(false);
@@ -159,9 +159,12 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
   }, [resizingConfigPane]);
 
   useEffect(() => {
-    Promise.allSettled([listOllamaModels(), listVectorCollections()]).then(([modelResult, collectionResult]) => {
+    Promise.allSettled([listAIModelOptions(), listVectorCollections()]).then(([modelResult, collectionResult]) => {
       const warnings: string[] = [];
-      if (modelResult.status === "fulfilled") setModels(modelResult.value);
+      if (modelResult.status === "fulfilled") {
+        setModels(modelResult.value.models);
+        warnings.push(...modelResult.value.warnings);
+      }
       else warnings.push(`Models: ${String(modelResult.reason)}`);
       if (collectionResult.status === "fulfilled") setCollections(collectionResult.value);
       else warnings.push(`Collections: ${String(collectionResult.reason)}`);

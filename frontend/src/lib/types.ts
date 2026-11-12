@@ -58,6 +58,47 @@ export type OllamaModel = {
   details?: { parameter_size?: string; family?: string };
 };
 
+export type AIModelOption = {
+  reference: string;
+  name: string;
+  provider: "ollama" | "openai-compatible" | string;
+  model_name: string;
+  capabilities: string[];
+  details?: Record<string, string>;
+};
+
+export type RegisteredAIModel = {
+  id: string;
+  reference: string;
+  name: string;
+  model_name: string;
+  endpoint_url: string;
+  additional_headers: Record<string, string>;
+  timeout_seconds: number;
+  supports_json_schema: boolean;
+  enabled: boolean;
+  has_api_key: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AIModelWrite = {
+  name: string;
+  model_name: string;
+  endpoint_url: string;
+  api_key?: string | null;
+  additional_headers: Record<string, string>;
+  timeout_seconds: number;
+  supports_json_schema: boolean;
+  enabled: boolean;
+};
+
+export type AIModelTestResult = {
+  ok: boolean;
+  latency_ms: number;
+  response_preview: string;
+};
+
 export type VectorCollection = {
   name: string;
   chunk_count: number;

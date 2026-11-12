@@ -1,4 +1,4 @@
-import type { OllamaModel, RunHistoryItem, VectorCollection, WorkflowDefinition, WorkflowDeployment, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
+import type { AIModelOption, AIModelTestResult, AIModelWrite, OllamaModel, RegisteredAIModel, RunHistoryItem, VectorCollection, WorkflowDefinition, WorkflowDeployment, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8400";
 
@@ -28,6 +28,20 @@ export async function deleteWorkflow(id: string): Promise<void> {
 
 export const listOllamaModels = async () =>
   (await request<{ models: OllamaModel[] }>("/providers/ollama/models")).models;
+
+export const listAIModelOptions = () => request<{ models: AIModelOption[]; warnings: string[] }>("/providers/models");
+export const listRegisteredAIModels = () => request<RegisteredAIModel[]>("/providers/registered-models");
+export const createRegisteredAIModel = (payload: AIModelWrite) => request<RegisteredAIModel>("/providers/registered-models", { method: "POST", body: JSON.stringify(payload) });
+export const updateRegisteredAIModel = (id: string, payload: AIModelWrite) => request<RegisteredAIModel>(`/providers/registered-models/${id}`, { method: "PUT", body: JSON.stringify(payload) });
+export const testRegisteredAIModel = (id: string) => request<AIModelTestResult>(`/providers/registered-models/${id}/test`, { method: "POST" });
+
+export async function deleteRegisteredAIModel(id: string): Promise<void> {
+  const response = await fetch(`${API_URL}/providers/registered-models/${id}`, { method: "DELETE" });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({ detail: response.statusText }));
+    throw new Error(typeof payload.detail === "string" ? payload.detail : JSON.stringify(payload.detail));
+  }
+}
 
 export const listVectorCollections = () => request<VectorCollection[]>("/vectors/collections");
 
