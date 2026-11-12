@@ -26,6 +26,7 @@ function graphNodes(
     data: {
       label: node.name ?? node.id,
       nodeType: node.type,
+      inputMapping: node.inputs ?? {},
       config: node.config,
       status: nodeStatuses[node.id] ?? "idle",
     },

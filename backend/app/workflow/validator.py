@@ -2,6 +2,7 @@ from collections import defaultdict, deque
 
 from app.schemas.workflow import NodeType, WorkflowDefinition
 from app.workflow.exceptions import WorkflowValidationError
+from app.workflow.expressions import iter_expressions, referenced_step
 
 
 class WorkflowValidator:
@@ -73,6 +74,33 @@ class WorkflowValidator:
         isolated = [node.id for node in workflow.nodes if node.id not in connected and len(workflow.nodes) > 1]
         if isolated:
             raise WorkflowValidationError(f"Workflow contains isolated nodes: {', '.join(isolated)}")
+
+        ancestors: dict[str, set[str]] = {node.id: set() for node in workflow.nodes}
+        for node_id in ordered:
+            for target in adjacency[node_id]:
+                ancestors[target].add(node_id)
+                ancestors[target].update(ancestors[node_id])
+
+        for node in workflow.nodes:
+            for expression in iter_expressions(node.inputs):
+                step_id = referenced_step(expression)
+                if step_id is not None:
+                    if step_id not in node_by_id:
+                        raise WorkflowValidationError(
+                            f"Node '{node.id}' references missing step '{step_id}'"
+                        )
+                    if step_id not in ancestors[node.id]:
+                        raise WorkflowValidationError(
+                            f"Node '{node.id}' can only reference connected upstream steps; "
+                            f"'{step_id}' is not upstream"
+                        )
+                elif not (
+                    expression.startswith("runtime.")
+                    or expression in {"run.id", "run_id"}
+                ):
+                    raise WorkflowValidationError(
+                        f"Node '{node.id}' contains unsupported expression '{{{{ {expression} }}}}'"
+                    )
 
         return ordered
 

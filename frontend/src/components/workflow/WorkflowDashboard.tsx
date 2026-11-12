@@ -67,6 +67,7 @@ const ragDefinition: WorkflowDefinition = {
     { id: "golden-input", type: "input", name: "Golden solution", config: { input_key: "golden", document_type: "golden_solution" } },
     {
       id: "golden-parser", type: "agent", name: "Chunk golden",
+      inputs: { document: "{{ steps.golden-input.output }}" },
       config: {
         model: "ollama/qwen2.5:3b", temperature: 0, output_schema: chunkOutputSchema,
         prompt: "You are a deterministic text segmenter. Split the golden solution into short semantic steps without summarizing or adding facts. Copy document_id from the input document. Create stable chunk_id values such as golden-0, golden-1. Return JSON only.",
@@ -74,11 +75,13 @@ const ragDefinition: WorkflowDefinition = {
     },
     {
       id: "golden-index", type: "database", name: "Index golden",
+      inputs: { chunks: "{{ steps.golden-parser.output.chunks }}" },
       config: { operation: "upsert", collection: "comparison-{{run_id}}", embedding_model: "ollama/nomic-embed-text" },
     },
     { id: "student-input", type: "input", name: "Student writeup", config: { input_key: "student", document_type: "student_submission" } },
     {
       id: "student-parser", type: "agent", name: "Chunk writeup",
+      inputs: { document: "{{ steps.student-input.output }}" },
       config: {
         model: "ollama/qwen2.5:3b", temperature: 0, output_schema: chunkOutputSchema,
         prompt: "You are a deterministic text segmenter. Split the student submission into short semantic steps without judging or adding facts. Copy document_id from the input document. Create stable chunk_id values such as student-0, student-1. Return JSON only.",
@@ -86,17 +89,24 @@ const ragDefinition: WorkflowDefinition = {
     },
     {
       id: "golden-search", type: "database", name: "Retrieve evidence",
+      inputs: { query_chunks: "{{ steps.student-parser.output.chunks }}" },
       config: { operation: "search", collection: "comparison-{{run_id}}", embedding_model: "ollama/nomic-embed-text", top_k: 3, score_threshold: 0.25 },
     },
     {
       id: "comparison-agent", type: "agent", name: "Similarity judge",
+      inputs: { retrieval_results: "{{ steps.golden-search.output.retrieval_results }}" },
       config: {
         model: "ollama/qwen2.5:3b", temperature: 0, output_schema: comparisonOutputSchema,
         prompt: "You compare one student submission with retrieved golden evidence. student-0, student-1, etc. are chunk IDs from the same submission, never different students. Evaluate every student chunk and refer to it as a chunk or citation. Give score from 0 to 1, one short Vietnamese explanation, and a short Vietnamese summary. Similar wording alone is not proof of correctness. Preserve student_content exactly and copy relevant golden IDs, content, and similarity scores. Return JSON only.",
       },
     },
     {
-      id: "report", type: "output", name: "CTFJudge report",
+      id: "report", type: "output", name: "Similarity report",
+      inputs: {
+        analysis: "{{ steps.comparison-agent.output }}",
+        retrieval_results: "{{ steps.golden-search.output.retrieval_results }}",
+        golden_chunks: "{{ steps.golden-parser.output.chunks }}",
+      },
       config: {
         format: "comparison_report",
       },
@@ -106,8 +116,7 @@ const ragDefinition: WorkflowDefinition = {
     { source: "golden-input", target: "golden-parser" }, { source: "golden-parser", target: "golden-index" },
     { source: "student-input", target: "student-parser" }, { source: "golden-index", target: "golden-search" },
     { source: "student-parser", target: "golden-search" }, { source: "golden-search", target: "comparison-agent" },
-    { source: "comparison-agent", target: "report" }, { source: "golden-search", target: "report" },
-    { source: "golden-parser", target: "report" },
+    { source: "comparison-agent", target: "report" },
   ],
 };
 

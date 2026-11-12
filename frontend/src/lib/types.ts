@@ -4,6 +4,7 @@ export type WorkflowNode = {
   id: string;
   type: NodeType;
   name?: string;
+  inputs?: Record<string, unknown>;
   config: Record<string, unknown>;
   position?: { x: number; y: number };
 };

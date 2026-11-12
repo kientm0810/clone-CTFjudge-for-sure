@@ -15,6 +15,7 @@
       "id": "golden-parser",
       "type": "agent",
       "name": "Golden Parser",
+      "inputs": {"document": "{{ steps.golden-input.output }}"},
       "config": {
         "model": "ollama/qwen2.5:3b",
         "prompt": "Split the golden solution into semantic chunks. Preserve meaning and return JSON only with a chunks array. Each chunk must contain chunk_id, document_id, content, chunk_index, start_offset, end_offset, and metadata."
@@ -24,6 +25,7 @@
       "id": "golden-index",
       "type": "database",
       "name": "Golden Vector Index",
+      "inputs": {"chunks": "{{ steps.golden-parser.output.chunks }}"},
       "config": {
         "operation": "upsert",
         "collection": "comparison-{{run_id}}",
@@ -43,6 +45,7 @@
       "id": "student-parser",
       "type": "agent",
       "name": "Student Parser",
+      "inputs": {"document": "{{ steps.student-input.output }}"},
       "config": {
         "model": "ollama/qwen2.5:3b",
         "prompt": "Split the student submission into semantic chunks. Return JSON only with a chunks array. Each chunk must contain chunk_id, document_id, content, chunk_index, start_offset, end_offset, and metadata."
@@ -52,6 +55,7 @@
       "id": "golden-search",
       "type": "database",
       "name": "Golden Similarity Search",
+      "inputs": {"query_chunks": "{{ steps.student-parser.output.chunks }}"},
       "config": {
         "operation": "search",
         "collection": "comparison-{{run_id}}",
@@ -64,6 +68,7 @@
       "id": "comparison-agent",
       "type": "agent",
       "name": "Comparison Judge",
+      "inputs": {"retrieval_results": "{{ steps.golden-search.output.retrieval_results }}"},
       "config": {
         "model": "ollama/qwen2.5:3b",
         "temperature": 0.0,
@@ -99,6 +104,11 @@
       "id": "report",
       "type": "output",
       "name": "Comparison Report",
+      "inputs": {
+        "analysis": "{{ steps.comparison-agent.output }}",
+        "retrieval_results": "{{ steps.golden-search.output.retrieval_results }}",
+        "golden_chunks": "{{ steps.golden-parser.output.chunks }}"
+      },
       "config": {
         "format": "comparison_report"
       }

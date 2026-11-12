@@ -12,6 +12,7 @@ from app.schemas.workflow import (
 )
 from app.workflow.context import WorkflowContext, WorkflowServices
 from app.workflow.exceptions import NodeExecutionError
+from app.workflow.expressions import resolve_inputs
 from app.workflow.observer import ExecutionObserver, NullExecutionObserver
 from app.workflow.validator import WorkflowValidator
 
@@ -45,16 +46,29 @@ class WorkflowExecutor:
 
         for sequence, node_id in enumerate(ordered_ids):
             definition = node_by_id[node_id]
-            node_inputs = {source: results[source] for source in incoming[node_id]}
+            legacy_inputs = {source: results[source] for source in incoming[node_id]}
             record = NodeExecutionRecord(
                 node_id=node_id,
                 node_type=definition.type,
                 status="RUNNING",
-                input=node_inputs,
+                input={},
             )
             records.append(record)
+            observer_started = False
             try:
+                node_inputs = (
+                    resolve_inputs(
+                        definition.inputs,
+                        results=results,
+                        runtime_inputs=runtime_inputs,
+                        run_id=context.run_id,
+                    )
+                    if definition.inputs
+                    else legacy_inputs
+                )
+                record.input = node_inputs
                 await execution_observer.node_started(definition, node_inputs, sequence)
+                observer_started = True
                 implementation = self.registry.create(definition.type)
                 node_result = await implementation.execute(definition, node_inputs, context)
                 results[node_id] = node_result.value
@@ -68,6 +82,8 @@ class WorkflowExecutor:
             except Exception as exc:
                 record.status = "FAILED"
                 record.error = str(exc)
+                if not observer_started:
+                    await execution_observer.node_started(definition, {}, sequence)
                 await execution_observer.node_failed(definition, exc, sequence)
                 if isinstance(exc, NodeExecutionError):
                     raise

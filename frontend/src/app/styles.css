@@ -304,7 +304,7 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
 .workflow-name-input { width: min(520px, 55vw); margin-top: 5px; border: 0; outline: 0; background: transparent; color: #e6f0f2; font-size: 18px; font-weight: 700; }
 .toolbar-actions, .inspector-actions { display: flex; gap: 8px; }
 .editor-error { margin: 12px 12px 0; }
-.editor-layout { display: grid; grid-template-columns: 190px minmax(0, 1fr) 350px; min-height: 690px; }
+.editor-layout { display: grid; grid-template-columns: 190px minmax(0, 1fr) 420px; min-height: 690px; }
 .node-palette, .node-inspector { padding: 15px; background: #0a181e; }
 .node-palette { border-right: 1px solid #213842; }
 .node-inspector { border-left: 1px solid #213842; }
@@ -376,6 +376,30 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
 .inspector-empty strong { color: #cbdadd; font-size: 12px; }
 .inspector-empty p { margin: 7px 0 0; color: #8099a1; font-size: 11px; line-height: 1.6; }
 .editor-canvas .react-flow__minimap { border: 1px solid #29434d; border-radius: 7px; background: #0b1b21; }
+.mapping-editor { display: grid; gap: 10px; margin: 14px 0; border: 1px solid #2a4650; border-radius: 11px; padding: 12px; background: #08171d; }
+.mapping-heading, .mapping-heading > div, .output-contract { display: flex; align-items: center; gap: 8px; }
+.mapping-heading { justify-content: space-between; }
+.mapping-heading span, .output-contract > span { border-radius: 5px; padding: 4px 6px; background: #15372f; color: #65d6c0; font-size: 8px; font-weight: 850; letter-spacing: .08em; }
+.mapping-heading strong, .output-contract strong { font-size: 11px; }
+.mapping-heading button { min-height: 32px; border: 1px solid #31505b; border-radius: 7px; padding: 5px 8px; background: #10232b; color: #b6cbd1; cursor: pointer; font-size: 9px; font-weight: 750; }
+.mapping-help, .mapping-empty, .mapping-warning { margin: 0; color: #7f9ba4; font-size: 10px; line-height: 1.55; }
+.mapping-warning { border: 1px solid #6c552f; border-radius: 7px; padding: 8px; background: #261f13; color: #e0bd78; }
+.mapping-rows { display: grid; gap: 8px; }
+.mapping-row { display: grid; grid-template-columns: 105px minmax(0, 1fr) auto; gap: 6px; align-items: start; }
+.mapping-row input, .mapping-row textarea { min-width: 0; border: 1px solid #294650; border-radius: 7px; padding: 8px; background: #071217; color: #c8d9dc; font-family: ui-monospace, monospace; font-size: 10px; }
+.mapping-row textarea { min-height: 54px; resize: vertical; }
+.mapping-row button { min-height: 34px; border: 0; padding: 6px; background: transparent; color: #e4939b; cursor: pointer; font-size: 9px; }
+.upstream-references { display: grid; gap: 7px; border-top: 1px solid #203942; padding-top: 10px; }
+.upstream-references > small { color: #78949e; font-size: 9px; font-weight: 750; text-transform: uppercase; }
+.upstream-references > div { display: grid; gap: 6px; }
+.upstream-references button { display: grid; gap: 3px; border: 1px solid #294650; border-radius: 7px; padding: 8px; background: #0c2027; color: #b9cdd2; text-align: left; cursor: pointer; }
+.upstream-references button:hover { border-color: #3b7c6e; background: #103029; }
+.upstream-references button strong { font-size: 10px; }
+.upstream-references button code { overflow: hidden; color: #65cbb4; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.upstream-references p { margin: 0; color: #708a93; font-size: 10px; }
+.output-contract { align-items: flex-start; border-top: 1px solid #203942; padding-top: 10px; }
+.output-contract div { display: grid; gap: 3px; }
+.output-contract p { margin: 0; color: #819ba4; font-size: 10px; line-height: 1.45; }
 
 @media (max-width: 900px) {
   main { padding: 12px; }
@@ -414,6 +438,8 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
   .chunk-scores { grid-template-columns: 1fr; }
   .chunk-pair { grid-template-columns: 1fr; }
   .golden-chunk-list article { grid-template-columns: 1fr; }
+  .mapping-row { grid-template-columns: 1fr auto; }
+  .mapping-row textarea { grid-column: 1 / -1; grid-row: 2; }
   .panel-actions { align-items: flex-end; flex-direction: column; }
 }
 

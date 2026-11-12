@@ -6,6 +6,7 @@ import type { NodeType, WorkflowDefinition, WorkflowNode } from "@/lib/types";
 export type WorkflowNodeData = {
   label: string;
   nodeType: NodeType;
+  inputMapping: Record<string, unknown>;
   config: Record<string, unknown>;
   status?: string;
 };

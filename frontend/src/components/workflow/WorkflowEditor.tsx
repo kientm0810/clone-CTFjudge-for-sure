@@ -18,6 +18,7 @@ import { createWorkflow, createWorkflowVersion, listOllamaModels, listVectorColl
 import type { NodeType, OllamaModel, VectorCollection, WorkflowDefinition, WorkflowNode } from "@/lib/types";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { NodeConfigForm, validateNodeConfig } from "./NodeConfigForm";
+import { NodeInputMapping } from "./NodeInputMapping";
 import { EditorJourney } from "./WorkflowGuide";
 import { savedOrTopologicalPosition, topologicalPositions, WorkflowFlowNode, workflowNodeTypes } from "./WorkflowNodeCard";
 
@@ -47,8 +48,8 @@ function initialGraph(definition?: WorkflowDefinition): { nodes: WorkflowFlowNod
     name: "Untitled workflow",
     version: 1,
     nodes: [
-      { id: "input-1", type: "input" as const, name: "Input", config: defaultConfigs.input },
-      { id: "output-1", type: "output" as const, name: "Output", config: defaultConfigs.output },
+      { id: "input-1", type: "input" as const, name: "Input", inputs: {}, config: defaultConfigs.input },
+      { id: "output-1", type: "output" as const, name: "Output", inputs: { result: "{{ steps.input-1.output }}" }, config: defaultConfigs.output },
     ],
     edges: [{ source: "input-1", target: "output-1" }],
   };
@@ -57,7 +58,7 @@ function initialGraph(definition?: WorkflowDefinition): { nodes: WorkflowFlowNod
     nodes: source.nodes.map((node) => ({
       id: node.id,
       position: savedOrTopologicalPosition(node, source, autoPositions),
-      data: { label: node.name ?? node.id, nodeType: node.type, config: structuredClone(node.config) },
+      data: { label: node.name ?? node.id, nodeType: node.type, inputMapping: structuredClone(node.inputs ?? {}), config: structuredClone(node.config) },
       type: "workflowNode",
     })),
     edges: source.edges.map((edge, index) => ({ id: `editor-edge-${index}-${edge.source}-${edge.target}`, ...edge })),
@@ -68,6 +69,26 @@ function nextNodeId(type: NodeType, nodes: WorkflowFlowNode[]): string {
   let counter = 1;
   while (nodes.some((node) => node.id === `${type}-${counter}`)) counter += 1;
   return `${type}-${counter}`;
+}
+
+function upstreamNodes(nodeId: string, nodes: WorkflowFlowNode[], edges: Edge[]) {
+  const incoming = new Map<string, string[]>();
+  for (const edge of edges) {
+    const sources = incoming.get(edge.target) ?? [];
+    sources.push(edge.source);
+    incoming.set(edge.target, sources);
+  }
+  const found = new Set<string>();
+  const queue = [...(incoming.get(nodeId) ?? [])];
+  while (queue.length) {
+    const current = queue.shift()!;
+    if (found.has(current)) continue;
+    found.add(current);
+    queue.push(...(incoming.get(current) ?? []));
+  }
+  return nodes
+    .filter((node) => found.has(node.id))
+    .map((node) => ({ id: node.id, name: node.data.label }));
 }
 
 export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSaved }: Props) {
@@ -130,7 +151,7 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
       return current.concat({
         id,
         position: position ?? { x: 100 + current.length * 28, y: 100 + current.length * 22 },
-        data: { label: `${type[0].toUpperCase()}${type.slice(1)}`, nodeType: type, config: structuredClone(defaultConfigs[type]) },
+        data: { label: `${type[0].toUpperCase()}${type.slice(1)}`, nodeType: type, inputMapping: {}, config: structuredClone(defaultConfigs[type]) },
         type: "workflowNode",
       });
     });
@@ -168,6 +189,15 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
       const configErrors = nodes.flatMap((node) =>
         validateNodeConfig(node.data.nodeType, node.data.config).map((message) => `${node.data.label}: ${message}`),
       );
+      for (const node of nodes) {
+        if (node.data.nodeType !== "input" && !Object.keys(node.data.inputMapping).length) {
+          configErrors.push(`${node.data.label}: hãy định nghĩa ít nhất một input mapping.`);
+        }
+        for (const [key, value] of Object.entries(node.data.inputMapping)) {
+          if (!key.trim()) configErrors.push(`${node.data.label}: tên input không được để trống.`);
+          if (typeof value === "string" && !value.trim()) configErrors.push(`${node.data.label}: expression của ${key || "input"} không được để trống.`);
+        }
+      }
       if (configErrors.length) throw new Error(configErrors.join(" "));
       const definition: WorkflowDefinition = {
         name: workflowName.trim() || "Untitled workflow",
@@ -176,6 +206,7 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
           id: node.id,
           type: node.data.nodeType,
           name: node.data.label,
+          inputs: node.data.inputMapping,
           config: node.data.config,
           position: node.position,
         })),
@@ -244,6 +275,13 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
             </div>
             <label>ID node<input value={selectedNode.id} disabled /><small className="config-hint">Tên kỹ thuật để hệ thống phân biệt node này.</small></label>
             <label>Tên dễ nhớ<input value={selectedNode.data.label} onChange={(event) => updateSelected((node) => ({ ...node, data: { ...node.data, label: event.target.value } }))} /></label>
+            <NodeInputMapping
+              type={selectedNode.data.nodeType}
+              mapping={selectedNode.data.inputMapping}
+              upstreamNodes={upstreamNodes(selectedNode.id, nodes, edges)}
+              config={selectedNode.data.config}
+              onChange={(inputMapping) => updateSelected((node) => ({ ...node, data: { ...node.data, inputMapping } }))}
+            />
             <NodeConfigForm
               type={selectedNode.data.nodeType}
               config={selectedNode.data.config}

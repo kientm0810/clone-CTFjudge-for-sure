@@ -12,14 +12,18 @@ class OutputNode(BaseNode):
         inputs: dict,
         context: WorkflowContext,
     ) -> NodeResult:
-        value = next(iter(inputs.values())) if len(inputs) == 1 else inputs
+        value = inputs if definition.inputs else (
+            next(iter(inputs.values())) if len(inputs) == 1 else inputs
+        )
         output_format = definition.config.get("format")
         if output_format in {"ctfjudge_report", "comparison_report"}:
             try:
-                report_value = value
-                retrieval_results = None
-                golden_chunks = None
-                if len(inputs) > 1:
+                report_value = inputs.get("analysis")
+                retrieval_results = inputs.get("retrieval_results")
+                golden_chunks = inputs.get("golden_chunks")
+                if report_value is None:
+                    report_value = value
+                if not definition.inputs and len(inputs) > 1:
                     report_value = next(
                         (item for item in inputs.values() if isinstance(item, dict) and "comparisons" in item),
                         None,

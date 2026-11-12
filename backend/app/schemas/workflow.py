@@ -20,6 +20,7 @@ class NodeDefinition(BaseModel):
     id: str = Field(min_length=1)
     type: NodeType
     name: str | None = None
+    inputs: dict[str, Any] = Field(default_factory=dict)
     config: dict[str, Any] = Field(default_factory=dict)
     position: NodePosition | None = None
 

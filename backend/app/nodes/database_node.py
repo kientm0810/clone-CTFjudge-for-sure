@@ -41,7 +41,8 @@ class DatabaseNode(BaseNode):
         )
 
         if operation == "upsert":
-            chunks = _find_list_by_keys(inputs, ("chunks",))
+            chunks = inputs.get("chunks") if isinstance(inputs.get("chunks"), list) else None
+            chunks = chunks or _find_list_by_keys(inputs, ("chunks",))
             if not chunks:
                 raise NodeExecutionError(definition.id, "Upsert requires an input containing 'chunks'")
             result = await context.services.vector_store.upsert(
@@ -52,7 +53,8 @@ class DatabaseNode(BaseNode):
             return NodeResult(value=result)
 
         if operation == "search":
-            query_chunks = _find_list_by_keys(inputs, ("query_chunks", "chunks"))
+            query_chunks = inputs.get("query_chunks") if isinstance(inputs.get("query_chunks"), list) else None
+            query_chunks = query_chunks or _find_list_by_keys(inputs, ("query_chunks", "chunks"))
             if not query_chunks:
                 raise NodeExecutionError(definition.id, "Search requires query chunks")
             result = await context.services.vector_store.search(

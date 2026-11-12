@@ -5,6 +5,8 @@ import pytest
 from app.schemas.workflow import WorkflowDefinition
 from app.workflow.context import WorkflowServices
 from app.workflow.executor import WorkflowExecutor
+from app.workflow.exceptions import WorkflowValidationError
+from app.workflow.validator import WorkflowValidator
 
 
 class FakeLLM:
@@ -137,30 +139,46 @@ async def test_executor_runs_isolated_rag_comparison() -> None:
                 {
                     "id": "golden-parser",
                     "type": "agent",
+                    "inputs": {"document": "{{ steps.golden-input.output }}"},
                     "config": {"prompt": "Chunk the golden solution."},
                 },
                 {
                     "id": "golden-index",
                     "type": "database",
+                    "inputs": {"chunks": "{{ steps.golden-parser.output.chunks }}"},
                     "config": {"operation": "upsert", "collection": "comparison-{{run_id}}"},
                 },
                 {"id": "student-input", "type": "input", "config": {"input_key": "student"}},
                 {
                     "id": "student-parser",
                     "type": "agent",
+                    "inputs": {"document": "{{ steps.student-input.output }}"},
                     "config": {"prompt": "Chunk the student submission."},
                 },
                 {
                     "id": "golden-search",
                     "type": "database",
+                    "inputs": {"query_chunks": "{{ steps.student-parser.output.chunks }}"},
                     "config": {"operation": "search", "collection": "comparison-{{run_id}}"},
                 },
                 {
                     "id": "comparison-agent",
                     "type": "agent",
+                    "inputs": {
+                        "retrieval_results": "{{ steps.golden-search.output.retrieval_results }}"
+                    },
                     "config": {"prompt": "Compare retrieved candidates."},
                 },
-                {"id": "report", "type": "output"},
+                {
+                    "id": "report",
+                    "type": "output",
+                    "inputs": {
+                        "analysis": "{{ steps.comparison-agent.output }}",
+                        "retrieval_results": "{{ steps.golden-search.output.retrieval_results }}",
+                        "golden_chunks": "{{ steps.golden-parser.output.chunks }}",
+                    },
+                    "config": {"format": "comparison_report"},
+                },
             ],
             "edges": [
                 {"source": "golden-input", "target": "golden-parser"},
@@ -187,4 +205,36 @@ async def test_executor_runs_isolated_rag_comparison() -> None:
     assert vector_store.upsert_collection == "comparison-run-123"
     assert vector_store.search_collection == "comparison-run-123"
     assert [record.status for record in result.node_runs] == ["COMPLETED"] * 8
+    report_run = next(record for record in result.node_runs if record.node_id == "report")
+    assert report_run.input["golden_chunks"][0]["chunk_id"] == "golden-1"
+    assert report_run.input["retrieval_results"][0]["student_chunk_id"] == "student-1"
+
+
+def test_validator_rejects_expression_from_unconnected_branch() -> None:
+    workflow = WorkflowDefinition.model_validate(
+        {
+            "name": "invalid-cross-branch-reference",
+            "nodes": [
+                {"id": "input-a", "type": "input"},
+                {"id": "input-b", "type": "input"},
+                {
+                    "id": "agent-a",
+                    "type": "agent",
+                    "inputs": {"document": "{{ steps.input-b.output }}"},
+                    "config": {"prompt": "A"},
+                },
+                {"id": "agent-b", "type": "agent", "config": {"prompt": "B"}},
+                {"id": "output", "type": "output"},
+            ],
+            "edges": [
+                {"source": "input-a", "target": "agent-a"},
+                {"source": "input-b", "target": "agent-b"},
+                {"source": "agent-a", "target": "output"},
+                {"source": "agent-b", "target": "output"},
+            ],
+        }
+    )
+
+    with pytest.raises(WorkflowValidationError, match="connected upstream"):
+        WorkflowValidator.validate(workflow)
 

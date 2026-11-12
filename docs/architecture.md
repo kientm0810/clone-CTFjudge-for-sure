@@ -3,9 +3,9 @@
 The new implementation is a small, extensible DAG workflow system. It intentionally starts with four node types:
 
 - `input`: converts runtime values into documents.
-- `agent`: sends a prompt plus upstream artifacts to a configured chat model.
+- `agent`: sends a prompt plus its resolved input mapping to a configured chat model.
 - `database`: embeds and upserts chunks, or retrieves similar chunks from pgvector.
-- `output`: exposes the final upstream artifact as the workflow result.
+- `output`: exposes explicitly mapped fields as the workflow result.
 
 ```text
 Golden input -> Golden parser agent -> Database(upsert) --+
@@ -22,7 +22,8 @@ Student input -> Student parser agent -----------------+-> Database(search)
 ## Runtime boundaries
 
 - The API validates definitions and starts executions.
-- The workflow engine only understands nodes, edges, and typed artifacts.
+- Edges define ordering and the set of connected upstream steps. Each node declares its input mapping with expressions such as `{{ steps.golden-parser.output.chunks }}`.
+- The executor resolves expressions immediately before a node starts and persists the resolved input in its execution trace.
 - The visual editor serializes its canvas back to the same node/edge definition consumed by the API; no execution logic lives in the browser.
 - Node implementations call services through `WorkflowContext`.
 - Model and vector implementations can be replaced without changing the executor.
