@@ -10,6 +10,7 @@ from app.api.runs import router as runs_router
 from app.api.vectors import router as vectors_router
 from app.api.workflows import router as workflows_router
 from app.database import init_database
+from app.config import get_settings
 
 
 @asynccontextmanager
@@ -23,11 +24,12 @@ app = FastAPI(
     version="0.2.0",
     description="Minimal extensible workflow engine for golden-solution comparison.",
     lifespan=lifespan,
+    root_path=get_settings().api_root_path,
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[origin.strip() for origin in get_settings().cors_origins.split(",") if origin.strip()],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

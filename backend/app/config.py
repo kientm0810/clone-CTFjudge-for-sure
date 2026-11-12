@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     default_temperature: float = 0.1
     ollama_base_url: str = "http://host.docker.internal:11434"
     ollama_timeout_seconds: float = 180
+    cors_origins: str = "http://localhost:3000"
+    api_root_path: str = ""
     upload_dir: str = "/data/uploads"
     artifact_dir: str = "/data/artifacts"
 

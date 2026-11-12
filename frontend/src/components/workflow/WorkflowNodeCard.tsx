@@ -64,7 +64,7 @@ function nodeContract(data: WorkflowNodeData): NodeContract {
     const fields = Object.keys(schema?.properties ?? {});
     return {
       purpose: "Gửi prompt và dữ liệu đầu vào cho model.",
-      inputs: mapping.length ? mapping : ["Chưa cấu hình input mapping"],
+      inputs: mapping.length ? mapping : [{ name: "input_mapping", type: "chưa cấu hình" }],
       use: `Model ${String(data.config.model ?? "default")} xử lý dữ liệu theo prompt đã cấu hình.`,
       outputs: fields.length ? fields.map((field) => ({ name: field, type: "theo schema đã cấu hình" })) : [{ name: "JSON do model trả về", type: "object" }],
     };

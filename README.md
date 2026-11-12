@@ -17,6 +17,7 @@ docker compose up --build
 - UI: `http://localhost:3000`
 - API docs: `http://localhost:8400/docs`
 - Architecture: [`docs/architecture.md`](docs/architecture.md)
+- Production deployment: [`docs/production.md`](docs/production.md)
 - Example workflow: [`examples/simple-comparison-workflow.json`](examples/simple-comparison-workflow.json)
 
 The default development provider is local Ollama: `ollama/qwen2.5:3b` for chat and `ollama/nomic-embed-text` for embeddings. Docker reaches the host Ollama server through `http://host.docker.internal:11434`.
