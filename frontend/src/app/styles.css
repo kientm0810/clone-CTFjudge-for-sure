@@ -320,6 +320,7 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
 .palette-help strong, .palette-help b { color: #bad0d5; }
 .editor-canvas { min-width: 0; height: 690px; background: #08151b; }
 .editor-canvas .react-flow__node { min-width: 0; border: 0; padding: 0; background: transparent; box-shadow: none; }
+.react-flow__node:has(.builder-node:hover), .react-flow__node:has(.builder-node:focus-within) { z-index: 1000 !important; }
 .builder-node { position: relative; display: grid; width: 170px; min-height: 64px; align-content: center; gap: 4px; border: 1px solid #49636d; border-radius: 10px; padding: 11px 15px; background: #102028; box-shadow: 0 10px 30px rgba(0, 0, 0, .28); }
 .builder-node small { color: #718d97; font-size: 8px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .builder-node strong { overflow: hidden; color: #e9f1f3; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
