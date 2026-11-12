@@ -12,7 +12,9 @@ function outputDescription(type: NodeType, config: Record<string, unknown>): str
   if (type === "database") return config.operation === "upsert"
     ? "collection, indexed_chunks, embedding_model"
     : "retrieval_results[]";
-  return "Object cuối cùng được tạo từ Input mapping";
+  return config.format === "json"
+    ? "Raw JSON từ mapping; nếu mapping trống, tự lấy dữ liệu của các node nối trực tiếp phía trước"
+    : "Báo cáo được tạo từ Input mapping hoặc dữ liệu upstream";
 }
 
 function nextKey(mapping: Mapping, base = "input"): string {
@@ -51,13 +53,15 @@ export function NodeInputMapping({ type, mapping, upstreamNodes, config, onChang
   return <section className="mapping-editor">
     <div className="mapping-heading"><div><span>INPUT</span><strong>Dữ liệu node sẽ nhận</strong></div>{type !== "input" && <button type="button" onClick={() => addReference()}>Thêm field</button>}</div>
     {type === "input" ? <p className="mapping-empty">Input node đọc dữ liệu người dùng theo <code>input_key</code>, nên không cần mapping từ node trước.</p> : <>
-      <p className="mapping-help">Đường nối quyết định step nào chạy trước. Expression quyết định chính xác dữ liệu nào được lấy.</p>
+      <p className="mapping-help">{type === "output" ? "Output có thể để mapping trống để tự nhận toàn bộ dữ liệu từ node nối trực tiếp phía trước. Thêm mapping khi bạn chỉ muốn trả về một số field cụ thể." : "Đường nối quyết định step nào chạy trước. Expression quyết định chính xác dữ liệu nào được lấy."}</p>
       <div className="mapping-rows">{Object.entries(mapping).map(([key, rawValue]) => <div className="mapping-row" key={key}>
         <input aria-label="Tên input" value={key} onChange={(event) => renameKey(key, event.target.value)} placeholder="field_name" />
         <textarea aria-label={`Expression cho ${key}`} value={typeof rawValue === "string" ? rawValue : JSON.stringify(rawValue)} onChange={(event) => updateValue(key, event.target.value)} placeholder="{{ steps.node-id.output.field }}" />
         <button type="button" onClick={() => remove(key)} aria-label={`Xóa input ${key}`}>Xóa</button>
       </div>)}</div>
-      {!Object.keys(mapping).length && <p className="mapping-warning">Node chưa có input. Hãy thêm field hoặc chọn một step upstream bên dưới.</p>}
+      {!Object.keys(mapping).length && (type === "output"
+        ? <p className="mapping-auto">Đang dùng chế độ tự động: một node upstream → trả thẳng JSON đó; nhiều node upstream → trả object theo ID từng node.</p>
+        : <p className="mapping-warning">Node chưa có input. Hãy thêm field hoặc chọn một step upstream bên dưới.</p>)}
       <div className="upstream-references"><small>Step upstream có thể dùng</small>{upstreamNodes.length ? <div>{upstreamNodes.map((node) => <button type="button" key={node.id} onClick={() => addReference(node.id)} title={`Thêm {{ steps.${node.id}.output }}`}><strong>{node.name}</strong><code>{`{{ steps.${node.id}.output }}`}</code></button>)}</div> : <p>Hãy nối node này với một node phía trước trước.</p>}</div>
     </>}
     <div className="output-contract"><span>OUTPUT</span><div><strong>Node sẽ trả về</strong><p>{outputDescription(type, config)}</p></div></div>

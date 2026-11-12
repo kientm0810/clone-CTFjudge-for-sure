@@ -254,7 +254,7 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
         validateNodeConfig(node.data.nodeType, node.data.config).map((message) => `${node.data.label}: ${message}`),
       );
       for (const node of nodes) {
-        if (node.data.nodeType !== "input" && !Object.keys(node.data.inputMapping).length) {
+        if (["agent", "database"].includes(node.data.nodeType) && !Object.keys(node.data.inputMapping).length) {
           configErrors.push(`${node.data.label}: hãy định nghĩa ít nhất một input mapping.`);
         }
         for (const [key, value] of Object.entries(node.data.inputMapping)) {

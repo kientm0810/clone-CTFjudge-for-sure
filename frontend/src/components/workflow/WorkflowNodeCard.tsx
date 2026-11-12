@@ -100,8 +100,8 @@ function nodeContract(data: WorkflowNodeData): NodeContract {
   const format = String(data.config.format ?? "json");
   return {
     purpose: "Gom các giá trị đã map thành kết quả workflow.",
-    inputs: mapping.length ? mapping : ["Chưa cấu hình input mapping"],
-    use: format === "comparison_report" ? "Chuẩn hóa similarity report và gắn golden evidence với từng student chunk." : `Đóng gói output theo format “${format}”.`,
+    inputs: mapping.length ? mapping : [{ name: "upstream_outputs", type: "tự động từ các node nối trực tiếp" }],
+    use: format === "comparison_report" ? "Chuẩn hóa similarity report và gắn golden evidence với từng student chunk." : format === "json" ? "Nếu không có mapping: trả thẳng JSON của một upstream, hoặc gom nhiều upstream theo ID node." : `Đóng gói output theo format “${format}”.`,
     outputs: format === "comparison_report"
       ? [
           { name: "report_type", type: '"similarity"' },

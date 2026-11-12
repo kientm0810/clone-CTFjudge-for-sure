@@ -469,8 +469,9 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
 .mapping-heading span, .output-contract > span { border-radius: 5px; padding: 4px 6px; background: #15372f; color: #65d6c0; font-size: 8px; font-weight: 850; letter-spacing: .08em; }
 .mapping-heading strong, .output-contract strong { font-size: 11px; }
 .mapping-heading button { min-height: 32px; border: 1px solid #31505b; border-radius: 7px; padding: 5px 8px; background: #10232b; color: #b6cbd1; cursor: pointer; font-size: 9px; font-weight: 750; }
-.mapping-help, .mapping-empty, .mapping-warning { margin: 0; color: #7f9ba4; font-size: 10px; line-height: 1.55; }
+.mapping-help, .mapping-empty, .mapping-warning, .mapping-auto { margin: 0; color: #7f9ba4; font-size: 10px; line-height: 1.55; }
 .mapping-warning { border: 1px solid #6c552f; border-radius: 7px; padding: 8px; background: #261f13; color: #e0bd78; }
+.mapping-auto { border: 1px solid #286b58; border-radius: 7px; padding: 8px; background: #102922; color: #8ed7c2; }
 .mapping-rows { display: grid; gap: 8px; }
 .mapping-row { display: grid; grid-template-columns: 105px minmax(0, 1fr) auto; gap: 6px; align-items: start; }
 .mapping-row input, .mapping-row textarea { min-width: 0; border: 1px solid #294650; border-radius: 7px; padding: 8px; background: #071217; color: #c8d9dc; font-family: ui-monospace, monospace; font-size: 10px; }
