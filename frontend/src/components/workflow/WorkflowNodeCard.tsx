@@ -13,17 +13,36 @@ export type WorkflowNodeData = {
 
 export type WorkflowFlowNode = Node<WorkflowNodeData>;
 
-function nodeContract(data: WorkflowNodeData): { purpose: string; inputs: string[]; use: string; outputs: string[] } {
-  const mapping = Object.entries(data.inputMapping ?? {}).map(([key, value]) =>
-    `${key} ← ${typeof value === "string" ? value : JSON.stringify(value)}`,
-  );
+type ContractField = { name: string; type: string; detail?: string };
+type NodeContract = { purpose: string; inputs: ContractField[]; use: string; outputs: ContractField[] };
+
+function mappedFields(data: WorkflowNodeData): ContractField[] {
+  return Object.entries(data.inputMapping ?? {}).map(([key, raw]) => {
+    const expression = typeof raw === "string" ? raw : JSON.stringify(raw);
+    const isChunks = /\.chunks\s*}}/.test(expression);
+    const isRetrieval = /retrieval_results/.test(expression);
+    return {
+      name: key,
+      type: isChunks ? "array<object>" : isRetrieval ? "array<retrieval_result>" : "theo output nguồn",
+      detail: expression,
+    };
+  });
+}
+
+function nodeContract(data: WorkflowNodeData): NodeContract {
+  const mapping = mappedFields(data);
   if (data.nodeType === "input") {
     const key = String(data.config.input_key ?? data.label);
     return {
       purpose: "Nhận dữ liệu người dùng khi chạy workflow.",
-      inputs: [`runtime.${key}`],
+      inputs: [{ name: `runtime.${key}`, type: "string", detail: "Văn bản người dùng nhập" }],
       use: `Đọc trường “${key}” rồi đóng gói nội dung thành document.`,
-      outputs: ["document_id", "document_type", "content", "metadata"],
+      outputs: [
+        { name: "document_id", type: "string" },
+        { name: "document_type", type: "string" },
+        { name: "content", type: "string" },
+        { name: "metadata", type: "object" },
+      ],
     };
   }
   if (data.nodeType === "agent") {
@@ -33,7 +52,7 @@ function nodeContract(data: WorkflowNodeData): { purpose: string; inputs: string
       purpose: "Gửi prompt và dữ liệu đầu vào cho model.",
       inputs: mapping.length ? mapping : ["Chưa cấu hình input mapping"],
       use: `Model ${String(data.config.model ?? "default")} xử lý dữ liệu theo prompt đã cấu hình.`,
-      outputs: fields.length ? fields : ["JSON do model trả về"],
+      outputs: fields.length ? fields.map((field) => ({ name: field, type: "theo schema đã cấu hình" })) : [{ name: "JSON do model trả về", type: "object" }],
     };
   }
   if (data.nodeType === "database") {
@@ -42,13 +61,26 @@ function nodeContract(data: WorkflowNodeData): { purpose: string; inputs: string
     const model = String(data.config.embedding_model ?? "embedding mặc định");
     return {
       purpose: upsert ? "Lưu các chunk dưới dạng vector." : "Tìm các chunk gần nhất trong vector collection.",
-      inputs: mapping.length ? mapping : [upsert ? "chunks: danh sách chunk cần lưu" : "query_chunks: chunk dùng để tìm kiếm"],
+      inputs: mapping.length ? mapping : [{
+        name: upsert ? "chunks" : "query_chunks",
+        type: "array<object>",
+        detail: "Mỗi object gồm chunk_id:string, content:string, document_id:string, metadata:object",
+      }],
       use: upsert
-        ? `Tạo embedding bằng ${model}, rồi lưu nội dung và vector vào collection “${collection}”.`
-        : `Tạo embedding cho từng query, tìm top ${String(data.config.top_k ?? 5)} trong “${collection}”, bỏ kết quả dưới ngưỡng ${String(data.config.score_threshold ?? 0.4)}.`,
+        ? `Với từng chunk: lấy content, tạo embedding bằng ${model}, rồi lưu text và vector vào collection “${collection}”.`
+        : `Với từng query chunk: lấy content, tạo embedding bằng ${model}, tìm top ${String(data.config.top_k ?? 5)} trong “${collection}” và bỏ kết quả dưới ngưỡng ${String(data.config.score_threshold ?? 0.4)}. Mỗi query tạo một retrieval result tương ứng.`,
       outputs: upsert
-        ? ["collection", "indexed_chunks", "embedding_model"]
-        : ["retrieval_results[]", "student_chunk_id", "student_content", "candidates[]: golden_chunk_id, content, similarity_score"],
+        ? [
+            { name: "collection", type: "string" },
+            { name: "indexed_chunks", type: "integer" },
+            { name: "embedding_model", type: "string" },
+          ]
+        : [
+            { name: "retrieval_results", type: "array<object>", detail: "Một phần tử cho mỗi query chunk" },
+            { name: "student_chunk_id", type: "string", detail: "ID query chunk" },
+            { name: "student_content", type: "string", detail: "Nội dung query chunk" },
+            { name: "candidates", type: "array<object>", detail: "golden_chunk_id:string, content:string, similarity_score:number" },
+          ],
     };
   }
   const format = String(data.config.format ?? "json");
@@ -57,8 +89,14 @@ function nodeContract(data: WorkflowNodeData): { purpose: string; inputs: string
     inputs: mapping.length ? mapping : ["Chưa cấu hình input mapping"],
     use: format === "comparison_report" ? "Chuẩn hóa similarity report và gắn golden evidence với từng student chunk." : `Đóng gói output theo format “${format}”.`,
     outputs: format === "comparison_report"
-      ? ["report_type", "golden_chunks[]", "similarity_score", "summary_score", "comparisons[]"]
-      : ["Các field đã khai báo trong Input mapping"],
+      ? [
+          { name: "report_type", type: '"similarity"' },
+          { name: "golden_chunks", type: "array<chunk>" },
+          { name: "similarity_score", type: "number · 0–1" },
+          { name: "summary_score", type: "number · 0–1" },
+          { name: "comparisons", type: "array<student_chunk_comparison>" },
+        ]
+      : [{ name: "các field đã map", type: "giữ nguyên kiểu dữ liệu" }],
   };
 }
 
@@ -74,9 +112,9 @@ export function WorkflowNodeCard({ data, selected, isConnectable }: NodeProps<Wo
       <aside className="node-contract-tooltip" role="tooltip">
         <strong>{data.label}</strong>
         <p>{contract.purpose}</p>
-        <section><b>INPUT THỰC TẾ</b>{contract.inputs.map((item, index) => <code key={`${item}-${index}`}>{item}</code>)}</section>
+        <section><b>INPUT THỰC TẾ</b>{contract.inputs.map((field) => <div className="node-contract-field" key={field.name}><span><code>{field.name}</code><em>{field.type}</em></span>{field.detail && <small>{field.detail}</small>}</div>)}</section>
         <p><b>Node dùng input thế nào?</b><br />{contract.use}</p>
-        <section><b>OUTPUT</b>{contract.outputs.map((item) => <code key={item}>{item}</code>)}</section>
+        <section><b>OUTPUT</b>{contract.outputs.map((field) => <div className="node-contract-field" key={field.name}><span><code>{field.name}</code><em>{field.type}</em></span>{field.detail && <small>{field.detail}</small>}</div>)}</section>
         <small>Chọn node để chỉnh Input mapping và cấu hình.</small>
       </aside>
       {data.nodeType !== "output" && <Handle id="output" type="source" position={Position.Right} isConnectable={isConnectable} />}
