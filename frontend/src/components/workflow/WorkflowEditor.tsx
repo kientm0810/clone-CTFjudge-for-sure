@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import {
   addEdge,
   Background,
@@ -102,6 +103,9 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [nodeDialogId, setNodeDialogId] = useState<string | null>(null);
   const [dialogConfigText, setDialogConfigText] = useState("");
+  const [configPaneWidth, setConfigPaneWidth] = useState(58);
+  const [resizingConfigPane, setResizingConfigPane] = useState(false);
+  const nodeEditGridRef = useRef<HTMLDivElement | null>(null);
   const [configText, setConfigText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -130,6 +134,29 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
   useEffect(() => {
     setDialogConfigText(dialogNode ? JSON.stringify(dialogNode.data.config, null, 2) : "");
   }, [dialogNode]);
+
+  useEffect(() => {
+    if (!resizingConfigPane) return;
+    const previousCursor = document.body.style.cursor;
+    const previousUserSelect = document.body.style.userSelect;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    const resize = (event: PointerEvent) => {
+      const bounds = nodeEditGridRef.current?.getBoundingClientRect();
+      if (!bounds) return;
+      const nextWidth = ((event.clientX - bounds.left) / bounds.width) * 100;
+      setConfigPaneWidth(Math.min(72, Math.max(42, nextWidth)));
+    };
+    const stopResizing = () => setResizingConfigPane(false);
+    window.addEventListener("pointermove", resize);
+    window.addEventListener("pointerup", stopResizing);
+    return () => {
+      window.removeEventListener("pointermove", resize);
+      window.removeEventListener("pointerup", stopResizing);
+      document.body.style.cursor = previousCursor;
+      document.body.style.userSelect = previousUserSelect;
+    };
+  }, [resizingConfigPane]);
 
   useEffect(() => {
     Promise.allSettled([listOllamaModels(), listVectorCollections()]).then(([modelResult, collectionResult]) => {
@@ -336,7 +363,11 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
       {dialogNode && <div className="node-details-backdrop node-edit-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setNodeDialogId(null); }}>
         <section className="node-details-dialog node-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="node-edit-title">
           <header><div><small>{dialogNode.data.nodeType} · CÀI ĐẶT VÀ CẤU TRÚC</small><h2 id="node-edit-title">{dialogNode.data.label}</h2></div><button type="button" onClick={() => setNodeDialogId(null)}>Đóng</button></header>
-          <div className="node-edit-grid">
+          <div
+            ref={nodeEditGridRef}
+            className="node-edit-grid"
+            style={{ "--config-pane-width": `${configPaneWidth}%` } as CSSProperties}
+          >
             <aside className="node-inspector node-edit-settings">
               <p className="section-label">CÀI ĐẶT NODE</p>
               <div className={`selected-node-explainer explainer-${dialogNode.data.nodeType}`}><strong>{dialogNode.data.label}</strong><span>Các thay đổi được áp dụng ngay vào workflow nháp. Bấm Lưu workflow để lưu version.</span></div>
@@ -347,6 +378,24 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
               <details className="advanced-config"><summary>Cài đặt nâng cao bằng JSON</summary><label>Config JSON<textarea className="config-editor" value={dialogConfigText} onChange={(event) => setDialogConfigText(event.target.value)} spellCheck={false} /></label><button className="secondary-button" onClick={applyDialogConfigJson}>Áp dụng JSON</button></details>
               <button className="danger-button" onClick={() => { setSelectedId(dialogNode.id); setNodeDialogId(null); setDeleteNodeOpen(true); }}>Xóa node</button>
             </aside>
+            <div
+              className={`node-edit-resizer ${resizingConfigPane ? "is-resizing" : ""}`}
+              role="separator"
+              aria-label="Điều chỉnh chiều rộng phần cài đặt node"
+              aria-orientation="vertical"
+              aria-valuemin={42}
+              aria-valuemax={72}
+              aria-valuenow={Math.round(configPaneWidth)}
+              tabIndex={0}
+              onPointerDown={(event) => { event.preventDefault(); setResizingConfigPane(true); }}
+              onDoubleClick={() => setConfigPaneWidth(58)}
+              onKeyDown={(event) => {
+                if (event.key === "ArrowLeft") { event.preventDefault(); setConfigPaneWidth((width) => Math.max(42, width - 4)); }
+                if (event.key === "ArrowRight") { event.preventDefault(); setConfigPaneWidth((width) => Math.min(72, width + 4)); }
+                if (event.key === "Home") { event.preventDefault(); setConfigPaneWidth(42); }
+                if (event.key === "End") { event.preventDefault(); setConfigPaneWidth(72); }
+              }}
+            ><span aria-hidden="true" /></div>
             <div className="node-edit-contract"><p className="section-label">NODE NHẬN VÀ TRẢ DỮ LIỆU GÌ?</p><WorkflowNodeContract data={dialogNode.data} /></div>
           </div>
         </section>
