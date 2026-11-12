@@ -331,6 +331,26 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
 .node-info-cue { position: absolute; top: 5px; right: 7px; display: grid; width: 20px; height: 20px; place-items: center; border: 1px solid #55737d; border-radius: 50%; background: #10252c; color: #b9d0d5; cursor: pointer; font: 700 10px/1 ui-sans-serif, sans-serif; }
 .node-info-cue:hover, .node-info-cue:focus-visible { border-color: #65d6c0; background: #153a35; color: #eafffb; }
 .node-details-backdrop { position: fixed; z-index: 10000; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(1, 8, 11, .72); backdrop-filter: blur(3px); pointer-events: auto; }
+.node-hover-preview { position: fixed; z-index: 10001; width: min(400px, calc(100vw - 32px)); max-height: min(72vh, 620px); gap: 12px; padding: 15px; }
+.node-hover-preview header { top: -15px; margin: -15px -15px 0; padding: 13px 15px 10px; }
+.node-hover-preview h2 { font-size: 15px; }
+.node-hover-preview > section { gap: 7px; padding: 10px; }
+.node-hover-preview footer { padding-bottom: 2px; }
+.node-edit-dialog { width: min(1180px, 100%); max-height: min(90vh, 900px); gap: 14px; }
+.node-edit-grid { display: grid; min-height: 0; grid-template-columns: minmax(0, 1.1fr) minmax(330px, .9fr); gap: 16px; }
+.node-edit-settings, .node-edit-contract { min-width: 0; max-height: calc(90vh - 115px); overflow: auto; padding: 12px; scrollbar-color: #31535d #09171d; }
+.node-edit-settings { border: 1px solid #203942; border-radius: 10px; }
+.node-edit-contract { display: grid; align-content: start; gap: 12px; border: 1px solid #203942; border-radius: 10px; background: #09191f; }
+.node-edit-contract > section { display: grid; gap: 9px; border: 1px solid #203942; border-radius: 10px; padding: 13px; background: #071519; }
+.node-edit-contract h3 { margin: 0; color: #65d6c0; font-size: 11px; }
+.node-edit-contract p { margin: 0; color: #bfd0d4; font-size: 12px; line-height: 1.6; }
+.node-edit-contract .node-contract-field { display: grid; gap: 5px; border-top: 1px solid #1c333a; padding-top: 7px; }
+.node-edit-contract .node-contract-field:first-of-type { border-top: 0; padding-top: 0; }
+.node-edit-contract .node-contract-field > span { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+.node-edit-contract .node-contract-field code { color: #d9ebed; font: 11px/1.45 ui-monospace, monospace; overflow-wrap: anywhere; }
+.node-edit-contract .node-contract-field em { color: #73cdb8; font: normal 10px ui-monospace, monospace; }
+.node-edit-contract .node-contract-field small { color: #8da7ae; font: 10px/1.5 ui-monospace, monospace; overflow-wrap: anywhere; }
+.node-edit-contract footer { color: #718b94; font-size: 10px; }
 .node-details-dialog { display: grid; width: min(620px, 100%); max-height: min(82vh, 760px); gap: 16px; overflow: auto; border: 1px solid #3b625f; border-radius: 15px; padding: 20px; background: #071519; box-shadow: 0 24px 80px rgba(0, 0, 0, .62); color: #dcebed; }
 .node-details-dialog header { position: sticky; z-index: 1; top: -20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin: -20px -20px 0; border-bottom: 1px solid #203942; padding: 18px 20px 13px; background: #071519; }
 .node-details-dialog header small { color: #65d6c0; font-size: 9px; font-weight: 800; letter-spacing: .1em; }
@@ -464,6 +484,11 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
   .mapping-row { grid-template-columns: 1fr auto; }
   .mapping-row textarea { grid-column: 1 / -1; grid-row: 2; }
   .panel-actions { align-items: flex-end; flex-direction: column; }
+}
+
+@media (max-width: 800px) {
+  .node-edit-grid { grid-template-columns: 1fr; }
+  .node-edit-settings, .node-edit-contract { max-height: 38vh; }
 }
 
 @media (prefers-reduced-motion: reduce) {

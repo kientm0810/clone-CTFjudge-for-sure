@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Handle, Node, NodeProps, Position } from "@xyflow/react";
 import type { NodeType, WorkflowDefinition, WorkflowNode } from "@/lib/types";
@@ -11,12 +11,24 @@ export type WorkflowNodeData = {
   inputMapping: Record<string, unknown>;
   config: Record<string, unknown>;
   status?: string;
+  editable?: boolean;
 };
 
 export type WorkflowFlowNode = Node<WorkflowNodeData>;
 
 type ContractField = { name: string; type: string; detail?: string };
 type NodeContract = { purpose: string; inputs: ContractField[]; use: string; outputs: ContractField[] };
+
+export function WorkflowNodeContract({ data }: { data: WorkflowNodeData }) {
+  const contract = nodeContract(data);
+  return <>
+    <p className="node-details-purpose">{contract.purpose}</p>
+    <section><h3>Input node nhận</h3>{contract.inputs.map((field) => <div className="node-contract-field" key={field.name}><span><code>{field.name}</code><em>{field.type}</em></span>{field.detail && <small>{field.detail}</small>}</div>)}</section>
+    <section><h3>Cách node xử lý input</h3><p>{contract.use}</p></section>
+    <section><h3>Output node trả về</h3>{contract.outputs.map((field) => <div className="node-contract-field" key={field.name}><span><code>{field.name}</code><em>{field.type}</em></span>{field.detail && <small>{field.detail}</small>}</div>)}</section>
+    <footer>Dữ liệu này được lấy từ input mapping và cấu hình hiện tại của node.</footer>
+  </>;
+}
 
 function mappedFields(data: WorkflowNodeData): ContractField[] {
   return Object.entries(data.inputMapping ?? {}).map(([key, raw]) => {
@@ -102,20 +114,41 @@ function nodeContract(data: WorkflowNodeData): NodeContract {
   };
 }
 
-export function WorkflowNodeCard({ data, selected, isConnectable }: NodeProps<WorkflowFlowNode>) {
-  const [detailsOpen, setDetailsOpen] = useState(false);
+export function WorkflowNodeCard({ id, data, selected, isConnectable }: NodeProps<WorkflowFlowNode>) {
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewPosition, setPreviewPosition] = useState({ left: 0, top: 0 });
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const status = (data.status ?? "idle").toLowerCase();
-  const contract = nodeContract(data);
+  const clearCloseTimer = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = null;
+  };
+  const openPreview = (target: HTMLElement) => {
+    clearCloseTimer();
+    const rect = target.getBoundingClientRect();
+    const width = Math.min(400, window.innerWidth - 32);
+    const left = rect.right + 12 + width <= window.innerWidth ? rect.right + 12 : Math.max(16, rect.left - width - 12);
+    setPreviewPosition({ left, top: Math.min(Math.max(16, rect.top - 24), Math.max(16, window.innerHeight - 560)) });
+    setPreviewOpen(true);
+  };
+  const scheduleClose = () => {
+    clearCloseTimer();
+    closeTimer.current = setTimeout(() => setPreviewOpen(false), 180);
+  };
   useEffect(() => {
-    if (!detailsOpen) return;
+    if (!previewOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setDetailsOpen(false);
+      if (event.key === "Escape") setPreviewOpen(false);
     };
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [detailsOpen]);
+    return () => { window.removeEventListener("keydown", onKeyDown); clearCloseTimer(); };
+  }, [previewOpen]);
   return (
-    <div className={`builder-node builder-${data.nodeType} status-${status} ${selected ? "builder-selected" : ""}`}>
+    <div
+      className={`builder-node builder-${data.nodeType} status-${status} ${selected ? "builder-selected" : ""}`}
+      onMouseEnter={(event) => openPreview(event.currentTarget)}
+      onMouseLeave={scheduleClose}
+    >
       {data.nodeType !== "input" && <Handle id="input" type="target" position={Position.Left} isConnectable={isConnectable} />}
       <small>{data.nodeType}</small>
       <strong title={data.label}>{data.label}</strong>
@@ -124,20 +157,21 @@ export function WorkflowNodeCard({ data, selected, isConnectable }: NodeProps<Wo
         className="node-info-cue"
         aria-label={`Xem input và output của ${data.label}`}
         aria-haspopup="dialog"
-        aria-expanded={detailsOpen}
-        onClick={(event) => { event.stopPropagation(); setDetailsOpen(true); }}
+        aria-expanded={data.editable ? undefined : previewOpen}
+        onClick={(event) => {
+          event.stopPropagation();
+          if (data.editable) {
+            setPreviewOpen(false);
+            window.dispatchEvent(new CustomEvent("workflow-node-edit", { detail: { nodeId: id } }));
+          }
+          else setPreviewOpen((open) => !open);
+        }}
       >i</button>
-      {detailsOpen && typeof document !== "undefined" && createPortal(
-        <div className="node-details-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDetailsOpen(false); }}>
-          <section className="node-details-dialog" role="dialog" aria-modal="true" aria-labelledby={`node-details-title-${data.id}`}>
-            <header><div><small>{data.nodeType} · CẤU TRÚC DỮ LIỆU</small><h2 id={`node-details-title-${data.id}`}>{data.label}</h2></div><button type="button" onClick={() => setDetailsOpen(false)} aria-label="Đóng phần giải thích">Đóng</button></header>
-            <p className="node-details-purpose">{contract.purpose}</p>
-            <section><h3>Input node nhận</h3>{contract.inputs.map((field) => <div className="node-contract-field" key={field.name}><span><code>{field.name}</code><em>{field.type}</em></span>{field.detail && <small>{field.detail}</small>}</div>)}</section>
-            <section><h3>Cách node xử lý input</h3><p>{contract.use}</p></section>
-            <section><h3>Output node trả về</h3>{contract.outputs.map((field) => <div className="node-contract-field" key={field.name}><span><code>{field.name}</code><em>{field.type}</em></span>{field.detail && <small>{field.detail}</small>}</div>)}</section>
-            <footer>Dữ liệu này được lấy từ input mapping và cấu hình hiện tại của node.</footer>
+      {previewOpen && typeof document !== "undefined" && createPortal(
+        <section className="node-details-dialog node-hover-preview" style={previewPosition} aria-label={`Giải thích node ${data.label}`} onMouseEnter={clearCloseTimer} onMouseLeave={scheduleClose}>
+            <header><div><small>{data.nodeType} · CẤU TRÚC DỮ LIỆU</small><h2>{data.label}</h2></div><button type="button" onClick={() => setPreviewOpen(false)} aria-label="Đóng phần giải thích">Đóng</button></header>
+            <WorkflowNodeContract data={data} />
           </section>
-        </div>,
         document.body,
       )}
       {data.nodeType !== "output" && <Handle id="output" type="source" position={Position.Right} isConnectable={isConnectable} />}

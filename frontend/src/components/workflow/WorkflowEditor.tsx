@@ -20,7 +20,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { NodeConfigForm, validateNodeConfig } from "./NodeConfigForm";
 import { NodeInputMapping } from "./NodeInputMapping";
 import { EditorJourney } from "./WorkflowGuide";
-import { savedOrTopologicalPosition, topologicalPositions, WorkflowFlowNode, workflowNodeTypes } from "./WorkflowNodeCard";
+import { savedOrTopologicalPosition, topologicalPositions, WorkflowFlowNode, WorkflowNodeContract, workflowNodeTypes } from "./WorkflowNodeCard";
 
 type Props = {
   workflowId?: string;
@@ -58,7 +58,7 @@ function initialGraph(definition?: WorkflowDefinition): { nodes: WorkflowFlowNod
     nodes: source.nodes.map((node) => ({
       id: node.id,
       position: savedOrTopologicalPosition(node, source, autoPositions),
-      data: { label: node.name ?? node.id, nodeType: node.type, inputMapping: structuredClone(node.inputs ?? {}), config: structuredClone(node.config) },
+      data: { label: node.name ?? node.id, nodeType: node.type, inputMapping: structuredClone(node.inputs ?? {}), config: structuredClone(node.config), editable: true },
       type: "workflowNode",
     })),
     edges: source.edges.map((edge, index) => ({ id: `editor-edge-${index}-${edge.source}-${edge.target}`, ...edge })),
@@ -100,6 +100,8 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
     initialDefinition ? (workflowId ? initialDefinition.name : `${initialDefinition.name} copy`) : "Untitled workflow",
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [nodeDialogId, setNodeDialogId] = useState<string | null>(null);
+  const [dialogConfigText, setDialogConfigText] = useState("");
   const [configText, setConfigText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -109,9 +111,25 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
   const [deleteNodeOpen, setDeleteNodeOpen] = useState(false);
 
   const selectedNode = nodes.find((node) => node.id === selectedId) ?? null;
+  const dialogNode = nodes.find((node) => node.id === nodeDialogId) ?? null;
   useEffect(() => {
     setConfigText(selectedNode ? JSON.stringify(selectedNode.data.config, null, 2) : "");
   }, [selectedNode]);
+
+  useEffect(() => {
+    const openNodeSettings = (event: Event) => {
+      const nodeId = (event as CustomEvent<{ nodeId: string }>).detail?.nodeId;
+      if (!nodeId) return;
+      setSelectedId(nodeId);
+      setNodeDialogId(nodeId);
+    };
+    window.addEventListener("workflow-node-edit", openNodeSettings);
+    return () => window.removeEventListener("workflow-node-edit", openNodeSettings);
+  }, []);
+
+  useEffect(() => {
+    setDialogConfigText(dialogNode ? JSON.stringify(dialogNode.data.config, null, 2) : "");
+  }, [dialogNode]);
 
   useEffect(() => {
     Promise.allSettled([listOllamaModels(), listVectorCollections()]).then(([modelResult, collectionResult]) => {
@@ -151,7 +169,7 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
       return current.concat({
         id,
         position: position ?? { x: 100 + current.length * 28, y: 100 + current.length * 22 },
-        data: { label: `${type[0].toUpperCase()}${type.slice(1)}`, nodeType: type, inputMapping: {}, config: structuredClone(defaultConfigs[type]) },
+        data: { label: `${type[0].toUpperCase()}${type.slice(1)}`, nodeType: type, inputMapping: {}, config: structuredClone(defaultConfigs[type]), editable: true },
         type: "workflowNode",
       });
     });
@@ -162,11 +180,27 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
     setNodes((current) => current.map((node) => node.id === selectedId ? updater(node) : node));
   }
 
+  function updateNodeById(nodeId: string, updater: (node: WorkflowFlowNode) => WorkflowFlowNode) {
+    setNodes((current) => current.map((node) => node.id === nodeId ? updater(node) : node));
+  }
+
   function applyConfigJson() {
     try {
       const parsed = JSON.parse(configText) as Record<string, unknown>;
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Config phải là JSON object");
       updateSelected((node) => ({ ...node, data: { ...node.data, config: parsed } }));
+      setError(null);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    }
+  }
+
+  function applyDialogConfigJson() {
+    if (!nodeDialogId) return;
+    try {
+      const parsed = JSON.parse(dialogConfigText) as Record<string, unknown>;
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Config phải là JSON object");
+      updateNodeById(nodeDialogId, (node) => ({ ...node, data: { ...node.data, config: parsed } }));
       setError(null);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
@@ -299,6 +333,24 @@ export function WorkflowEditor({ workflowId, initialDefinition, onCancel, onSave
           </> : <div className="inspector-empty"><strong>Hãy chọn một node ở giữa</strong><p>Khi bạn bấm vào node, phần này sẽ giải thích từng ô và cho phép sửa tên, prompt hoặc cách lưu/tìm dữ liệu.</p></div>}
         </aside>
       </div>
+      {dialogNode && <div className="node-details-backdrop node-edit-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setNodeDialogId(null); }}>
+        <section className="node-details-dialog node-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="node-edit-title">
+          <header><div><small>{dialogNode.data.nodeType} · CÀI ĐẶT VÀ CẤU TRÚC</small><h2 id="node-edit-title">{dialogNode.data.label}</h2></div><button type="button" onClick={() => setNodeDialogId(null)}>Đóng</button></header>
+          <div className="node-edit-grid">
+            <aside className="node-inspector node-edit-settings">
+              <p className="section-label">CÀI ĐẶT NODE</p>
+              <div className={`selected-node-explainer explainer-${dialogNode.data.nodeType}`}><strong>{dialogNode.data.label}</strong><span>Các thay đổi được áp dụng ngay vào workflow nháp. Bấm Lưu workflow để lưu version.</span></div>
+              <label>ID node<input value={dialogNode.id} disabled /></label>
+              <label>Tên dễ nhớ<input value={dialogNode.data.label} onChange={(event) => updateNodeById(dialogNode.id, (node) => ({ ...node, data: { ...node.data, label: event.target.value } }))} /></label>
+              <NodeInputMapping type={dialogNode.data.nodeType} mapping={dialogNode.data.inputMapping} upstreamNodes={upstreamNodes(dialogNode.id, nodes, edges)} config={dialogNode.data.config} onChange={(inputMapping) => updateNodeById(dialogNode.id, (node) => ({ ...node, data: { ...node.data, inputMapping } }))} />
+              <NodeConfigForm type={dialogNode.data.nodeType} config={dialogNode.data.config} models={models} collections={collections} onChange={(config) => updateNodeById(dialogNode.id, (node) => ({ ...node, data: { ...node.data, config } }))} />
+              <details className="advanced-config"><summary>Cài đặt nâng cao bằng JSON</summary><label>Config JSON<textarea className="config-editor" value={dialogConfigText} onChange={(event) => setDialogConfigText(event.target.value)} spellCheck={false} /></label><button className="secondary-button" onClick={applyDialogConfigJson}>Áp dụng JSON</button></details>
+              <button className="danger-button" onClick={() => { setSelectedId(dialogNode.id); setNodeDialogId(null); setDeleteNodeOpen(true); }}>Xóa node</button>
+            </aside>
+            <div className="node-edit-contract"><p className="section-label">NODE NHẬN VÀ TRẢ DỮ LIỆU GÌ?</p><WorkflowNodeContract data={dialogNode.data} /></div>
+          </div>
+        </section>
+      </div>}
       <ConfirmDialog
         open={deleteNodeOpen}
         title={`Xóa node “${selectedNode?.data.label ?? "đã chọn"}”?`}
