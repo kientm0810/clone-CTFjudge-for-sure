@@ -70,7 +70,7 @@ const ragDefinition: WorkflowDefinition = {
       inputs: { document: "{{ steps.golden-input.output }}" },
       config: {
         model: "ollama/qwen2.5:3b", temperature: 0, output_schema: chunkOutputSchema,
-        prompt: "You are a deterministic text segmenter. Split the golden solution into short semantic steps without summarizing or adding facts. Copy document_id from the input document. Create stable chunk_id values such as golden-0, golden-1. Return JSON only.",
+        prompt: "You are a deterministic text segmenter. Split the golden solution into short semantic steps without summarizing or adding facts. Copy document_id from the input document. Create stable chunk_id values such as golden-0, golden-1. Every chunk object must store its exact text in the property named content; never rename content to text or another name. Return JSON only.",
       },
     },
     {
@@ -84,7 +84,7 @@ const ragDefinition: WorkflowDefinition = {
       inputs: { document: "{{ steps.student-input.output }}" },
       config: {
         model: "ollama/qwen2.5:3b", temperature: 0, output_schema: chunkOutputSchema,
-        prompt: "You are a deterministic text segmenter. Split the student submission into short semantic steps without judging or adding facts. Copy document_id from the input document. Create stable chunk_id values such as student-0, student-1. Return JSON only.",
+        prompt: "You are a deterministic text segmenter. Split the student submission into short semantic steps without judging or adding facts. Copy document_id from the input document. Create stable chunk_id values such as student-0, student-1. Every chunk object must store its exact text in the property named content; never rename content to text or another name. Return JSON only.",
       },
     },
     {

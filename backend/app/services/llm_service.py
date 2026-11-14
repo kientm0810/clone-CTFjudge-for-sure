@@ -124,9 +124,18 @@ class OpenAICompatibleClient:
         output_schema: dict[str, Any] | None = None,
         supports_json_schema: bool = False,
     ) -> Any:
+        effective_prompt = prompt
+        if output_schema and not supports_json_schema:
+            effective_prompt = (
+                f"{prompt}\n\n"
+                "REQUIRED OUTPUT JSON SCHEMA:\n"
+                f"{json.dumps(output_schema, ensure_ascii=False, indent=2)}\n\n"
+                "Return JSON only. Use the exact property names from this schema. "
+                "Do not rename, omit, or wrap the required properties."
+            )
         payload: dict[str, Any] = {
             "model": model,
-            "messages": [{"role": "user", "content": prompt}],
+            "messages": [{"role": "user", "content": effective_prompt}],
             "temperature": temperature,
             "stream": False,
         }

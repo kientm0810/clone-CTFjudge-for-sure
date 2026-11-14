@@ -22,7 +22,7 @@
       "config": {
         "model": "ollama/qwen2.5:3b",
         "temperature": 0,
-        "prompt": "You are a deterministic text segmenter. Split the golden solution into short semantic steps without summarizing or adding facts. Copy document_id from the input document. Create stable chunk_id values such as golden-0, golden-1. Return JSON only.",
+        "prompt": "You are a deterministic text segmenter. Split the golden solution into short semantic steps without summarizing or adding facts. Copy document_id from the input document. Create stable chunk_id values such as golden-0, golden-1. Every chunk object must store its exact text in the property named content; never rename content to text or another name. Return JSON only.",
         "output_schema": {
           "type": "object",
           "properties": {
@@ -80,7 +80,7 @@
       "config": {
         "model": "ollama/qwen2.5:3b",
         "temperature": 0,
-        "prompt": "You are a deterministic text segmenter. Split the student submission into short semantic steps without judging or adding facts. Copy document_id from the input document. Create stable chunk_id values such as student-0, student-1. Return JSON only.",
+        "prompt": "You are a deterministic text segmenter. Split the student submission into short semantic steps without judging or adding facts. Copy document_id from the input document. Create stable chunk_id values such as student-0, student-1. Every chunk object must store its exact text in the property named content; never rename content to text or another name. Return JSON only.",
         "output_schema": {
           "type": "object",
           "properties": {

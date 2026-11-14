@@ -93,7 +93,7 @@ class DatabaseExecutionObserver:
         if node_run is None:
             return
         node_run.status = "FAILED"
-        node_run.error = str(error)
+        node_run.error = str(error).strip() or error.__class__.__name__
         node_run.completed_at = completion_time(node_run.started_at)
         await self.session.commit()
 

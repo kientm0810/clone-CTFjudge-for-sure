@@ -80,14 +80,15 @@ class WorkflowExecutor:
                 record.output = node_result.value
                 await execution_observer.node_completed(definition, node_result, sequence)
             except Exception as exc:
+                error_message = str(exc).strip() or exc.__class__.__name__
                 record.status = "FAILED"
-                record.error = str(exc)
+                record.error = error_message
                 if not observer_started:
                     await execution_observer.node_started(definition, {}, sequence)
                 await execution_observer.node_failed(definition, exc, sequence)
                 if isinstance(exc, NodeExecutionError):
                     raise
-                raise NodeExecutionError(node_id, str(exc)) from exc
+                raise NodeExecutionError(node_id, error_message) from exc
 
         outputs = {
             node_id: results[node_id]
