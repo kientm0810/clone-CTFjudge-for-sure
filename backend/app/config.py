@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     ollama_timeout_seconds: float = 180
     cors_origins: str = "http://localhost:3000"
     api_root_path: str = ""
+    seed_default_workflow: bool = True
     upload_dir: str = "/data/uploads"
     artifact_dir: str = "/data/artifacts"
 

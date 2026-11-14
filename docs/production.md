@@ -16,6 +16,8 @@ At minimum, replace:
 - `SITE_ADDRESS`
 - `CORS_ORIGINS`
 
+Keep `SEED_DEFAULT_WORKFLOW=true` to install and publish the built-in CTFJudge RAG workflow automatically on a fresh database. The seed is idempotent and does not replace an existing prod deployment.
+
 For an IP-only deployment:
 
 ```env

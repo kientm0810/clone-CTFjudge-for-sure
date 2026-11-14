@@ -1,0 +1,213 @@
+{
+  "name": "CTFJudge RAG - Golden vs Student",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "golden-input",
+      "type": "input",
+      "name": "Golden solution",
+      "config": {
+        "input_key": "golden",
+        "document_type": "golden_solution"
+      },
+      "position": { "x": 40, "y": 80 }
+    },
+    {
+      "id": "golden-parser",
+      "type": "agent",
+      "name": "Chunk golden",
+      "inputs": {
+        "document": "{{ steps.golden-input.output }}"
+      },
+      "config": {
+        "model": "ollama/qwen2.5:3b",
+        "temperature": 0,
+        "prompt": "You are a deterministic text segmenter. Split the golden solution into short semantic steps without summarizing or adding facts. Copy document_id from the input document. Create stable chunk_id values such as golden-0, golden-1. Return JSON only.",
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "chunks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "chunk_id": { "type": "string" },
+                  "document_id": { "type": "string" },
+                  "content": { "type": "string" },
+                  "chunk_index": { "type": "integer" },
+                  "metadata": { "type": "object" }
+                },
+                "required": ["chunk_id", "document_id", "content", "chunk_index", "metadata"]
+              }
+            }
+          },
+          "required": ["chunks"]
+        }
+      },
+      "position": { "x": 300, "y": 80 }
+    },
+    {
+      "id": "golden-index",
+      "type": "database",
+      "name": "Index golden",
+      "inputs": {
+        "chunks": "{{ steps.golden-parser.output.chunks }}"
+      },
+      "config": {
+        "operation": "upsert",
+        "collection": "comparison-{{run_id}}",
+        "embedding_model": "ollama/nomic-embed-text"
+      },
+      "position": { "x": 560, "y": 80 }
+    },
+    {
+      "id": "student-input",
+      "type": "input",
+      "name": "Student writeup",
+      "config": {
+        "input_key": "student",
+        "document_type": "student_submission"
+      },
+      "position": { "x": 40, "y": 300 }
+    },
+    {
+      "id": "student-parser",
+      "type": "agent",
+      "name": "Chunk writeup",
+      "inputs": {
+        "document": "{{ steps.student-input.output }}"
+      },
+      "config": {
+        "model": "ollama/qwen2.5:3b",
+        "temperature": 0,
+        "prompt": "You are a deterministic text segmenter. Split the student submission into short semantic steps without judging or adding facts. Copy document_id from the input document. Create stable chunk_id values such as student-0, student-1. Return JSON only.",
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "chunks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "chunk_id": { "type": "string" },
+                  "document_id": { "type": "string" },
+                  "content": { "type": "string" },
+                  "chunk_index": { "type": "integer" },
+                  "metadata": { "type": "object" }
+                },
+                "required": ["chunk_id", "document_id", "content", "chunk_index", "metadata"]
+              }
+            }
+          },
+          "required": ["chunks"]
+        }
+      },
+      "position": { "x": 300, "y": 300 }
+    },
+    {
+      "id": "golden-search",
+      "type": "database",
+      "name": "Retrieve evidence",
+      "inputs": {
+        "query_chunks": "{{ steps.student-parser.output.chunks }}"
+      },
+      "config": {
+        "operation": "search",
+        "collection": "comparison-{{run_id}}",
+        "embedding_model": "ollama/nomic-embed-text",
+        "top_k": 3,
+        "score_threshold": 0.25
+      },
+      "position": { "x": 820, "y": 190 }
+    },
+    {
+      "id": "comparison-agent",
+      "type": "agent",
+      "name": "Similarity judge",
+      "inputs": {
+        "retrieval_results": "{{ steps.golden-search.output.retrieval_results }}"
+      },
+      "config": {
+        "model": "ollama/qwen2.5:3b",
+        "temperature": 0,
+        "prompt": "You compare one student submission with retrieved golden evidence. student-0, student-1, etc. are chunk IDs from the same submission, never different students. Evaluate every student chunk and refer to it as a chunk or citation. Give score from 0 to 1, one short Vietnamese explanation, and a short Vietnamese summary. Similar wording alone is not proof of correctness. Preserve student_content exactly and copy relevant golden IDs, content, and similarity scores. Return JSON only.",
+        "output_schema": {
+          "type": "object",
+          "properties": {
+            "summary": { "type": "string" },
+            "comparisons": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "student_chunk_id": { "type": "string" },
+                  "student_content": { "type": "string" },
+                  "classification": {
+                    "type": "string",
+                    "enum": [
+                      "exact_match",
+                      "paraphrase",
+                      "partial_match",
+                      "additional_valid_approach",
+                      "contradiction",
+                      "incorrect",
+                      "irrelevant",
+                      "no_match"
+                    ]
+                  },
+                  "score": { "type": "number", "minimum": 0, "maximum": 1 },
+                  "explanation": { "type": "string" },
+                  "matched_golden": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "chunk_id": { "type": "string" },
+                        "content": { "type": "string" },
+                        "similarity_score": { "type": "number" }
+                      },
+                      "required": ["chunk_id", "content", "similarity_score"]
+                    }
+                  }
+                },
+                "required": [
+                  "student_chunk_id",
+                  "student_content",
+                  "classification",
+                  "score",
+                  "explanation",
+                  "matched_golden"
+                ]
+              }
+            }
+          },
+          "required": ["summary", "comparisons"]
+        }
+      },
+      "position": { "x": 1080, "y": 190 }
+    },
+    {
+      "id": "report",
+      "type": "output",
+      "name": "Similarity report",
+      "inputs": {
+        "analysis": "{{ steps.comparison-agent.output }}",
+        "retrieval_results": "{{ steps.golden-search.output.retrieval_results }}",
+        "golden_chunks": "{{ steps.golden-parser.output.chunks }}"
+      },
+      "config": {
+        "format": "comparison_report"
+      },
+      "position": { "x": 1340, "y": 190 }
+    }
+  ],
+  "edges": [
+    { "source": "golden-input", "target": "golden-parser" },
+    { "source": "golden-parser", "target": "golden-index" },
+    { "source": "student-input", "target": "student-parser" },
+    { "source": "golden-index", "target": "golden-search" },
+    { "source": "student-parser", "target": "golden-search" },
+    { "source": "golden-search", "target": "comparison-agent" },
+    { "source": "comparison-agent", "target": "report" }
+  ]
+}

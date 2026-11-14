@@ -32,3 +32,9 @@ async def init_database() -> None:
     async with engine.begin() as connection:
         await connection.run_sync(Base.metadata.create_all)
 
+    if get_settings().seed_default_workflow:
+        from app.seeds.workflow_seeder import ensure_default_workflow
+
+        async with SessionLocal() as session:
+            await ensure_default_workflow(session)
+

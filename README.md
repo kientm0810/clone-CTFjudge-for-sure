@@ -141,11 +141,14 @@ POSTGRES_PASSWORD=replace-with-a-strong-database-password
 SITE_ADDRESS=http://YOUR_SERVER_IP
 CORS_ORIGINS=http://YOUR_SERVER_IP
 API_ROOT_PATH=/api
+SEED_DEFAULT_WORKFLOW=true
 
 DEFAULT_CHAT_MODEL=ollama/qwen2.5:3b
 DEFAULT_EMBEDDING_MODEL=ollama/nomic-embed-text
 OLLAMA_BASE_URL=http://host.docker.internal:11434
 ```
+
+`SEED_DEFAULT_WORKFLOW=true` installs the built-in **CTFJudge RAG - Golden vs Student** workflow when the API starts. On a fresh database it is also published to the `prod` environment automatically, so both the workflow editor and `/prod` are ready without importing JSON manually. Existing workflows and an existing prod deployment are never overwritten. Set this value to `false` only when you intentionally want an empty installation.
 
 Generate a suitable application secret with:
 
@@ -212,7 +215,7 @@ Open the **AI Models** tab to register another OpenAI-compatible chat endpoint. 
 
 Workflow definitions and immutable versions are stored in PostgreSQL. Runs execute asynchronously through Redis and Celery, with each node's status, input, output, and error persisted for inspection.
 
-To test without writing API payloads, open `http://localhost:3000`, create the Ollama demo workflow, edit its input JSON, and run it. The dashboard polls the persisted run and displays the graph status plus per-node artifacts.
+To test without writing API payloads, open `http://localhost:3000`. The built-in RAG workflow is created automatically, so you can select it, edit its input JSON, and run it immediately. The dashboard polls the persisted run and displays the graph status plus per-node artifacts.
 
 For CTFTiny benchmark, please refer to [CTFTiny Official Repository](https://github.com/NYU-LLM-CTF/CTFTiny/tree/main).
 
