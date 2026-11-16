@@ -3,11 +3,11 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import SessionLocal, init_database
-from app.models.workflow import NodeRun, WorkflowRun, WorkflowVersion
+from app.models.workflow import GoldenSnapshot, NodeRun, WorkflowRun, WorkflowVersion
 from app.nodes.base import NodeResult
 from app.schemas.workflow import NodeDefinition, WorkflowDefinition
 from app.services.llm_service import LLMService
@@ -103,6 +103,72 @@ def run_workflow(run_id: str) -> dict[str, Any]:
     return asyncio.run(_run_workflow(run_id))
 
 
+@celery_app.task(name="ctfjudge.prepare_golden_snapshot")
+def prepare_golden_snapshot(snapshot_id: str) -> dict[str, Any]:
+    return asyncio.run(_prepare_golden_snapshot(snapshot_id))
+
+
+async def _prepare_golden_snapshot(snapshot_id: str) -> dict[str, Any]:
+    await init_database()
+    async with SessionLocal() as session:
+        snapshot = await session.get(GoldenSnapshot, snapshot_id)
+        if snapshot is None:
+            raise ValueError(f"Golden snapshot '{snapshot_id}' does not exist")
+        version = await session.get(WorkflowVersion, snapshot.workflow_version_id)
+        if version is None:
+            raise ValueError("Workflow version for golden snapshot no longer exists")
+
+        snapshot.status = "RUNNING"
+        snapshot.error = None
+        await session.commit()
+
+        captured_results: dict[str, Any] = {}
+        try:
+            await WorkflowExecutor().execute(
+                WorkflowDefinition.model_validate(version.definition),
+                runtime_inputs=snapshot.input_data,
+                services=WorkflowServices(
+                    llm=LLMService(),
+                    vector_store=PgVectorService(),
+                ),
+                run_id=snapshot.id,
+                target_node_ids={snapshot.frozen_node_id},
+                result_sink=captured_results,
+            )
+            terminal_output = captured_results.get(snapshot.frozen_node_id)
+            if not isinstance(terminal_output, dict) or not terminal_output.get("collection"):
+                raise ValueError("Frozen database node did not return a vector collection")
+
+            await session.execute(
+                update(GoldenSnapshot)
+                .where(
+                    GoldenSnapshot.workflow_version_id == snapshot.workflow_version_id,
+                    GoldenSnapshot.id != snapshot.id,
+                    GoldenSnapshot.is_active.is_(True),
+                )
+                .values(is_active=False)
+            )
+            snapshot.outputs = captured_results
+            snapshot.collection_name = str(terminal_output["collection"])
+            snapshot.embedding_model = str(terminal_output.get("embedding_model") or "") or None
+            snapshot.chunk_count = int(terminal_output.get("indexed_chunks") or 0)
+            snapshot.status = "READY"
+            snapshot.is_active = True
+            snapshot.completed_at = completion_time(None)
+            await session.commit()
+            return {
+                "snapshot_id": snapshot.id,
+                "collection": snapshot.collection_name,
+                "chunk_count": snapshot.chunk_count,
+            }
+        except Exception as exc:
+            snapshot.status = "FAILED"
+            snapshot.error = str(exc).strip() or exc.__class__.__name__
+            snapshot.completed_at = completion_time(None)
+            await session.commit()
+            raise
+
+
 async def _run_workflow(run_id: str) -> dict[str, Any]:
     await init_database()
     async with SessionLocal() as session:
@@ -120,15 +186,29 @@ async def _run_workflow(run_id: str) -> dict[str, Any]:
 
         observer = DatabaseExecutionObserver(session, run.id)
         try:
+            runtime_inputs = dict(run.runtime_inputs)
+            snapshot_id = runtime_inputs.pop("__golden_snapshot_id", None)
+            initial_results: dict[str, Any] | None = None
+            if snapshot_id:
+                snapshot = await session.get(GoldenSnapshot, str(snapshot_id))
+                if (
+                    snapshot is None
+                    or snapshot.status != "READY"
+                    or snapshot.workflow_version_id != version.id
+                ):
+                    raise ValueError("Golden snapshot is missing, not ready, or belongs to another version")
+                initial_results = dict(snapshot.outputs)
+
             result = await WorkflowExecutor().execute(
                 WorkflowDefinition.model_validate(version.definition),
-                runtime_inputs=run.runtime_inputs,
+                runtime_inputs=runtime_inputs,
                 services=WorkflowServices(
                     llm=LLMService(),
                     vector_store=PgVectorService(),
                 ),
                 run_id=run.id,
                 observer=observer,
+                initial_results=initial_results,
             )
         except Exception as exc:
             run.status = "FAILED"

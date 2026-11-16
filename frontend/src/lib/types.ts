@@ -50,6 +50,22 @@ export type WorkflowDeployment = {
   definition: WorkflowDefinition;
 };
 
+export type GoldenSnapshot = {
+  id: string;
+  workflow_version_id: string;
+  frozen_node_id: string;
+  status: "PENDING" | "RUNNING" | "READY" | "FAILED" | string;
+  content_hash: string;
+  collection_name?: string | null;
+  embedding_model?: string | null;
+  chunk_count: number;
+  is_active: boolean;
+  error?: string | null;
+  frozen_node_ids: string[];
+  created_at: string;
+  completed_at?: string | null;
+};
+
 export type OllamaModel = {
   name: string;
   model?: string;

@@ -217,6 +217,10 @@ Workflow definitions and immutable versions are stored in PostgreSQL. Runs execu
 
 To test without writing API payloads, open `http://localhost:3000`. The built-in RAG workflow is created automatically, so you can select it, edit its input JSON, and run it immediately. The dashboard polls the persisted run and displays the graph status plus per-node artifacts.
 
+### Reuse one Golden solution for many submissions
+
+Open `/prod` after publishing the RAG workflow. In **Step 1**, paste the Golden solution and select **Prepare & Freeze**. The worker runs only the Golden branch, stores its parsed output and vector collection as an active snapshot, and marks those nodes as `FROZEN`. In **Step 2**, enter one student submission at a time; each grading run reuses the active Golden snapshot instead of embedding it again. Preparing a replacement keeps the current snapshot active until the new one reaches `READY`.
+
 For CTFTiny benchmark, please refer to [CTFTiny Official Repository](https://github.com/NYU-LLM-CTF/CTFTiny/tree/main).
 
 ## Overview

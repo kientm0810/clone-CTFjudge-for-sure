@@ -55,6 +55,27 @@ class WorkflowDeploymentDetail(BaseModel):
     definition: WorkflowDefinition
 
 
+class GoldenSnapshotCreate(BaseModel):
+    inputs: dict[str, Any] = Field(default_factory=dict)
+    frozen_node_id: str | None = Field(default=None, min_length=1)
+
+
+class GoldenSnapshotDetail(BaseModel):
+    id: str
+    workflow_version_id: str
+    frozen_node_id: str
+    status: str
+    content_hash: str
+    collection_name: str | None
+    embedding_model: str | None
+    chunk_count: int
+    is_active: bool
+    error: str | None
+    frozen_node_ids: list[str] = Field(default_factory=list)
+    created_at: datetime
+    completed_at: datetime | None
+
+
 class RunCreate(BaseModel):
     inputs: dict[str, Any] = Field(default_factory=dict)
 

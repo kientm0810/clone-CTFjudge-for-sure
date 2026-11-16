@@ -55,7 +55,8 @@
       },
       "config": {
         "operation": "upsert",
-        "collection": "comparison-{{run_id}}",
+        "collection": "golden-{{run_id}}",
+        "freeze": true,
         "embedding_model": "ollama/nomic-embed-text"
       },
       "position": { "x": 560, "y": 80 }
@@ -109,6 +110,7 @@
       "type": "database",
       "name": "Retrieve evidence",
       "inputs": {
+        "collection": "{{ steps.golden-index.output.collection }}",
         "query_chunks": "{{ steps.student-parser.output.chunks }}"
       },
       "config": {

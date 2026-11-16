@@ -1,11 +1,25 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
-from app.schemas.persistence import RunCreate, RunSummary, WorkflowDeploymentDetail
+from app.models.workflow import GoldenSnapshot
+from app.schemas.persistence import (
+    GoldenSnapshotCreate,
+    GoldenSnapshotDetail,
+    RunCreate,
+    RunSummary,
+    WorkflowDeploymentDetail,
+)
 from app.schemas.workflow import WorkflowDefinition
+from app.services.golden_snapshot_service import (
+    find_golden_freeze_node,
+    get_active_snapshot,
+    snapshot_content_hash,
+    snapshot_detail,
+)
 from app.services.workflow_store import WorkflowStore
 
 
@@ -35,6 +49,96 @@ async def get_deployment(environment: str, session: SessionDependency) -> Workfl
     return deployment_detail(stored)
 
 
+@router.get(
+    "/{environment}/golden-snapshot",
+    response_model=GoldenSnapshotDetail,
+)
+async def get_deployment_golden_snapshot(
+    environment: str,
+    session: SessionDependency,
+) -> GoldenSnapshotDetail:
+    stored = await WorkflowStore(session).get_deployment(environment)
+    if stored is None:
+        raise HTTPException(status_code=404, detail="Chưa có workflow nào được publish lên môi trường này.")
+    deployment, _, _ = stored
+    snapshot = await get_active_snapshot(session, deployment.workflow_version_id)
+    if snapshot is None:
+        raise HTTPException(status_code=404, detail="Chưa có golden solution được chuẩn bị.")
+    return snapshot_detail(snapshot)
+
+
+@router.post(
+    "/{environment}/golden-snapshots",
+    response_model=GoldenSnapshotDetail,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def create_deployment_golden_snapshot(
+    environment: str,
+    payload: GoldenSnapshotCreate,
+    session: SessionDependency,
+) -> GoldenSnapshotDetail:
+    stored = await WorkflowStore(session).get_deployment(environment)
+    if stored is None:
+        raise HTTPException(status_code=404, detail="Chưa có workflow nào được publish lên môi trường này.")
+    deployment, _, version = stored
+    definition = WorkflowDefinition.model_validate(version.definition)
+    expected_node_id = find_golden_freeze_node(definition)
+    if expected_node_id is None:
+        raise HTTPException(
+            status_code=422,
+            detail="Workflow này chưa có database node upsert dành cho golden solution.",
+        )
+    requested_node_id = payload.frozen_node_id or expected_node_id
+    if requested_node_id != expected_node_id:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Node được phép freeze là '{expected_node_id}'.",
+        )
+    in_progress = await session.scalar(
+        select(GoldenSnapshot.id).where(
+            GoldenSnapshot.workflow_version_id == deployment.workflow_version_id,
+            GoldenSnapshot.status.in_(["PENDING", "RUNNING"]),
+        ).limit(1)
+    )
+    if in_progress:
+        raise HTTPException(status_code=409, detail="Một golden snapshot khác đang được chuẩn bị.")
+
+    snapshot = GoldenSnapshot(
+        workflow_version_id=deployment.workflow_version_id,
+        frozen_node_id=expected_node_id,
+        status="PENDING",
+        input_data=payload.inputs,
+        content_hash=snapshot_content_hash(payload.inputs),
+    )
+    session.add(snapshot)
+    await session.commit()
+    await session.refresh(snapshot)
+
+    from app.workers.workflow_task import prepare_golden_snapshot
+
+    prepare_golden_snapshot.delay(snapshot.id)
+    return snapshot_detail(snapshot)
+
+
+@router.get(
+    "/{environment}/golden-snapshots/{snapshot_id}",
+    response_model=GoldenSnapshotDetail,
+)
+async def get_deployment_golden_snapshot_by_id(
+    environment: str,
+    snapshot_id: str,
+    session: SessionDependency,
+) -> GoldenSnapshotDetail:
+    stored = await WorkflowStore(session).get_deployment(environment)
+    if stored is None:
+        raise HTTPException(status_code=404, detail="Chưa có workflow nào được publish lên môi trường này.")
+    deployment, _, _ = stored
+    snapshot = await session.get(GoldenSnapshot, snapshot_id)
+    if snapshot is None or snapshot.workflow_version_id != deployment.workflow_version_id:
+        raise HTTPException(status_code=404, detail="Không tìm thấy golden snapshot này.")
+    return snapshot_detail(snapshot)
+
+
 @router.post("/{environment}/runs", response_model=RunSummary, status_code=status.HTTP_202_ACCEPTED)
 async def start_deployment_run(
     environment: str,
@@ -45,8 +149,18 @@ async def start_deployment_run(
     stored = await store.get_deployment(environment)
     if stored is None:
         raise HTTPException(status_code=404, detail="Chưa có workflow nào được publish lên môi trường này.")
-    deployment, _, _ = stored
-    run = await store.create_run_for_version(deployment.workflow_version_id, payload.inputs)
+    deployment, _, version = stored
+    definition = WorkflowDefinition.model_validate(version.definition)
+    run_inputs = dict(payload.inputs)
+    if find_golden_freeze_node(definition):
+        snapshot = await get_active_snapshot(session, deployment.workflow_version_id)
+        if snapshot is None:
+            raise HTTPException(
+                status_code=409,
+                detail="Hãy chuẩn bị và freeze golden solution trước khi chấm bài.",
+            )
+        run_inputs["__golden_snapshot_id"] = snapshot.id
+    run = await store.create_run_for_version(deployment.workflow_version_id, run_inputs)
     if run is None:
         raise HTTPException(status_code=409, detail="Version đã publish không còn tồn tại.")
 

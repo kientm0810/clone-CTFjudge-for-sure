@@ -1,13 +1,16 @@
 import type { WorkflowDefinition } from "@/lib/types";
 
-export function RuntimeInputs({ definition, value, onChange }: {
-  definition?: WorkflowDefinition; value: string; onChange: (value: string) => void;
+export function RuntimeInputs({ definition, value, onChange, hiddenKeys = [] }: {
+  definition?: WorkflowDefinition; value: string; onChange: (value: string) => void; hiddenKeys?: string[];
 }) {
   let parsed: Record<string, unknown> = {};
   try { parsed = JSON.parse(value); } catch { /* Keep raw editing available. */ }
   const valid = parsed !== null && typeof parsed === "object" && !Array.isArray(parsed);
   return <div>
-    {valid && definition?.nodes.filter((node) => node.type === "input").map((node) => {
+    {valid && definition?.nodes.filter((node) => {
+      const key = String(node.config.input_key ?? node.id);
+      return node.type === "input" && !hiddenKeys.includes(key);
+    }).map((node) => {
       const key = String(node.config.input_key ?? node.id);
       return <label key={node.id} style={{ display: "block", marginTop: 16 }}>
         <strong>{node.name ?? key}</strong>

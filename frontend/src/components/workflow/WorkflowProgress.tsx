@@ -7,6 +7,7 @@ const statusLabels: Record<string, string> = {
   COMPLETED: "Hoàn tất",
   FAILED: "Có lỗi",
   CANCELLED: "Đã dừng",
+  FROZEN: "Đã freeze",
 };
 
 function topologicalNodeIds(definition: WorkflowDefinition): string[] {
@@ -31,11 +32,16 @@ function topologicalNodeIds(definition: WorkflowDefinition): string[] {
   return result.length === definition.nodes.length ? result : definition.nodes.map((node) => node.id);
 }
 
-export function WorkflowProgress({ definition, run }: { definition: WorkflowDefinition; run: WorkflowRun | null }) {
+export function WorkflowProgress({ definition, run, frozenNodeIds = [] }: {
+  definition: WorkflowDefinition;
+  run: WorkflowRun | null;
+  frozenNodeIds?: string[];
+}) {
   const order = topologicalNodeIds(definition);
   const nodes = Object.fromEntries(definition.nodes.map((node) => [node.id, node]));
-  const statuses = Object.fromEntries((run?.node_runs ?? []).map((node) => [node.node_id, node.status]));
-  const completed = Object.values(statuses).filter((status) => status === "COMPLETED").length;
+  const statuses: Record<string, string> = Object.fromEntries(frozenNodeIds.map((id) => [id, "FROZEN"]));
+  for (const node of run?.node_runs ?? []) statuses[node.node_id] = node.status;
+  const completed = Object.values(statuses).filter((item) => ["COMPLETED", "FROZEN"].includes(item)).length;
   const percent = Math.round((completed / Math.max(order.length, 1)) * 100);
   const current = order.find((id) => statuses[id] === "RUNNING");
   const message = run?.status === "COMPLETED"
@@ -46,14 +52,16 @@ export function WorkflowProgress({ definition, run }: { definition: WorkflowDefi
         ? `Đang chạy: ${nodes[current]?.name ?? current}.`
         : run
           ? "Đang chuẩn bị workflow."
-          : "Workflow chưa chạy.";
+          : frozenNodeIds.length
+            ? "Nhánh golden đã freeze, sẵn sàng chấm bài."
+            : "Workflow chưa chạy.";
 
   return <div className="workflow-progress">
-    <div className="progress-summary" role="status" aria-atomic="true"><div><strong>{message}</strong><span>{completed}/{order.length} node hoàn tất</span></div><b>{run ? percent : 0}%</b></div>
-    <div className="progress-track" aria-hidden="true"><span style={{ width: `${run ? percent : 0}%` }} /></div>
+    <div className="progress-summary" role="status" aria-atomic="true"><div><strong>{message}</strong><span>{completed}/{order.length} node hoàn tất</span></div><b>{run || frozenNodeIds.length ? percent : 0}%</b></div>
+    <div className="progress-track" aria-hidden="true"><span style={{ width: `${run || frozenNodeIds.length ? percent : 0}%` }} /></div>
     <ol>{order.map((id, index) => {
-      const status = statuses[id] ?? "idle";
-      return <li className={`progress-${status.toLowerCase()}`} key={id}><span>{index + 1}</span><div><strong>{nodes[id]?.name ?? id}</strong><small>{statusLabels[status] ?? status}</small></div></li>;
+      const nodeStatus = statuses[id] ?? "idle";
+      return <li className={`progress-${nodeStatus.toLowerCase()}`} key={id}><span>{index + 1}</span><div><strong>{nodes[id]?.name ?? id}</strong><small>{statusLabels[nodeStatus] ?? nodeStatus}</small></div></li>;
     })}</ol>
   </div>;
 }

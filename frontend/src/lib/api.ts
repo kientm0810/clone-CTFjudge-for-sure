@@ -1,4 +1,4 @@
-import type { AIModelOption, AIModelTestResult, AIModelWrite, OllamaModel, RegisteredAIModel, RunHistoryItem, VectorCollection, WorkflowDefinition, WorkflowDeployment, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
+import type { AIModelOption, AIModelTestResult, AIModelWrite, GoldenSnapshot, OllamaModel, RegisteredAIModel, RunHistoryItem, VectorCollection, WorkflowDefinition, WorkflowDeployment, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8400";
 
@@ -83,6 +83,23 @@ export function publishWorkflow(workflowId: string) {
 
 export const getDeployment = (environment = "prod") =>
   request<WorkflowDeployment>(`/deployments/${environment}`);
+
+export const getActiveGoldenSnapshot = (environment = "prod") =>
+  request<GoldenSnapshot>(`/deployments/${environment}/golden-snapshot`);
+
+export function createGoldenSnapshot(
+  environment: string,
+  inputs: Record<string, unknown>,
+  frozenNodeId: string,
+) {
+  return request<GoldenSnapshot>(`/deployments/${environment}/golden-snapshots`, {
+    method: "POST",
+    body: JSON.stringify({ inputs, frozen_node_id: frozenNodeId }),
+  });
+}
+
+export const getGoldenSnapshot = (environment: string, snapshotId: string) =>
+  request<GoldenSnapshot>(`/deployments/${environment}/golden-snapshots/${snapshotId}`);
 
 export function startDeploymentRun(environment: string, inputs: Record<string, unknown>) {
   return request<WorkflowRun>(`/deployments/${environment}/runs`, {

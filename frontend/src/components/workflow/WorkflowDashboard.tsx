@@ -76,7 +76,7 @@ const ragDefinition: WorkflowDefinition = {
     {
       id: "golden-index", type: "database", name: "Index golden",
       inputs: { chunks: "{{ steps.golden-parser.output.chunks }}" },
-      config: { operation: "upsert", collection: "comparison-{{run_id}}", embedding_model: "ollama/nomic-embed-text" },
+      config: { operation: "upsert", collection: "golden-{{run_id}}", freeze: true, embedding_model: "ollama/nomic-embed-text" },
     },
     { id: "student-input", type: "input", name: "Student writeup", config: { input_key: "student", document_type: "student_submission" } },
     {
@@ -89,7 +89,7 @@ const ragDefinition: WorkflowDefinition = {
     },
     {
       id: "golden-search", type: "database", name: "Retrieve evidence",
-      inputs: { query_chunks: "{{ steps.student-parser.output.chunks }}" },
+      inputs: { collection: "{{ steps.golden-index.output.collection }}", query_chunks: "{{ steps.student-parser.output.chunks }}" },
       config: { operation: "search", collection: "comparison-{{run_id}}", embedding_model: "ollama/nomic-embed-text", top_k: 3, score_threshold: 0.25 },
     },
     {

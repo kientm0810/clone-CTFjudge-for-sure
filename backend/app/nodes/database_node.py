@@ -74,6 +74,16 @@ class DatabaseNode(BaseNode):
         operation = definition.config.get("operation")
         collection_template = str(definition.config.get("collection", "golden-solutions"))
         collection = collection_template.replace("{{run_id}}", context.run_id)
+        mapped_collection = inputs.get("collection")
+        if isinstance(mapped_collection, str) and mapped_collection.strip():
+            collection = mapped_collection.strip()
+        elif operation == "search":
+            for artifact in context.artifacts.values():
+                value = artifact.get("value") if isinstance(artifact, dict) else None
+                candidate = value.get("collection") if isinstance(value, dict) else None
+                if isinstance(candidate, str) and candidate.strip():
+                    collection = candidate.strip()
+                    break
         embedding_model = definition.config.get(
             "embedding_model",
             get_settings().default_embedding_model,
