@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     seed_default_workflow: bool = True
     upload_dir: str = "/data/uploads"
     artifact_dir: str = "/data/artifacts"
+    max_docx_upload_bytes: int = 10 * 1024 * 1024
+    max_docx_uncompressed_bytes: int = 25 * 1024 * 1024
+    max_extracted_text_chars: int = 1_000_000
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

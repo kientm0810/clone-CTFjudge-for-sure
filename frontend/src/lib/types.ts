@@ -66,6 +66,13 @@ export type GoldenSnapshot = {
   completed_at?: string | null;
 };
 
+export type DocumentExtraction = {
+  filename: string;
+  content: string;
+  character_count: number;
+  paragraph_count: number;
+};
+
 export type OllamaModel = {
   name: string;
   model?: string;

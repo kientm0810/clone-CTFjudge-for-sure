@@ -131,6 +131,18 @@ main { min-height: 100vh; padding: 24px; }
 .card textarea:focus { border-color: #339a86; }
 .card-help { max-width: 56ch; margin: 5px 0 0; color: #7f99a2; font-size: 11px; line-height: 1.45; }
 .card-help code { color: #9edbc9; }
+.runtime-input-field { margin-top: 16px; }
+.runtime-input-field > label { color: #dcebed; font-size: 12px; }
+.docx-upload { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; gap: 5px 10px; min-height: 54px; margin-top: 10px; border: 1px dashed #315b63; border-radius: 9px; padding: 9px; background: #09191f; }
+.docx-upload input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.docx-upload > label { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; border: 1px solid #39776a; border-radius: 8px; padding: 8px 11px; background: #12342f; color: #bde9de; cursor: pointer; font-size: 11px; font-weight: 750; }
+.docx-upload > label:hover { border-color: #55bba4; background: #17453d; }
+.docx-upload input:focus-visible + label { outline: 3px solid rgba(101, 214, 192, .45); outline-offset: 2px; }
+.docx-upload > label[aria-disabled="true"] { cursor: not-allowed; filter: saturate(.4); opacity: .6; }
+.docx-upload > span { color: #79969e; font-size: 10px; line-height: 1.45; }
+.docx-upload p { grid-column: 1 / -1; min-height: 16px; margin: 1px 0 0; overflow-wrap: anywhere; font-size: 10px; line-height: 1.5; }
+.docx-success { color: #72d5b8; }
+.docx-error { color: #f2a2a9; }
 pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia Code", Consolas, monospace; font-size: 11px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
 .card > pre { height: 170px; padding: 12px; border-radius: 9px; background: #071217; }
 .result-card { max-height: 470px; overflow: auto; }

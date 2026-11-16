@@ -1,23 +1,35 @@
 import type { WorkflowDefinition } from "@/lib/types";
+import { DocxUpload } from "./DocxUpload";
 
 export function RuntimeInputs({ definition, value, onChange, hiddenKeys = [] }: {
-  definition?: WorkflowDefinition; value: string; onChange: (value: string) => void; hiddenKeys?: string[];
+  definition?: WorkflowDefinition;
+  value: string;
+  onChange: (value: string) => void;
+  hiddenKeys?: string[];
 }) {
   let parsed: Record<string, unknown> = {};
   try { parsed = JSON.parse(value); } catch { /* Keep raw editing available. */ }
   const valid = parsed !== null && typeof parsed === "object" && !Array.isArray(parsed);
+
   return <div>
     {valid && definition?.nodes.filter((node) => {
       const key = String(node.config.input_key ?? node.id);
       return node.type === "input" && !hiddenKeys.includes(key);
     }).map((node) => {
       const key = String(node.config.input_key ?? node.id);
-      return <label key={node.id} style={{ display: "block", marginTop: 16 }}>
-        <strong>{node.name ?? key}</strong>
-        <p className="card-help">Dán nội dung vào đây. Dữ liệu này sẽ được gửi tới node {node.name ?? node.id}.</p>
-        <textarea aria-label={node.name ?? key} value={typeof parsed[key] === "string" ? parsed[key] as string : JSON.stringify(parsed[key] ?? "")}
-          onChange={(event) => onChange(JSON.stringify({ ...parsed, [key]: event.target.value }, null, 2))} />
-      </label>;
+      const textareaId = `runtime-input-${node.id}`;
+      const updateContent = (content: string) => onChange(JSON.stringify({ ...parsed, [key]: content }, null, 2));
+      return <div className="runtime-input-field" key={node.id}>
+        <label htmlFor={textareaId}><strong>{node.name ?? key}</strong></label>
+        <p className="card-help">Dán nội dung hoặc chọn file DOCX. Văn bản sẽ được gửi tới node {node.name ?? node.id}.</p>
+        <DocxUpload onExtract={updateContent} />
+        <textarea
+          id={textareaId}
+          aria-label={node.name ?? key}
+          value={typeof parsed[key] === "string" ? parsed[key] as string : JSON.stringify(parsed[key] ?? "")}
+          onChange={(event) => updateContent(event.target.value)}
+        />
+      </div>;
     })}
     <details className="advanced-config"><summary>Dữ liệu JSON nâng cao</summary>
       <textarea aria-label="Dữ liệu JSON nâng cao" value={value} onChange={(event) => onChange(event.target.value)} spellCheck={false} />

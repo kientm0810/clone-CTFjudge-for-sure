@@ -1,4 +1,4 @@
-import type { AIModelOption, AIModelTestResult, AIModelWrite, GoldenSnapshot, OllamaModel, RegisteredAIModel, RunHistoryItem, VectorCollection, WorkflowDefinition, WorkflowDeployment, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
+import type { AIModelOption, AIModelTestResult, AIModelWrite, DocumentExtraction, GoldenSnapshot, OllamaModel, RegisteredAIModel, RunHistoryItem, VectorCollection, WorkflowDefinition, WorkflowDeployment, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8400";
 
@@ -100,6 +100,17 @@ export function createGoldenSnapshot(
 
 export const getGoldenSnapshot = (environment: string, snapshotId: string) =>
   request<GoldenSnapshot>(`/deployments/${environment}/golden-snapshots/${snapshotId}`);
+
+export async function extractDocx(file: File): Promise<DocumentExtraction> {
+  const body = new FormData();
+  body.append("file", file);
+  const response = await fetch(`${API_URL}/documents/extract-docx`, { method: "POST", body });
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({ detail: response.statusText }));
+    throw new Error(typeof payload.detail === "string" ? payload.detail : JSON.stringify(payload.detail));
+  }
+  return response.json() as Promise<DocumentExtraction>;
+}
 
 export function startDeploymentRun(environment: string, inputs: Record<string, unknown>) {
   return request<WorkflowRun>(`/deployments/${environment}/runs`, {

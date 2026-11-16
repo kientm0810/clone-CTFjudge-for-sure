@@ -221,6 +221,8 @@ To test without writing API payloads, open `http://localhost:3000`. The built-in
 
 Open `/prod` after publishing the RAG workflow. In **Step 1**, paste the Golden solution and select **Prepare & Freeze**. The worker runs only the Golden branch, stores its parsed output and vector collection as an active snapshot, and marks those nodes as `FROZEN`. In **Step 2**, enter one student submission at a time; each grading run reuses the active Golden snapshot instead of embedding it again. Preparing a replacement keeps the current snapshot active until the new one reaches `READY`.
 
+Both Golden and student inputs accept plain text or a `.docx` file without images. DOCX files are parsed in memory, limited to 10 MB, and their extracted text is placed in the textarea for review before the workflow runs. Files are not kept on disk.
+
 For CTFTiny benchmark, please refer to [CTFTiny Official Repository](https://github.com/NYU-LLM-CTF/CTFTiny/tree/main).
 
 ## Overview

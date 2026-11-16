@@ -12,6 +12,7 @@ import {
 } from "@/lib/api";
 import type { GoldenSnapshot, WorkflowDeployment, WorkflowNode, WorkflowRun } from "@/lib/types";
 import { ComparisonResult } from "./ComparisonResult";
+import { DocxUpload } from "./DocxUpload";
 import { RuntimeInputs } from "./RuntimeInputs";
 import { WorkflowCanvas } from "./WorkflowCanvas";
 import { WorkflowProgress } from "./WorkflowProgress";
@@ -163,11 +164,12 @@ export function ProdDashboard() {
           <div><small>Embedding model</small><strong>{snapshot.embedding_model || "Mặc định"}</strong></div>
           <div><small>Collection</small><strong className="break-anywhere">{snapshot.collection_name}</strong></div>
         </div>}
-        {goldenKey ? <label className="snapshot-input">
-          <strong>{snapshot ? "Thay Golden solution" : (goldenNode?.name ?? "Golden solution")}</strong>
+        {goldenKey ? <div className="snapshot-input">
+          <label htmlFor="golden-solution-input"><strong>{snapshot ? "Thay Golden solution" : (goldenNode?.name ?? "Golden solution")}</strong></label>
           <span>{snapshot ? "Nội dung mới chỉ thay bản đang active sau khi chuẩn bị thành công." : "Dán đáp án chuẩn vào đây để tạo snapshot đầu tiên."}</span>
-          <textarea aria-label="Golden solution" value={goldenContent} onChange={(event) => setGoldenContent(event.target.value)} />
-        </label> : <p className="inline-error">Workflow không có input dành cho golden solution.</p>}
+          <DocxUpload onExtract={setGoldenContent} disabled={snapshotBusy} />
+          <textarea id="golden-solution-input" aria-label="Golden solution" value={goldenContent} onChange={(event) => setGoldenContent(event.target.value)} />
+        </div> : <p className="inline-error">Workflow không có input dành cho golden solution.</p>}
         <div className="snapshot-actions">
           <button className="primary-button" onClick={prepareGolden} disabled={snapshotBusy || !goldenContent.trim() || !goldenKey}>{snapshotBusy ? "Đang chuẩn bị…" : snapshot ? "Tạo snapshot mới" : "Chuẩn bị & Freeze"}</button>
           {preparingSnapshot && <p role="status" aria-live="polite">{preparingSnapshot.status === "RUNNING" ? "Đang parse và tạo vector cho Golden solution…" : "Đang xếp hàng chuẩn bị Golden solution…"}</p>}
