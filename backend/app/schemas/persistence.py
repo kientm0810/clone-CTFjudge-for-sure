@@ -96,6 +96,15 @@ class RunCreate(BaseModel):
     inputs: dict[str, Any] = Field(default_factory=dict)
 
 
+class BatchSubmissionCreate(BaseModel):
+    filename: str = Field(min_length=1, max_length=255)
+    inputs: dict[str, Any] = Field(default_factory=dict)
+
+
+class BatchRunCreate(BaseModel):
+    submissions: list[BatchSubmissionCreate] = Field(min_length=1, max_length=10)
+
+
 class RunSummary(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -108,6 +117,11 @@ class RunSummary(BaseModel):
     started_at: datetime | None
     completed_at: datetime | None
     created_at: datetime
+
+
+class BatchRunItem(BaseModel):
+    filename: str
+    run: RunSummary
 
 
 class RunHistoryItem(RunSummary):

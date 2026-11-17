@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_session
 from app.models.workflow import GoldenSnapshot
 from app.schemas.persistence import (
+    BatchRunCreate,
+    BatchRunItem,
     GoldenSnapshotCreate,
     GoldenSnapshotDetail,
     RunCreate,
@@ -174,3 +176,49 @@ async def start_deployment_run(
     await session.commit()
     await session.refresh(run)
     return RunSummary.model_validate(run)
+
+
+@router.post(
+    "/{environment}/runs/batch",
+    response_model=list[BatchRunItem],
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def start_deployment_batch_runs(
+    environment: str,
+    payload: BatchRunCreate,
+    session: SessionDependency,
+) -> list[BatchRunItem]:
+    store = WorkflowStore(session)
+    stored = await store.get_deployment(environment)
+    if stored is None:
+        raise HTTPException(status_code=404, detail="Chưa có workflow được publish lên môi trường này.")
+    deployment, _, version = stored
+    definition = WorkflowDefinition.model_validate(version.definition)
+    snapshot = None
+    if find_golden_freeze_node(definition):
+        snapshot = await get_active_snapshot(session, deployment.workflow_version_id)
+        if snapshot is None:
+            raise HTTPException(
+                status_code=409,
+                detail="Hãy chuẩn bị và freeze golden solution trước khi chấm batch.",
+            )
+
+    from app.workers.workflow_task import run_workflow
+
+    created: list[BatchRunItem] = []
+    for submission in payload.submissions:
+        run_inputs = dict(submission.inputs)
+        run_inputs["__submission_filename"] = submission.filename
+        if snapshot is not None:
+            run_inputs["__golden_snapshot_id"] = snapshot.id
+        run = await store.create_run_for_version(deployment.workflow_version_id, run_inputs)
+        if run is None:
+            raise HTTPException(status_code=409, detail="Version đã publish không còn tồn tại.")
+        task = run_workflow.delay(run.id)
+        run.celery_task_id = task.id
+        await session.commit()
+        await session.refresh(run)
+        created.append(
+            BatchRunItem(filename=submission.filename, run=RunSummary.model_validate(run))
+        )
+    return created

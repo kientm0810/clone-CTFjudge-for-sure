@@ -9,9 +9,11 @@ import {
   getGoldenSnapshot,
   getRun,
   getRunHtmlReportUrl,
+  startDeploymentBatch,
   startDeploymentRun,
 } from "@/lib/api";
-import type { GoldenSnapshot, WorkflowDeployment, WorkflowNode, WorkflowRun } from "@/lib/types";
+import type { BatchRunItem, DocumentExtraction, GoldenSnapshot, WorkflowDeployment, WorkflowNode, WorkflowRun } from "@/lib/types";
+import { BatchDocxUpload } from "./BatchDocxUpload";
 import { ComparisonResult } from "./ComparisonResult";
 import { DocxUpload } from "./DocxUpload";
 import { RuntimeInputs } from "./RuntimeInputs";
@@ -61,13 +63,21 @@ export function ProdDashboard() {
   const [snapshot, setSnapshot] = useState<GoldenSnapshot | null>(null);
   const [preparingSnapshot, setPreparingSnapshot] = useState<GoldenSnapshot | null>(null);
   const [run, setRun] = useState<WorkflowRun | null>(null);
+  const [submissionFilename, setSubmissionFilename] = useState("writeup");
+  const [batchDocuments, setBatchDocuments] = useState<DocumentExtraction[]>([]);
+  const [batchRuns, setBatchRuns] = useState<BatchRunItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [batchBusy, setBatchBusy] = useState(false);
   const [snapshotBusy, setSnapshotBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const goldenNode = useMemo(() => deployment ? goldenInputNode(deployment) : undefined, [deployment]);
   const goldenKey = goldenNode ? inputKey(goldenNode) : undefined;
+  const studentNode = useMemo(() => deployment?.definition.nodes.find(
+    (node) => node.type === "input" && inputKey(node) !== goldenKey,
+  ), [deployment, goldenKey]);
+  const studentKey = studentNode ? inputKey(studentNode) : undefined;
   const frozenNodeIds = snapshot?.frozen_node_ids ?? [];
   const snapshotProgress = useMemo(() => {
     const items = preparingSnapshot?.progress ?? [];
@@ -135,6 +145,7 @@ export function ProdDashboard() {
     setRun(null);
     try {
       const parsed = JSON.parse(inputs) as Record<string, unknown>;
+      parsed.__submission_filename = submissionFilename;
       let current = await startDeploymentRun("prod", parsed);
       setRun(current);
       for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt += 1) {
@@ -150,6 +161,49 @@ export function ProdDashboard() {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function gradeBatch() {
+    if (!deployment || !snapshot || !studentKey || !batchDocuments.length) return;
+    setBatchBusy(true);
+    setError(null);
+    setBatchRuns([]);
+    try {
+      const baseInputs = JSON.parse(inputs) as Record<string, unknown>;
+      let current = await startDeploymentBatch(
+        "prod",
+        batchDocuments.map((document) => ({
+          filename: document.filename,
+          inputs: { ...baseInputs, [studentKey]: document.content },
+        })),
+      );
+      setBatchRuns(current);
+      setRun(current[0]?.run ?? null);
+      for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt += 1) {
+        const active = current.filter((item) => !["COMPLETED", "FAILED", "CANCELLED"].includes(item.run.status));
+        if (!active.length) break;
+        await delay(POLL_INTERVAL_MS);
+        const updates = new Map(
+          await Promise.all(active.map(async (item) => [item.run.id, await getRun(item.run.id)] as const)),
+        );
+        current = current.map((item) => ({ ...item, run: updates.get(item.run.id) ?? item.run }));
+        setBatchRuns(current);
+        const visible = current.find((item) => item.run.status === "RUNNING")
+          ?? current.find((item) => item.run.status === "PENDING")
+          ?? [...current].reverse().find((item) => item.run.status === "COMPLETED");
+        if (visible) setRun(visible.run);
+      }
+      const unfinished = current.filter((item) => !["COMPLETED", "FAILED", "CANCELLED"].includes(item.run.status));
+      if (unfinished.length) {
+        throw new Error(`${unfinished.length} bài vẫn đang chạy sau thời gian theo dõi. Có thể xem lại trong Run history.`);
+      }
+      const failed = current.filter((item) => item.run.status === "FAILED");
+      if (failed.length) setError(`${failed.length}/${current.length} bài chấm bị lỗi. Hãy mở từng run để xem nguyên nhân.`);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setBatchBusy(false);
     }
   }
 
@@ -175,7 +229,7 @@ export function ProdDashboard() {
         {goldenKey ? <div className="snapshot-input">
           <label htmlFor="golden-solution-input"><strong>{snapshot ? "Thay Golden solution" : (goldenNode?.name ?? "Golden solution")}</strong></label>
           <span>{snapshot ? "Nội dung mới chỉ thay bản đang active sau khi chuẩn bị thành công." : "Dán đáp án chuẩn vào đây để tạo snapshot đầu tiên."}</span>
-          <DocxUpload onExtract={setGoldenContent} disabled={snapshotBusy} />
+          <DocxUpload onExtract={(content) => setGoldenContent(content)} disabled={snapshotBusy} />
           <textarea id="golden-solution-input" aria-label="Golden solution" value={goldenContent} onChange={(event) => setGoldenContent(event.target.value)} />
         </div> : <p className="inline-error">Workflow không có input dành cho golden solution.</p>}
         <div className="snapshot-actions">
@@ -189,9 +243,39 @@ export function ProdDashboard() {
       </section>
 
       <section className="prod-form card">
-        <div className="card-heading"><div><p className="section-label">Bước 2</p><h2>Nhập bài sinh viên</h2><p className="card-help">Mỗi lần chạy chấm một bài. Golden snapshot phía trên được giữ nguyên và tái sử dụng.</p></div><button className="primary-button" onClick={gradeSubmission} disabled={busy || !snapshot}>{busy ? "Đang chấm…" : "Chấm bài"}</button></div>
+        <div className="card-heading"><div><p className="section-label">Bước 2</p><h2>Nhập bài sinh viên</h2><p className="card-help">Chấm một bài hoặc chọn batch tối đa 10 DOCX. Mỗi bài vẫn chạy một workflow độc lập và dùng chung Golden Snapshot.</p></div><button className="primary-button" onClick={gradeSubmission} disabled={busy || batchBusy || !snapshot}>{busy ? "Đang chấm…" : "Chấm một bài"}</button></div>
         {!snapshot && <p className="snapshot-notice">Bạn cần chuẩn bị Golden solution trước khi chấm bài.</p>}
-        <RuntimeInputs definition={deployment.definition} value={inputs} onChange={setInputs} hiddenKeys={goldenKey ? [goldenKey] : []} />
+        <RuntimeInputs
+          definition={deployment.definition}
+          value={inputs}
+          onChange={setInputs}
+          hiddenKeys={goldenKey ? [goldenKey] : []}
+          onDocumentExtract={(key, document) => {
+            if (key === studentKey) setSubmissionFilename(document.filename);
+          }}
+        />
+        <div className="batch-panel">
+          <div className="batch-heading"><div><strong>Chấm batch cùng Golden Solution</strong><span>Chọn từ 1 đến 10 writeups DOCX. Danh sách được xếp hàng và xử lý riêng từng bài.</span></div><button className="primary-button" onClick={gradeBatch} disabled={batchBusy || busy || !snapshot || !batchDocuments.length}>{batchBusy ? "Đang chấm batch…" : `Chấm batch (${batchDocuments.length})`}</button></div>
+          <BatchDocxUpload
+            disabled={batchBusy || busy || !snapshot}
+            onExtract={(documents) => { setBatchDocuments(documents); setBatchRuns([]); }}
+          />
+          {!!batchDocuments.length && <div className="batch-list" aria-label="Danh sách writeups trong batch">
+            {batchDocuments.map((document, index) => {
+              const item = batchRuns[index];
+              return <article key={`${document.filename}-${index}`}>
+                <div><strong>{index + 1}. {document.filename}</strong><small>{document.paragraph_count} đoạn · {document.table_count} bảng</small></div>
+                <span className={`mini-status run-${(item?.run.status ?? "ready").toLowerCase()}`}>{item?.run.status ?? "READY"}</span>
+                <div className="batch-actions">
+                  {item && <button type="button" onClick={() => setRun(item.run)}>Xem</button>}
+                  {item?.run.status === "COMPLETED" && <a href={getRunHtmlReportUrl(item.run.id)}>Tải HTML</a>}
+                  {!batchBusy && !item && <button type="button" className="delete" onClick={() => setBatchDocuments((current) => current.filter((_, position) => position !== index))}>Bỏ</button>}
+                </div>
+              </article>;
+            })}
+          </div>}
+          {!!batchRuns.length && <p className="batch-summary" role="status" aria-atomic="true">Đã hoàn tất {batchRuns.filter((item) => item.run.status === "COMPLETED").length}/{batchRuns.length} bài · Đang chạy {batchRuns.filter((item) => ["PENDING", "RUNNING"].includes(item.run.status)).length} bài</p>}
+        </div>
       </section>
 
       <section className="prod-workflow card">

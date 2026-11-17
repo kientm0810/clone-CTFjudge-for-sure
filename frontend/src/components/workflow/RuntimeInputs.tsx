@@ -1,11 +1,12 @@
-import type { WorkflowDefinition } from "@/lib/types";
+import type { DocumentExtraction, WorkflowDefinition } from "@/lib/types";
 import { DocxUpload } from "./DocxUpload";
 
-export function RuntimeInputs({ definition, value, onChange, hiddenKeys = [] }: {
+export function RuntimeInputs({ definition, value, onChange, hiddenKeys = [], onDocumentExtract }: {
   definition?: WorkflowDefinition;
   value: string;
   onChange: (value: string) => void;
   hiddenKeys?: string[];
+  onDocumentExtract?: (key: string, document: DocumentExtraction) => void;
 }) {
   let parsed: Record<string, unknown> = {};
   try { parsed = JSON.parse(value); } catch { /* Keep raw editing available. */ }
@@ -22,7 +23,10 @@ export function RuntimeInputs({ definition, value, onChange, hiddenKeys = [] }: 
       return <div className="runtime-input-field" key={node.id}>
         <label htmlFor={textareaId}><strong>{node.name ?? key}</strong></label>
         <p className="card-help">Dán nội dung hoặc chọn file DOCX. Văn bản sẽ được gửi tới node {node.name ?? node.id}.</p>
-        <DocxUpload onExtract={updateContent} />
+        <DocxUpload onExtract={(content, document) => {
+          updateContent(content);
+          onDocumentExtract?.(key, document);
+        }} />
         <textarea
           id={textareaId}
           aria-label={node.name ?? key}

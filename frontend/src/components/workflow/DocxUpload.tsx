@@ -2,11 +2,12 @@
 
 import { useId, useState } from "react";
 import { extractDocx } from "@/lib/api";
+import type { DocumentExtraction } from "@/lib/types";
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
 export function DocxUpload({ onExtract, disabled = false }: {
-  onExtract: (content: string) => void;
+  onExtract: (content: string, document: DocumentExtraction) => void;
   disabled?: boolean;
 }) {
   const inputId = useId();
@@ -30,7 +31,7 @@ export function DocxUpload({ onExtract, disabled = false }: {
     setBusy(true);
     try {
       const result = await extractDocx(file);
-      onExtract(result.content);
+      onExtract(result.content, result);
       setMessage(`${result.filename} · ${result.paragraph_count} đoạn · ${result.table_count} bảng · ${result.character_count.toLocaleString("vi-VN")} ký tự`);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));

@@ -1,4 +1,4 @@
-import type { AIModelOption, AIModelTestResult, AIModelWrite, DocumentExtraction, GoldenSnapshot, OllamaModel, RegisteredAIModel, RunHistoryItem, VectorCollection, WorkflowDefinition, WorkflowDeployment, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
+import type { AIModelOption, AIModelTestResult, AIModelWrite, BatchRunItem, DocumentExtraction, GoldenSnapshot, OllamaModel, RegisteredAIModel, RunHistoryItem, VectorCollection, WorkflowDefinition, WorkflowDeployment, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8800";
 
@@ -116,6 +116,16 @@ export function startDeploymentRun(environment: string, inputs: Record<string, u
   return request<WorkflowRun>(`/deployments/${environment}/runs`, {
     method: "POST",
     body: JSON.stringify({ inputs }),
+  });
+}
+
+export function startDeploymentBatch(
+  environment: string,
+  submissions: Array<{ filename: string; inputs: Record<string, unknown> }>,
+) {
+  return request<BatchRunItem[]>(`/deployments/${environment}/runs/batch`, {
+    method: "POST",
+    body: JSON.stringify({ submissions }),
   });
 }
 

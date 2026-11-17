@@ -143,6 +143,27 @@ main { min-height: 100vh; padding: 24px; }
 .docx-upload p { grid-column: 1 / -1; min-height: 16px; margin: 1px 0 0; overflow-wrap: anywhere; font-size: 10px; line-height: 1.5; }
 .docx-success { color: #72d5b8; }
 .docx-error { color: #f2a2a9; }
+.batch-panel { display: grid; gap: 12px; margin-top: 18px; border-top: 1px solid #29434d; padding-top: 18px; }
+.batch-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.batch-heading > div { display: grid; gap: 4px; }
+.batch-heading strong { color: #dcebed; font-size: 13px; }
+.batch-heading span { color: #78949e; font-size: 11px; line-height: 1.5; }
+.batch-upload { display: grid; grid-template-columns: max-content minmax(0, 1fr); align-items: center; gap: 6px 12px; border: 1px dashed #397269; border-radius: 10px; padding: 12px; background: #09191f; }
+.batch-upload input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); }
+.batch-upload label { display: inline-flex; min-height: 44px; align-items: center; justify-content: center; border: 1px solid #39776a; border-radius: 8px; padding: 8px 12px; background: #12342f; color: #bde9de; cursor: pointer; font-size: 11px; font-weight: 750; }
+.batch-upload input:focus-visible + label { outline: 3px solid rgba(101, 214, 192, .45); outline-offset: 2px; }
+.batch-upload label[aria-disabled="true"] { cursor: not-allowed; opacity: .5; }
+.batch-upload > span { color: #79969e; font-size: 10px; line-height: 1.5; }
+.batch-upload p { grid-column: 1 / -1; margin: 0; }
+.batch-list { display: grid; gap: 7px; }
+.batch-list article { display: grid; grid-template-columns: minmax(0, 1fr) max-content max-content; align-items: center; gap: 10px; border: 1px solid #29434d; border-radius: 9px; padding: 10px 12px; background: #09191f; }
+.batch-list article > div:first-child { display: grid; min-width: 0; gap: 3px; }
+.batch-list article strong { overflow-wrap: anywhere; color: #c9dadd; font-size: 11px; }
+.batch-list article small { color: #718b94; font-size: 9px; }
+.batch-actions { display: flex; gap: 6px; }
+.batch-actions button, .batch-actions a { display: inline-flex; min-height: 34px; align-items: center; border: 1px solid #31505b; border-radius: 7px; padding: 6px 9px; background: #10232b; color: #b3c8ce; cursor: pointer; font-size: 9px; font-weight: 750; text-decoration: none; }
+.batch-actions .delete { border-color: #61383e; color: #e99ca4; }
+.batch-summary { margin: 0; color: #9fb6bc; font-size: 11px; font-variant-numeric: tabular-nums; }
 pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia Code", Consolas, monospace; font-size: 11px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
 .card > pre { height: 170px; padding: 12px; border-radius: 9px; background: #071217; }
 .result-card { max-height: 470px; overflow: auto; }
@@ -579,6 +600,11 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
   .deployment-badge { width: 100%; min-width: 0; }
   .snapshot-card { grid-template-columns: 1fr 1fr; }
   .snapshot-actions { align-items: stretch; flex-direction: column; }
+  .batch-heading { align-items: stretch; flex-direction: column; }
+  .batch-upload { grid-template-columns: 1fr; }
+  .batch-upload p { grid-column: auto; }
+  .batch-list article { grid-template-columns: minmax(0, 1fr); }
+  .batch-actions { flex-wrap: wrap; }
   .telemetry-facts { grid-template-columns: 1fr; }
   .chunk-scores { grid-template-columns: 1fr; }
   .chunk-pair { grid-template-columns: 1fr; }

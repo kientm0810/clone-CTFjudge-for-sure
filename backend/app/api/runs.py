@@ -1,4 +1,7 @@
 from typing import Annotated
+import re
+import unicodedata
+from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import select
@@ -20,6 +23,12 @@ from app.services.vector_service import PgVectorService
 
 router = APIRouter(prefix="/runs", tags=["runs"])
 SessionDependency = Annotated[AsyncSession, Depends(get_session)]
+
+
+def _safe_filename_part(value: str, fallback: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", normalized).strip("._-")
+    return cleaned[:100] or fallback
 
 
 @router.get("/{run_id}/report.html")
@@ -67,11 +76,23 @@ async def download_run_html_report(run_id: str, session: SessionDependency) -> R
 
     progress = await list_execution_progress("run", run.id)
     html = build_run_html_report(run, definition, progress, model_names)
+    unique_models = list(dict.fromkeys(model_names.values()))
+    model_file_values = [value.split(" · ", 1)[0] for value in unique_models]
+    model_part = _safe_filename_part("+".join(model_file_values), "model")
+    original_filename = str(
+        run.runtime_inputs.get("__submission_filename") or f"writeup-{run.id[:8]}"
+    ).replace("\\", "/").rsplit("/", 1)[-1]
+    writeup_stem = original_filename.rsplit(".", 1)[0] if "." in original_filename else original_filename
+    writeup_part = _safe_filename_part(writeup_stem, f"writeup-{run.id[:8]}")
+    report_filename = f"{model_part}_{writeup_part}.html"
     return Response(
         content=html,
         media_type="text/html; charset=utf-8",
         headers={
-            "Content-Disposition": f'attachment; filename="ctfjudge-{run.id[:8]}.html"'
+            "Content-Disposition": (
+                f'attachment; filename="{report_filename}"; '
+                f"filename*=UTF-8''{quote(report_filename)}"
+            )
         },
     )
 

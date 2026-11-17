@@ -175,6 +175,11 @@ export type RunHistoryItem = WorkflowRun & {
   version_number: number;
 };
 
+export type BatchRunItem = {
+  filename: string;
+  run: WorkflowRun;
+};
+
 export type GoldenMatch = {
   chunk_id: string;
   content: string;
