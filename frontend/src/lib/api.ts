@@ -1,6 +1,6 @@
 import type { AIModelOption, AIModelTestResult, AIModelWrite, DocumentExtraction, GoldenSnapshot, OllamaModel, RegisteredAIModel, RunHistoryItem, VectorCollection, WorkflowDefinition, WorkflowDeployment, WorkflowDetail, WorkflowRun, WorkflowSummary, WorkflowVersionDetail, WorkflowVersionSummary } from "./types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8400";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8800";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {

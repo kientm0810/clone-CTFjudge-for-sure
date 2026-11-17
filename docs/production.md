@@ -66,7 +66,7 @@ From another machine, open the value configured in `SITE_ADDRESS`. API documenta
 
 ## 4. Firewall
 
-Allow inbound TCP `80` and `443`. Remove the public rules for `3000` and `8400` after the production stack is healthy. Those ports are not published by `docker-compose.prod.yml`.
+Allow inbound TCP `80` and `443`. Remove the public rules for `3000` and `8800` after the production stack is healthy. Those ports are not published by `docker-compose.prod.yml`.
 
 ## 5. Updating
 

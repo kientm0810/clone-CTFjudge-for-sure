@@ -15,7 +15,7 @@ docker compose up --build
 ```
 
 - UI: `http://localhost:3000`
-- API docs: `http://localhost:8400/docs`
+- API docs: `http://localhost:8800/docs`
 - Architecture: [`docs/architecture.md`](docs/architecture.md)
 - Production deployment: [`docs/production.md`](docs/production.md)
 - Example workflow: [`examples/simple-comparison-workflow.json`](examples/simple-comparison-workflow.json)
@@ -184,7 +184,7 @@ Then open:
 - Application: the value configured in `SITE_ADDRESS`
 - API documentation: `<SITE_ADDRESS>/api/docs`
 
-The cloud firewall should allow inbound TCP `80` and `443` only. Ports `3000`, `8400`, `5432`, `6379`, and `11434` must not be public.
+The cloud firewall should allow inbound TCP `80` and `443` only. Ports `3000`, `8800`, `5432`, `6379`, and `11434` must not be public.
 
 ### 8. Update or restart later
 

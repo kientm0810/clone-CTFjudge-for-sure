@@ -10,8 +10,8 @@ docker compose up --build
 Services:
 
 - Web: <http://localhost:3000>
-- API documentation: <http://localhost:8400/docs>
-- Health check: <http://localhost:8400/health>
+- API documentation: <http://localhost:8800/docs>
+- Health check: <http://localhost:8800/health>
 
 ## Local models with Ollama
 
@@ -30,7 +30,7 @@ ollama pull qwen2.5:3b
 ollama pull nomic-embed-text
 ```
 
-Check what the Dockerized API can see at <http://localhost:8400/providers/ollama/models>. Agent nodes use `/api/chat`; Database nodes use `/api/embed`.
+Check what the Dockerized API can see at <http://localhost:8800/providers/ollama/models>. Agent nodes use `/api/chat`; Database nodes use `/api/embed`.
 
 ## Persisted asynchronous runs
 

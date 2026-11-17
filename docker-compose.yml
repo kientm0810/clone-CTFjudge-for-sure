@@ -40,7 +40,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
-      - "${API_PORT:-8400}:8000"
+      - "${API_PORT:-8800}:8000"
     volumes:
       - ./backend:/app
       - upload_data:/data/uploads
@@ -80,7 +80,7 @@ services:
     build:
       context: ./frontend
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8400}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8800}
     ports:
       - "${WEB_PORT:-3000}:3000"
     volumes:
