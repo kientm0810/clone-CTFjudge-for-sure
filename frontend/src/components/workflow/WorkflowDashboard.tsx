@@ -70,7 +70,7 @@ const ragDefinition: WorkflowDefinition = {
       id: "golden-parser", type: "agent", name: "Chunk golden",
       inputs: { document: "{{ steps.golden-input.output }}" },
       config: {
-        model: "ollama/qwen2.5:3b", temperature: 0, output_schema: chunkOutputSchema,
+        model: "ollama/qwen2.5:3b", temperature: 0, max_tokens: 20000, output_schema: chunkOutputSchema,
         prompt: "You are a deterministic text segmenter. Split the golden solution into short semantic steps without summarizing or adding facts. Copy document_id from the input document. Create stable chunk_id values such as golden-0, golden-1. Every chunk object must store its exact text in the property named content; never rename content to text or another name. Return JSON only.",
       },
     },
@@ -84,7 +84,7 @@ const ragDefinition: WorkflowDefinition = {
       id: "student-parser", type: "agent", name: "Chunk writeup",
       inputs: { document: "{{ steps.student-input.output }}" },
       config: {
-        model: "ollama/qwen2.5:3b", temperature: 0, output_schema: chunkOutputSchema,
+        model: "ollama/qwen2.5:3b", temperature: 0, max_tokens: 20000, output_schema: chunkOutputSchema,
         prompt: "You are a deterministic text segmenter. Split the student submission into short semantic steps without judging or adding facts. Copy document_id from the input document. Create stable chunk_id values such as student-0, student-1. Every chunk object must store its exact text in the property named content; never rename content to text or another name. Return JSON only.",
       },
     },
@@ -97,7 +97,7 @@ const ragDefinition: WorkflowDefinition = {
       id: "comparison-agent", type: "agent", name: "Similarity judge",
       inputs: { retrieval_results: "{{ steps.golden-search.output.retrieval_results }}" },
       config: {
-        model: "ollama/qwen2.5:3b", temperature: 0, output_schema: comparisonOutputSchema,
+        model: "ollama/qwen2.5:3b", temperature: 0, max_tokens: 20000, output_schema: comparisonOutputSchema,
         prompt: "You compare one student submission with retrieved golden evidence. student-0, student-1, etc. are chunk IDs from the same submission, never different students. Evaluate every student chunk and refer to it as a chunk or citation. Give score from 0 to 1, one short Vietnamese explanation, and a short Vietnamese summary. Similar wording alone is not proof of correctness. Preserve student_content exactly and copy relevant golden IDs, content, and similarity scores. Return JSON only.",
       },
     },
