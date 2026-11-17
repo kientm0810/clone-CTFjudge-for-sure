@@ -6,3 +6,4 @@ class DocumentExtraction(BaseModel):
     content: str
     character_count: int
     paragraph_count: int
+    table_count: int

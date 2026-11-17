@@ -85,6 +85,7 @@ export type DocumentExtraction = {
   content: string;
   character_count: number;
   paragraph_count: number;
+  table_count: number;
 };
 
 export type OllamaModel = {

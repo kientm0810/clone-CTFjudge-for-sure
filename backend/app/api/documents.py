@@ -30,7 +30,7 @@ async def extract_docx(file: DocxFile) -> DocumentExtraction:
         raise HTTPException(status_code=415, detail="Nội dung file không phải định dạng DOCX hợp lệ.")
 
     try:
-        content, paragraph_count = extract_docx_text(
+        content, paragraph_count, table_count = extract_docx_text(
             payload,
             max_uncompressed_bytes=settings.max_docx_uncompressed_bytes,
             max_characters=settings.max_extracted_text_chars,
@@ -43,4 +43,5 @@ async def extract_docx(file: DocxFile) -> DocumentExtraction:
         content=content,
         character_count=len(content),
         paragraph_count=paragraph_count,
+        table_count=table_count,
     )

@@ -31,7 +31,7 @@ export function DocxUpload({ onExtract, disabled = false }: {
     try {
       const result = await extractDocx(file);
       onExtract(result.content);
-      setMessage(`${result.filename} · ${result.paragraph_count} đoạn · ${result.character_count.toLocaleString("vi-VN")} ký tự`);
+      setMessage(`${result.filename} · ${result.paragraph_count} đoạn · ${result.table_count} bảng · ${result.character_count.toLocaleString("vi-VN")} ký tự`);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
     } finally {
