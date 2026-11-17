@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.workflow import GoldenSnapshot
-from app.schemas.persistence import GoldenSnapshotDetail
+from app.schemas.persistence import ExecutionProgressDetail, GoldenSnapshotDetail
 from app.schemas.workflow import NodeType, WorkflowDefinition
 
 
@@ -39,7 +39,10 @@ def snapshot_content_hash(inputs: dict) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def snapshot_detail(snapshot: GoldenSnapshot) -> GoldenSnapshotDetail:
+def snapshot_detail(
+    snapshot: GoldenSnapshot,
+    progress: list | None = None,
+) -> GoldenSnapshotDetail:
     return GoldenSnapshotDetail(
         id=snapshot.id,
         workflow_version_id=snapshot.workflow_version_id,
@@ -54,6 +57,7 @@ def snapshot_detail(snapshot: GoldenSnapshot) -> GoldenSnapshotDetail:
         frozen_node_ids=list(snapshot.outputs.keys()),
         created_at=snapshot.created_at,
         completed_at=snapshot.completed_at,
+        progress=[ExecutionProgressDetail.model_validate(item) for item in (progress or [])],
     )
 
 

@@ -20,6 +20,7 @@ from app.services.golden_snapshot_service import (
     snapshot_content_hash,
     snapshot_detail,
 )
+from app.services.execution_progress import list_execution_progress
 from app.services.workflow_store import WorkflowStore
 
 
@@ -64,7 +65,8 @@ async def get_deployment_golden_snapshot(
     snapshot = await get_active_snapshot(session, deployment.workflow_version_id)
     if snapshot is None:
         raise HTTPException(status_code=404, detail="Chưa có golden solution được chuẩn bị.")
-    return snapshot_detail(snapshot)
+    progress = await list_execution_progress("snapshot", snapshot.id)
+    return snapshot_detail(snapshot, progress)
 
 
 @router.post(
@@ -136,7 +138,8 @@ async def get_deployment_golden_snapshot_by_id(
     snapshot = await session.get(GoldenSnapshot, snapshot_id)
     if snapshot is None or snapshot.workflow_version_id != deployment.workflow_version_id:
         raise HTTPException(status_code=404, detail="Không tìm thấy golden snapshot này.")
-    return snapshot_detail(snapshot)
+    progress = await list_execution_progress("snapshot", snapshot.id)
+    return snapshot_detail(snapshot, progress)
 
 
 @router.post("/{environment}/runs", response_model=RunSummary, status_code=status.HTTP_202_ACCEPTED)

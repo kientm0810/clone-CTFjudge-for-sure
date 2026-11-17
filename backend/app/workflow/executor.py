@@ -71,6 +71,10 @@ class WorkflowExecutor:
             result_sink.update(results)
         records: list[NodeExecutionRecord] = []
         execution_observer = observer or NullExecutionObserver()
+        context.progress_callback = lambda node_id, update: execution_observer.node_progress(
+            node_by_id[node_id],
+            update,
+        )
 
         for sequence, node_id in enumerate(ordered_ids):
             if node_id not in selected_ids:

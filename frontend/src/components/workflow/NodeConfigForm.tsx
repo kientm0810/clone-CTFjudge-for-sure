@@ -31,6 +31,8 @@ export function validateNodeConfig(type: NodeType, config: Record<string, unknow
   const errors: string[] = [];
   if (type === "input" && !String(config.input_key ?? "").trim()) errors.push("Input key là bắt buộc.");
   if (type === "agent") {
+    const maxTokens = Number(config.max_tokens ?? 4096);
+    if (maxTokens < 64 || maxTokens > 32768) errors.push("Max output tokens phải từ 64 đến 32768.");
     if (!String(config.model ?? "").trim()) errors.push("Hãy chọn model.");
     if (!String(config.prompt ?? "").trim()) errors.push("Prompt là bắt buộc.");
   }
@@ -85,6 +87,7 @@ export function NodeConfigForm({ type, config, models, collections, onChange }: 
       </select>
     </Field>
     <Field label={`Temperature · ${Number(config.temperature ?? 0).toFixed(1)}`} help="0 ổn định hơn; giá trị cao tạo câu trả lời đa dạng hơn."><input type="range" min="0" max="1" step="0.1" value={Number(config.temperature ?? 0)} onChange={(event) => update("temperature", Number(event.target.value))} /></Field>
+    <Field label="Max output tokens" help="Giới hạn token model được phép sinh; giá trị này dùng làm mốc tiến trình."><input type="number" min="64" max="32768" step="64" value={Number(config.max_tokens ?? 4096)} onChange={(event) => update("max_tokens", Number(event.target.value))} /></Field>
     <Field label="Prompt"><textarea value={String(config.prompt ?? "")} onChange={(event) => update("prompt", event.target.value)} placeholder="Mô tả nhiệm vụ của agent…" /></Field>
     <Field label="Response format"><select value={config.output_schema ? "structured" : "json"} onChange={(event) => { if (event.target.value === "json") { const next = { ...config }; delete next.output_schema; onChange(next); } else update("output_schema", { type: "object", properties: {}, required: [] }); }}><option value="json">JSON</option><option value="structured">Structured JSON schema</option></select></Field>
     {config.output_schema ? <p className="config-hint">Schema chi tiết có thể chỉnh trong Advanced JSON.</p> : null}

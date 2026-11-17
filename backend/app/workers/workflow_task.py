@@ -11,6 +11,7 @@ from app.models.workflow import GoldenSnapshot, NodeRun, WorkflowRun, WorkflowVe
 from app.nodes.base import NodeResult
 from app.schemas.workflow import NodeDefinition, WorkflowDefinition
 from app.services.llm_service import LLMService
+from app.services.execution_progress import ExecutionProgressWriter
 from app.services.vector_service import PgVectorService
 from app.services.run_cleanup import owned_vector_collections
 from app.workflow.context import WorkflowServices
@@ -42,6 +43,7 @@ class DatabaseExecutionObserver:
     def __init__(self, session: AsyncSession, run_id: str) -> None:
         self.session = session
         self.run_id = run_id
+        self.progress = ExecutionProgressWriter("run", run_id)
 
     async def _get_node_run(self, node_id: str) -> NodeRun | None:
         return await self.session.scalar(
@@ -68,6 +70,19 @@ class DatabaseExecutionObserver:
         )
         self.session.add(node_run)
         await self.session.commit()
+        await self.progress.update(
+            definition.id,
+            {
+                "stage": "STARTING",
+                "message": f"Đang bắt đầu node {definition.name or definition.id}.",
+                "generated_tokens": 0,
+                "max_tokens": (
+                    int(definition.config.get("max_tokens", 4096))
+                    if definition.type.value == "agent"
+                    else None
+                ),
+            },
+        )
 
     async def node_completed(
         self,
@@ -82,6 +97,10 @@ class DatabaseExecutionObserver:
         node_run.output_data = result.value
         node_run.completed_at = completion_time(node_run.started_at)
         await self.session.commit()
+        await self.progress.update(
+            definition.id,
+            {"stage": "COMPLETED", "message": "Node đã hoàn tất."},
+        )
 
     async def node_failed(
         self,
@@ -96,6 +115,74 @@ class DatabaseExecutionObserver:
         node_run.error = str(error).strip() or error.__class__.__name__
         node_run.completed_at = completion_time(node_run.started_at)
         await self.session.commit()
+        await self.progress.update(
+            definition.id,
+            {"stage": "FAILED", "message": node_run.error},
+        )
+
+    async def node_progress(
+        self,
+        definition: NodeDefinition,
+        update: dict[str, Any],
+    ) -> None:
+        await self.progress.update(definition.id, update)
+
+
+class SnapshotExecutionObserver:
+    def __init__(self, snapshot_id: str) -> None:
+        self.progress = ExecutionProgressWriter("snapshot", snapshot_id)
+
+    async def node_started(
+        self,
+        definition: NodeDefinition,
+        inputs: dict[str, Any],
+        sequence: int,
+    ) -> None:
+        await self.progress.update(
+            definition.id,
+            {
+                "stage": "STARTING",
+                "message": f"Đang bắt đầu node {definition.name or definition.id}.",
+                "generated_tokens": 0,
+                "max_tokens": (
+                    int(definition.config.get("max_tokens", 4096))
+                    if definition.type.value == "agent"
+                    else None
+                ),
+            },
+        )
+
+    async def node_completed(
+        self,
+        definition: NodeDefinition,
+        result: NodeResult,
+        sequence: int,
+    ) -> None:
+        await self.progress.update(
+            definition.id,
+            {"stage": "COMPLETED", "message": "Node đã hoàn tất."},
+        )
+
+    async def node_failed(
+        self,
+        definition: NodeDefinition,
+        error: Exception,
+        sequence: int,
+    ) -> None:
+        await self.progress.update(
+            definition.id,
+            {
+                "stage": "FAILED",
+                "message": str(error).strip() or error.__class__.__name__,
+            },
+        )
+
+    async def node_progress(
+        self,
+        definition: NodeDefinition,
+        update: dict[str, Any],
+    ) -> None:
+        await self.progress.update(definition.id, update)
 
 
 @celery_app.task(name="ctfjudge.run_workflow")
@@ -134,6 +221,7 @@ async def _prepare_golden_snapshot(snapshot_id: str) -> dict[str, Any]:
                 run_id=snapshot.id,
                 target_node_ids={snapshot.frozen_node_id},
                 result_sink=captured_results,
+                observer=SnapshotExecutionObserver(snapshot.id),
             )
             terminal_output = captured_results.get(snapshot.frozen_node_id)
             if not isinstance(terminal_output, dict) or not terminal_output.get("collection"):

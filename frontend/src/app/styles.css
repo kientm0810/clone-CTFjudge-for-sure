@@ -261,6 +261,20 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
 .progress-summary b { color: #65d6c0; font-size: 18px; font-variant-numeric: tabular-nums; }
 .progress-track, .score-bar { height: 7px; margin-top: 9px; overflow: hidden; border-radius: 999px; background: #142831; }
 .progress-track span, .score-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #238b76, #65d6c0); transition: width .25s ease; }
+.execution-telemetry { display: grid; min-height: 142px; gap: 10px; margin-top: 12px; border: 1px solid #315664; border-radius: 10px; padding: 13px; background: #0a1b22; }
+.telemetry-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.telemetry-heading > div { display: grid; gap: 3px; }
+.telemetry-heading small, .telemetry-facts small { color: #77939c; font-size: 9px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
+.telemetry-heading strong { color: #baf3e5; font-size: 13px; }
+.telemetry-heading b { color: #f1cb83; font-size: 18px; font-variant-numeric: tabular-nums; }
+.execution-telemetry > p { margin: 0; color: #aac1c7; font-size: 11px; line-height: 1.5; }
+.telemetry-token-track { height: 8px; overflow: hidden; border-radius: 999px; background: #18313a; }
+.telemetry-token-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #2c9c83, #79e4ca); transition: width .25s ease; }
+.telemetry-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.telemetry-facts span { display: grid; min-width: 0; gap: 3px; }
+.telemetry-facts strong { overflow-wrap: anywhere; color: #d5e5e8; font-size: 11px; font-variant-numeric: tabular-nums; }
+.telemetry-note { color: #6f8992; font-size: 9px; line-height: 1.45; }
+.telemetry-failed { border-color: #7a4149; background: #29181c; }
 .workflow-progress ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 7px; margin: 14px 0 0; padding: 0; list-style: none; }
 .workflow-progress li { display: flex; min-width: 0; align-items: center; gap: 8px; border: 1px solid #29434d; border-radius: 8px; padding: 8px; background: #09181e; }
 .workflow-progress li > span { display: grid; flex: 0 0 24px; height: 24px; place-items: center; border-radius: 50%; background: #1a3039; color: #89a5ad; font-size: 10px; font-weight: 800; }
@@ -563,6 +577,7 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
   .deployment-badge { width: 100%; min-width: 0; }
   .snapshot-card { grid-template-columns: 1fr 1fr; }
   .snapshot-actions { align-items: stretch; flex-direction: column; }
+  .telemetry-facts { grid-template-columns: 1fr; }
   .chunk-scores { grid-template-columns: 1fr; }
   .chunk-pair { grid-template-columns: 1fr; }
   .golden-chunk-list article { grid-template-columns: 1fr; }

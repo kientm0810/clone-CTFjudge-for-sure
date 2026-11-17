@@ -2,7 +2,7 @@ from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.workflow import NodeRun, Workflow, WorkflowDeployment, WorkflowRun, WorkflowVersion
+from app.models.workflow import ExecutionProgress, NodeRun, Workflow, WorkflowDeployment, WorkflowRun, WorkflowVersion
 from app.schemas.persistence import WorkflowCreate
 from app.schemas.workflow import WorkflowDefinition
 
@@ -228,6 +228,12 @@ class WorkflowStore:
         return await self.session.scalar(statement)
 
     async def reset_run(self, run: WorkflowRun) -> None:
+        await self.session.execute(
+            delete(ExecutionProgress).where(
+                ExecutionProgress.execution_kind == "run",
+                ExecutionProgress.execution_id == run.id,
+            )
+        )
         await self.session.execute(delete(NodeRun).where(NodeRun.workflow_run_id == run.id))
         run.status = "PENDING"
         run.result = None
@@ -238,6 +244,12 @@ class WorkflowStore:
         await self.session.commit()
 
     async def delete_run(self, run: WorkflowRun) -> None:
+        await self.session.execute(
+            delete(ExecutionProgress).where(
+                ExecutionProgress.execution_kind == "run",
+                ExecutionProgress.execution_id == run.id,
+            )
+        )
         await self.session.delete(run)
         await self.session.commit()
 

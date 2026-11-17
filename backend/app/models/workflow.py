@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -127,4 +127,32 @@ class NodeRun(Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     workflow_run: Mapped[WorkflowRun] = relationship(back_populates="node_runs")
+
+
+class ExecutionProgress(Base):
+    __tablename__ = "execution_progress"
+    __table_args__ = (
+        UniqueConstraint(
+            "execution_kind",
+            "execution_id",
+            "node_id",
+            name="uq_execution_progress_node",
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    execution_kind: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    execution_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
+    node_id: Mapped[str] = mapped_column(String(255), nullable=False)
+    stage: Mapped[str] = mapped_column(String(32), nullable=False, default="STARTING")
+    message: Mapped[str] = mapped_column(Text, nullable=False, default="Đang chuẩn bị node.")
+    prompt_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    generated_tokens: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    max_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    elapsed_seconds: Mapped[float] = mapped_column(Float, nullable=False, default=0)
+    heartbeat_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now
+    )
 

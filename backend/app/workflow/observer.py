@@ -26,6 +26,12 @@ class ExecutionObserver(Protocol):
         sequence: int,
     ) -> None: ...
 
+    async def node_progress(
+        self,
+        definition: NodeDefinition,
+        update: dict[str, Any],
+    ) -> None: ...
+
 
 class NullExecutionObserver:
     async def node_started(self, definition: NodeDefinition, inputs: dict, sequence: int) -> None:
@@ -35,5 +41,8 @@ class NullExecutionObserver:
         return None
 
     async def node_failed(self, definition: NodeDefinition, error: Exception, sequence: int) -> None:
+        return None
+
+    async def node_progress(self, definition: NodeDefinition, update: dict[str, Any]) -> None:
         return None
 

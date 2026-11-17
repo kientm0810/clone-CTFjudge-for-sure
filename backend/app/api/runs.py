@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session
 from app.schemas.persistence import NodeRunDetail, RunDetail, RunSummary
+from app.schemas.persistence import ExecutionProgressDetail
+from app.services.execution_progress import list_execution_progress
 from app.services.run_cleanup import owned_vector_collections
 from app.services.workflow_store import WorkflowStore
 from app.services.vector_service import PgVectorService
@@ -19,9 +21,22 @@ async def get_run(run_id: str, session: SessionDependency) -> RunDetail:
     run = await WorkflowStore(session).get_run(run_id, include_nodes=True)
     if run is None:
         raise HTTPException(status_code=404, detail="Workflow run not found")
+    progress_by_node = {
+        item.node_id: item for item in await list_execution_progress("run", run.id)
+    }
     return RunDetail(
         **RunSummary.model_validate(run).model_dump(),
-        node_runs=[NodeRunDetail.model_validate(node_run) for node_run in run.node_runs],
+        node_runs=[
+            NodeRunDetail(
+                **NodeRunDetail.model_validate(node_run).model_dump(exclude={"progress"}),
+                progress=(
+                    ExecutionProgressDetail.model_validate(progress_by_node[node_run.node_id])
+                    if node_run.node_id in progress_by_node
+                    else None
+                ),
+            )
+            for node_run in run.node_runs
+        ],
     )
 
 

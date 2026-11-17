@@ -31,7 +31,7 @@ async def test_ollama_chat_uses_native_api_and_json_schema() -> None:
 
     assert result == {"score": 9}
     assert captured["model"] == "qwen2.5:3b"
-    assert captured["stream"] is False
+    assert captured["stream"] is True
     assert captured["format"]["type"] == "object"
 
 

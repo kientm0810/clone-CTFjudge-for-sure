@@ -15,7 +15,7 @@ import { ComparisonResult } from "./ComparisonResult";
 import { DocxUpload } from "./DocxUpload";
 import { RuntimeInputs } from "./RuntimeInputs";
 import { WorkflowCanvas } from "./WorkflowCanvas";
-import { WorkflowProgress } from "./WorkflowProgress";
+import { ExecutionTelemetry, WorkflowProgress } from "./WorkflowProgress";
 
 function inputKey(node: WorkflowNode): string {
   return String(node.config.input_key ?? node.id);
@@ -65,6 +65,10 @@ export function ProdDashboard() {
   const goldenNode = useMemo(() => deployment ? goldenInputNode(deployment) : undefined, [deployment]);
   const goldenKey = goldenNode ? inputKey(goldenNode) : undefined;
   const frozenNodeIds = snapshot?.frozen_node_ids ?? [];
+  const snapshotProgress = useMemo(() => {
+    const items = preparingSnapshot?.progress ?? [];
+    return [...items].reverse().find((item) => !["COMPLETED", "FAILED"].includes(item.stage)) ?? items[items.length - 1];
+  }, [preparingSnapshot]);
   const nodeStatuses = useMemo(() => {
     const statuses: Record<string, string> = Object.fromEntries(frozenNodeIds.map((id) => [id, "FROZEN"]));
     for (const node of run?.node_runs ?? []) statuses[node.node_id] = node.status;
@@ -174,6 +178,10 @@ export function ProdDashboard() {
           <button className="primary-button" onClick={prepareGolden} disabled={snapshotBusy || !goldenContent.trim() || !goldenKey}>{snapshotBusy ? "Đang chuẩn bị…" : snapshot ? "Tạo snapshot mới" : "Chuẩn bị & Freeze"}</button>
           {preparingSnapshot && <p role="status" aria-live="polite">{preparingSnapshot.status === "RUNNING" ? "Đang parse và tạo vector cho Golden solution…" : "Đang xếp hàng chuẩn bị Golden solution…"}</p>}
         </div>
+        <ExecutionTelemetry
+          progress={snapshotProgress}
+          nodeName={snapshotProgress ? deployment.definition.nodes.find((node) => node.id === snapshotProgress.node_id)?.name ?? snapshotProgress.node_id : undefined}
+        />
       </section>
 
       <section className="prod-form card">

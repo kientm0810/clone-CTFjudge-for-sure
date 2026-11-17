@@ -10,6 +10,7 @@ import { RuntimeInputs } from "./RuntimeInputs";
 import { WorkflowCanvas } from "./WorkflowCanvas";
 import { WorkflowEditor } from "./WorkflowEditor";
 import { NodeGuide, WorkflowJourney } from "./WorkflowGuide";
+import { WorkflowProgress } from "./WorkflowProgress";
 
 const chunkOutputSchema = {
   type: "object",
@@ -246,7 +247,7 @@ export function WorkflowDashboard() {
   async function watchRun(runId: string) {
     let current = await getRun(runId);
     setRun(current);
-    for (let attempt = 0; attempt < 180; attempt += 1) {
+    for (let attempt = 0; attempt < 1800; attempt += 1) {
       if (["COMPLETED", "FAILED", "CANCELLED"].includes(current.status)) return;
       await new Promise((resolve) => setTimeout(resolve, 1000));
       current = await getRun(runId);
@@ -426,6 +427,7 @@ export function WorkflowDashboard() {
             nodeStatuses={nodeStatuses}
             onSaveLayout={!runDefinition && selected ? saveWorkflowLayout : undefined}
           />
+          {selected && <WorkflowProgress definition={runDefinition ?? selected.definition} run={run} />}
           <NodeGuide />
           <div className="execution-grid">
             <section className="card">

@@ -39,7 +39,7 @@ const palette: { type: NodeType; label: string; hint: string }[] = [
 
 const defaultConfigs: Record<NodeType, Record<string, unknown>> = {
   input: { input_key: "input", document_type: "generic" },
-  agent: { model: "ollama/qwen2.5:3b", temperature: 0, prompt: "Process the upstream data and return JSON only." },
+  agent: { model: "ollama/qwen2.5:3b", temperature: 0, max_tokens: 4096, prompt: "Process the upstream data and return JSON only." },
   database: { operation: "search", collection: "comparison-{{run_id}}", embedding_model: "ollama/nomic-embed-text", top_k: 3, score_threshold: 0.25 },
   output: { format: "json" },
 };

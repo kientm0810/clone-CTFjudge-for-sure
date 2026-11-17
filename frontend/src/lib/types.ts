@@ -50,6 +50,19 @@ export type WorkflowDeployment = {
   definition: WorkflowDefinition;
 };
 
+export type ExecutionProgress = {
+  node_id: string;
+  stage: string;
+  message: string;
+  prompt_tokens?: number | null;
+  generated_tokens: number;
+  max_tokens?: number | null;
+  elapsed_seconds: number;
+  heartbeat_at: string;
+  started_at: string;
+  updated_at: string;
+};
+
 export type GoldenSnapshot = {
   id: string;
   workflow_version_id: string;
@@ -64,6 +77,7 @@ export type GoldenSnapshot = {
   frozen_node_ids: string[];
   created_at: string;
   completed_at?: string | null;
+  progress: ExecutionProgress[];
 };
 
 export type DocumentExtraction = {
@@ -139,6 +153,7 @@ export type NodeRun = {
   error?: string | null;
   started_at?: string | null;
   completed_at?: string | null;
+  progress?: ExecutionProgress | null;
 };
 
 export type WorkflowRun = {

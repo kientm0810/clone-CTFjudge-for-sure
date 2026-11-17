@@ -55,6 +55,21 @@ class WorkflowDeploymentDetail(BaseModel):
     definition: WorkflowDefinition
 
 
+class ExecutionProgressDetail(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    node_id: str
+    stage: str
+    message: str
+    prompt_tokens: int | None
+    generated_tokens: int
+    max_tokens: int | None
+    elapsed_seconds: float
+    heartbeat_at: datetime
+    started_at: datetime
+    updated_at: datetime
+
+
 class GoldenSnapshotCreate(BaseModel):
     inputs: dict[str, Any] = Field(default_factory=dict)
     frozen_node_id: str | None = Field(default=None, min_length=1)
@@ -74,6 +89,7 @@ class GoldenSnapshotDetail(BaseModel):
     frozen_node_ids: list[str] = Field(default_factory=list)
     created_at: datetime
     completed_at: datetime | None
+    progress: list[ExecutionProgressDetail] = Field(default_factory=list)
 
 
 class RunCreate(BaseModel):
@@ -111,6 +127,7 @@ class NodeRunDetail(BaseModel):
     error: str | None
     started_at: datetime | None
     completed_at: datetime | None
+    progress: ExecutionProgressDetail | None = None
 
 
 class RunDetail(RunSummary):
