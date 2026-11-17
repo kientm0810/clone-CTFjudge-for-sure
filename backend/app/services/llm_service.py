@@ -129,11 +129,17 @@ class OllamaClient:
         self._client = client
 
     async def _post(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
-        if self._client is not None:
-            response = await self._client.post(path, json=payload)
-        else:
-            async with httpx.AsyncClient(base_url=self.base_url, timeout=self.timeout) as client:
-                response = await client.post(path, json=payload)
+        try:
+            if self._client is not None:
+                response = await self._client.post(path, json=payload)
+            else:
+                async with httpx.AsyncClient(base_url=self.base_url, timeout=self.timeout) as client:
+                    response = await client.post(path, json=payload)
+        except httpx.ConnectError as exc:
+            raise ConnectionError(
+                f"Không thể kết nối Ollama tại {self.base_url}. "
+                "Hãy kiểm tra Ollama đang chạy và OLLAMA_BASE_URL đúng."
+            ) from exc
         response.raise_for_status()
         return response.json()
 

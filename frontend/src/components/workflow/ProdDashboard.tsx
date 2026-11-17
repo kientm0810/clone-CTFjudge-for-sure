@@ -50,6 +50,9 @@ function delay(milliseconds: number) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+const POLL_INTERVAL_MS = 60_000;
+const MAX_POLL_ATTEMPTS = 30;
+
 export function ProdDashboard() {
   const [deployment, setDeployment] = useState<WorkflowDeployment | null>(null);
   const [inputs, setInputs] = useState("{}");
@@ -107,9 +110,9 @@ export function ProdDashboard() {
         targetNodeId,
       );
       setPreparingSnapshot(current);
-      for (let attempt = 0; attempt < 1800; attempt += 1) {
+      for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt += 1) {
         if (["READY", "FAILED"].includes(current.status)) break;
-        await delay(1000);
+        await delay(POLL_INTERVAL_MS);
         current = await getGoldenSnapshot("prod", current.id);
         setPreparingSnapshot(current);
       }
@@ -133,9 +136,9 @@ export function ProdDashboard() {
       const parsed = JSON.parse(inputs) as Record<string, unknown>;
       let current = await startDeploymentRun("prod", parsed);
       setRun(current);
-      for (let attempt = 0; attempt < 1800; attempt += 1) {
+      for (let attempt = 0; attempt < MAX_POLL_ATTEMPTS; attempt += 1) {
         if (["COMPLETED", "FAILED", "CANCELLED"].includes(current.status)) break;
-        await delay(1000);
+        await delay(POLL_INTERVAL_MS);
         current = await getRun(current.id);
         setRun(current);
       }
