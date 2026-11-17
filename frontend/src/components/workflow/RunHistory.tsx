@@ -1,4 +1,5 @@
 import type { RunHistoryItem } from "@/lib/types";
+import { getRunHtmlReportUrl } from "@/lib/api";
 
 type Props = {
   runs: RunHistoryItem[];
@@ -31,6 +32,7 @@ export function RunHistory({ runs, selectedRunId, busy, onOpen, onRetry, onDelet
               <small>{formatDate(item.created_at)}</small>
             </button>
             <div className="run-actions">
+              {item.status === "COMPLETED" && <a href={getRunHtmlReportUrl(item.id)}>HTML</a>}
               <button disabled={busy || active} onClick={() => onRetry(item.id)}>Retry</button>
               <button className="delete" disabled={busy || active} onClick={() => onDelete(item.id)}>Delete</button>
             </div>

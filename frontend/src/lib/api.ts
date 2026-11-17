@@ -127,6 +127,7 @@ export function startRun(workflowId: string, inputs: Record<string, unknown>) {
 }
 
 export const getRun = (runId: string) => request<WorkflowRun>(`/runs/${runId}`);
+export const getRunHtmlReportUrl = (runId: string) => `${API_URL}/runs/${runId}/report.html`;
 
 export const listWorkflowRuns = (workflowId: string) =>
   request<RunHistoryItem[]>(`/workflows/${workflowId}/runs`);

@@ -345,9 +345,10 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
 .run-open small { color: #69858e; font-size: 10px; }
 .run-state { font-size: 9px; font-weight: 800; letter-spacing: .06em; }
 .run-actions { display: flex; gap: 5px; }
-.run-actions button { border: 1px solid #31505b; border-radius: 7px; padding: 5px 8px; background: #10232b; color: #a9c1c8; cursor: pointer; font-size: 9px; font-weight: 700; }
+.run-actions button, .run-actions a { border: 1px solid #31505b; border-radius: 7px; padding: 5px 8px; background: #10232b; color: #a9c1c8; cursor: pointer; font-size: 9px; font-weight: 700; text-decoration: none; }
 .run-actions button.delete { border-color: #61383e; color: #e99ca4; }
 .run-actions button:disabled { cursor: not-allowed; opacity: .35; }
+.report-download { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; white-space: nowrap; }
 .empty-history { padding: 24px; color: #68838d; text-align: center; font-size: 12px; }
 .compact { margin-bottom: 12px; }
 .trace-list { display: grid; gap: 8px; }

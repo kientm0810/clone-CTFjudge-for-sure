@@ -8,6 +8,7 @@ import {
   getDeployment,
   getGoldenSnapshot,
   getRun,
+  getRunHtmlReportUrl,
   startDeploymentRun,
 } from "@/lib/api";
 import type { GoldenSnapshot, WorkflowDeployment, WorkflowNode, WorkflowRun } from "@/lib/types";
@@ -200,7 +201,7 @@ export function ProdDashboard() {
       </section>
 
       <section className="prod-result card">
-        <div className="card-heading"><div><p className="section-label">Bước 4</p><h2>Kết quả đối chiếu</h2><p className="card-help">Golden chunks → mức tương đồng toàn bài → đối chiếu từng student chunk.</p></div></div>
+        <div className="card-heading"><div><p className="section-label">Bước 4</p><h2>Kết quả đối chiếu</h2><p className="card-help">Golden chunks → mức tương đồng toàn bài → đối chiếu từng student chunk.</p></div>{run?.status === "COMPLETED" && <a className="secondary-button report-download" href={getRunHtmlReportUrl(run.id)}>Tải báo cáo HTML</a>}</div>
         <ComparisonResult run={run} />
       </section>
     </main>
