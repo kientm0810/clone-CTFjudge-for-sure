@@ -262,6 +262,7 @@ pre { overflow: auto; margin: 13px 0 0; color: #bcd1d8; font-family: "Cascadia C
 .progress-track, .score-bar { height: 7px; margin-top: 9px; overflow: hidden; border-radius: 999px; background: #142831; }
 .progress-track span, .score-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #238b76, #65d6c0); transition: width .25s ease; }
 .execution-telemetry { display: grid; min-height: 142px; gap: 10px; margin-top: 12px; border: 1px solid #315664; border-radius: 10px; padding: 13px; background: #0a1b22; }
+.execution-telemetry-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
 .telemetry-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .telemetry-heading > div { display: grid; gap: 3px; }
 .telemetry-heading small, .telemetry-facts small { color: #77939c; font-size: 9px; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }

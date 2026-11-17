@@ -91,7 +91,9 @@ export function WorkflowProgress({ definition, run, frozenNodeIds = [] }: {
   const completed = Object.values(statuses).filter((item) => ["COMPLETED", "FROZEN"].includes(item)).length;
   const percent = Math.round((completed / Math.max(order.length, 1)) * 100);
   const current = order.find((id) => statuses[id] === "RUNNING");
-  const currentRun = run?.node_runs?.find((item) => item.node_id === current);
+  const agentRunsWithProgress = order
+    .map((id) => run?.node_runs?.find((item) => item.node_id === id))
+    .filter((item) => item?.progress && nodes[item.node_id]?.type === "agent");
   const message = run?.status === "COMPLETED"
     ? "Workflow đã hoàn tất."
     : run?.status === "FAILED"
@@ -107,7 +109,13 @@ export function WorkflowProgress({ definition, run, frozenNodeIds = [] }: {
   return <div className="workflow-progress">
     <div className="progress-summary"><div><strong>{message}</strong><span>{completed}/{order.length} node hoàn tất</span></div><b>{run || frozenNodeIds.length ? percent : 0}%</b></div>
     <div className="progress-track" aria-hidden="true"><span style={{ width: `${run || frozenNodeIds.length ? percent : 0}%` }} /></div>
-    <ExecutionTelemetry progress={currentRun?.progress} nodeName={current ? nodes[current]?.name ?? current : undefined} />
+    {!!agentRunsWithProgress.length && <div className="execution-telemetry-list">
+      {agentRunsWithProgress.map((nodeRun) => nodeRun && <ExecutionTelemetry
+        key={nodeRun.node_id}
+        progress={nodeRun.progress}
+        nodeName={nodes[nodeRun.node_id]?.name ?? nodeRun.node_id}
+      />)}
+    </div>}
     <ol>{order.map((id, index) => {
       const nodeStatus = statuses[id] ?? "idle";
       return <li className={`progress-${nodeStatus.toLowerCase()}`} key={id}><span>{index + 1}</span><div><strong>{nodes[id]?.name ?? id}</strong><small>{statusLabels[nodeStatus] ?? nodeStatus}</small></div></li>;
