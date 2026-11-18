@@ -1,0 +1,23 @@
+[
+  {
+    "file": "L02_ransomware_sim_043_HE206060.docx",
+    "expected": "average",
+    "run_id": "c2beb9db-46e8-4764-85c2-f340c8bbca8f",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L02_ransomware_sim_048_HE198279.docx",
+    "expected": "weak",
+    "run_id": "fec0ade3-7aa5-496f-a9ef-3653c8c9d96f",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L02_ransomware_sim_049_HE175300.docx",
+    "expected": "weak",
+    "run_id": "bcc5e655-4d46-4978-94b7-72336aaf360e",
+    "status": "COMPLETED",
+    "error": null
+  }
+]
