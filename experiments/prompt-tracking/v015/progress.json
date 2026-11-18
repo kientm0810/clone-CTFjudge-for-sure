@@ -1,0 +1,72 @@
+[
+  {
+    "file": "L06_process_injection_128_HE187916.docx",
+    "expected": "excellent",
+    "run_id": "3786113d-8107-4e20-9012-9064b24b6b1c",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_126_HE187730.docx",
+    "expected": "excellent",
+    "run_id": "1f8c6b02-9282-414f-afeb-36ab79feaf08",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_129_HE203681.docx",
+    "expected": "excellent",
+    "run_id": "521043f2-b44b-4e7b-9351-47067f8e55d4",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_130_HE207518.docx",
+    "expected": "excellent",
+    "run_id": "85e474ef-e806-429d-99a7-38280525df9d",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_131_HE204699.docx",
+    "expected": "good",
+    "run_id": "438e6eb1-998b-48ac-ba84-ac6dd48e77ed",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_132_HE172801.docx",
+    "expected": "good",
+    "run_id": "cf1c855d-1aea-481c-a165-14dbec982fb1",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_133_HE195548.docx",
+    "expected": "good",
+    "run_id": "74d06535-a9ae-45e2-9271-478995848efc",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_135_HE191977.docx",
+    "expected": "good",
+    "run_id": "cffd5a74-0ba1-4589-8b65-047717bdd0ee",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_136_HE203303.docx",
+    "expected": "good",
+    "run_id": "80644b67-1eda-4c76-944b-a7aa43431c4c",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_137_HE193152.docx",
+    "expected": "good",
+    "run_id": "98deb680-d7a6-4bac-b4dd-b69c628bee1b",
+    "status": "COMPLETED",
+    "error": null
+  }
+]
