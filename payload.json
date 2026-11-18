@@ -1,0 +1,9 @@
+{
+  "model": "qwen3.8-27b-ridge",
+  "messages": [
+    {"role": "system", "content": "Bạn là trợ lý AI hữu ích, trả lời ngắn gọn bằng tiếng Việt."},
+    {"role": "user", "content": "Giải thích ngắn gọn cơ chế hoạt động của eBPF trên Linux."}
+  ],
+  "max_tokens": 1024,
+  "temperature": 0.6
+}

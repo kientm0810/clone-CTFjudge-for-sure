@@ -1,0 +1,347 @@
+[
+  {
+    "lab_id": "L01_keylogger_ads",
+    "title": "Keylogger - ADS Stealth Mode",
+    "sample_names": [
+      "keylogger.exe",
+      "sample3.exe",
+      "kl_ads.exe",
+      "lab_kl.exe"
+    ],
+    "sha256": "356029C1D0D833FB6582401015042222DE2BC5C6DD9612AB952938E2CD7EF383",
+    "findings": [
+      {
+        "key": "proc_start",
+        "group": "process",
+        "essential": true
+      },
+      {
+        "key": "runkey",
+        "group": "persistence",
+        "essential": true
+      },
+      {
+        "key": "no_runkey",
+        "group": "persistence",
+        "essential": true
+      },
+      {
+        "key": "hook",
+        "group": "process",
+        "essential": false
+      },
+      {
+        "key": "ads_denied",
+        "group": "file",
+        "essential": true
+      },
+      {
+        "key": "ads_write",
+        "group": "file",
+        "essential": true
+      },
+      {
+        "key": "append",
+        "group": "file",
+        "essential": false
+      },
+      {
+        "key": "no_net",
+        "group": "network",
+        "essential": false
+      }
+    ],
+    "note": "Hành vi chuẩn do Claude dựng cho dataset (trừ L01 bám theo golden template.docx); cần giảng viên soát lại."
+  },
+  {
+    "lab_id": "L02_ransomware_sim",
+    "title": "Ransomware Simulator - File Encryption",
+    "sample_names": [
+      "locker_sim.exe",
+      "sample_rw.exe",
+      "rw_lab.exe"
+    ],
+    "sha256": "A1F3C09B7E5D2246F0B8E13C9A7D6E51B4C2F8A0D3E9617B25C4F0A8E6D3B172",
+    "findings": [
+      {
+        "key": "proc_start",
+        "group": "process",
+        "essential": true
+      },
+      {
+        "key": "enum_encrypt",
+        "group": "file",
+        "essential": true
+      },
+      {
+        "key": "note",
+        "group": "file",
+        "essential": true
+      },
+      {
+        "key": "vss",
+        "group": "process",
+        "essential": true
+      },
+      {
+        "key": "reg",
+        "group": "registry",
+        "essential": false
+      },
+      {
+        "key": "no_persist",
+        "group": "persistence",
+        "essential": false
+      },
+      {
+        "key": "no_net",
+        "group": "network",
+        "essential": false
+      }
+    ],
+    "note": "Hành vi chuẩn do Claude dựng cho dataset (trừ L01 bám theo golden template.docx); cần giảng viên soát lại."
+  },
+  {
+    "lab_id": "L03_downloader_schtask",
+    "title": "Downloader + Scheduled Task Persistence",
+    "sample_names": [
+      "invoice_viewer.exe",
+      "sample_dl.exe",
+      "dl_lab.exe"
+    ],
+    "sha256": "5D0E7A13C6B94F28E1A07D3B92C5F6084E1D7B3A60C9F25E8D41B7A3C02F9E64",
+    "findings": [
+      {
+        "key": "proc_start",
+        "group": "process",
+        "essential": true
+      },
+      {
+        "key": "dns_http",
+        "group": "network",
+        "essential": true
+      },
+      {
+        "key": "drop",
+        "group": "file",
+        "essential": true
+      },
+      {
+        "key": "schtask",
+        "group": "persistence",
+        "essential": true
+      },
+      {
+        "key": "exec_payload",
+        "group": "process",
+        "essential": false
+      },
+      {
+        "key": "reg_taskcache",
+        "group": "registry",
+        "essential": false
+      }
+    ],
+    "note": "Hành vi chuẩn do Claude dựng cho dataset (trừ L01 bám theo golden template.docx); cần giảng viên soát lại."
+  },
+  {
+    "lab_id": "L04_http_beacon",
+    "title": "HTTP Beacon / C2 Simulation",
+    "sample_names": [
+      "winupdate_svc.exe",
+      "sample_rat.exe",
+      "beacon_lab.exe"
+    ],
+    "sha256": "C7B2E94F1A3D6085E2F7C19B4D8A30E6F5B1C2D7A94E0386B5F1D2C7E8A3946B",
+    "findings": [
+      {
+        "key": "proc_start",
+        "group": "process",
+        "essential": true
+      },
+      {
+        "key": "runkey",
+        "group": "persistence",
+        "essential": true
+      },
+      {
+        "key": "recon",
+        "group": "process",
+        "essential": false
+      },
+      {
+        "key": "beacon",
+        "group": "network",
+        "essential": true
+      },
+      {
+        "key": "no_cmd",
+        "group": "network",
+        "essential": false
+      }
+    ],
+    "note": "Hành vi chuẩn do Claude dựng cho dataset (trừ L01 bám theo golden template.docx); cần giảng viên soát lại."
+  },
+  {
+    "lab_id": "L05_stealer_ftp",
+    "title": "Info Stealer - File Grabber & FTP Exfil",
+    "sample_names": [
+      "photo_resize.exe",
+      "sample_st.exe",
+      "grabber_lab.exe"
+    ],
+    "sha256": "9E4A1C7D2B5F8036E7C1A9D4F2B6E0835C7A1F9D3E6B2048A5C9F1E7D3B6024C",
+    "findings": [
+      {
+        "key": "proc_start",
+        "group": "process",
+        "essential": true
+      },
+      {
+        "key": "browser",
+        "group": "file",
+        "essential": true
+      },
+      {
+        "key": "grab",
+        "group": "file",
+        "essential": true
+      },
+      {
+        "key": "ftp",
+        "group": "network",
+        "essential": true
+      },
+      {
+        "key": "cleanup_zip",
+        "group": "file",
+        "essential": false
+      },
+      {
+        "key": "no_persist",
+        "group": "persistence",
+        "essential": false
+      }
+    ],
+    "note": "Hành vi chuẩn do Claude dựng cho dataset (trừ L01 bám theo golden template.docx); cần giảng viên soát lại."
+  },
+  {
+    "lab_id": "L06_process_injection",
+    "title": "Process Injection - Remote Thread",
+    "sample_names": [
+      "launcher.exe",
+      "sample_inj.exe",
+      "inj_lab.exe"
+    ],
+    "sha256": "2F8C6E1A9D3B7054C2E8F1A6D9B3C7E0425A8F1C6D2E9B7034F5A1C8E6D2B9F3",
+    "findings": [
+      {
+        "key": "spawn",
+        "group": "process",
+        "essential": true
+      },
+      {
+        "key": "inject",
+        "group": "process",
+        "essential": true
+      },
+      {
+        "key": "notepad_net",
+        "group": "network",
+        "essential": true
+      },
+      {
+        "key": "exit",
+        "group": "process",
+        "essential": false
+      },
+      {
+        "key": "no_persist",
+        "group": "persistence",
+        "essential": false
+      }
+    ],
+    "note": "Hành vi chuẩn do Claude dựng cho dataset (trừ L01 bám theo golden template.docx); cần giảng viên soát lại."
+  },
+  {
+    "lab_id": "L07_service_persistence",
+    "title": "Windows Service Persistence",
+    "sample_names": [
+      "tsync_setup.exe",
+      "sample_svc.exe",
+      "svc_lab.exe"
+    ],
+    "sha256": "E3B7A90C4F2D1658B9E0C3A7F4D1B8256E0A9C3F7B2D4E1058C6A3F9E2B7D401",
+    "findings": [
+      {
+        "key": "proc_start",
+        "group": "process",
+        "essential": true
+      },
+      {
+        "key": "svc_create",
+        "group": "persistence",
+        "essential": true
+      },
+      {
+        "key": "svc_denied",
+        "group": "persistence",
+        "essential": true
+      },
+      {
+        "key": "svc_reg",
+        "group": "registry",
+        "essential": false
+      },
+      {
+        "key": "svc_log",
+        "group": "file",
+        "essential": false
+      },
+      {
+        "key": "no_net",
+        "group": "network",
+        "essential": false
+      }
+    ],
+    "note": "Hành vi chuẩn do Claude dựng cho dataset (trừ L01 bám theo golden template.docx); cần giảng viên soát lại."
+  },
+  {
+    "lab_id": "L08_clipboard_hijacker",
+    "title": "Clipboard Hijacker (Crypto Clipper)",
+    "sample_names": [
+      "wallet_helper.exe",
+      "sample_clip.exe",
+      "clip_lab.exe"
+    ],
+    "sha256": "7A0D3F9C2E6B1854A9D0F3C7E2B6A1094D8F0C3A7E1B9D2F5068C4A9E3D7B1F2",
+    "findings": [
+      {
+        "key": "proc_start",
+        "group": "process",
+        "essential": true
+      },
+      {
+        "key": "replace",
+        "group": "process",
+        "essential": true
+      },
+      {
+        "key": "startup",
+        "group": "persistence",
+        "essential": true
+      },
+      {
+        "key": "log",
+        "group": "file",
+        "essential": false
+      },
+      {
+        "key": "no_net",
+        "group": "network",
+        "essential": false
+      }
+    ],
+    "note": "Hành vi chuẩn do Claude dựng cho dataset (trừ L01 bám theo golden template.docx); cần giảng viên soát lại."
+  }
+]

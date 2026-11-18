@@ -87,6 +87,12 @@ def build_similarity_report(
         raise ValueError("Similarity report input must be an object")
     comparisons = _ground_comparisons(value.get("comparisons"), retrieval_results)
     scores = [normalize_score(item.get("score")) for item in comparisons]
+    model_overall_score = value.get("overall_score")
+    summary_score = (
+        normalize_score(model_overall_score)
+        if model_overall_score is not None
+        else round(sum(scores) / len(scores), 3) if scores else 0.0
+    )
     vector_scores = [
         max(
             (normalize_score(match.get("similarity_score")) for match in item.get("matched_golden", [])),
@@ -97,7 +103,8 @@ def build_similarity_report(
     return {
         "report_type": "similarity",
         "summary": str(value.get("summary", "")),
-        "summary_score": round(sum(scores) / len(scores), 3) if scores else 0.0,
+        "summary_score": summary_score,
+        "quality_label": value.get("quality_label"),
         "similarity_score": round(sum(vector_scores) / len(vector_scores), 3) if vector_scores else 0.0,
         "golden_chunks": golden_chunks or [],
         "comparisons": comparisons,
