@@ -137,10 +137,25 @@ def create_workflow(
                 "type": "string",
                 "enum": ["excellent", "good", "average", "weak"],
             }
+            schema["properties"]["defects"] = {
+                "type": "array",
+                "items": {"type": "string"},
+            }
+            schema["properties"]["defect_count"] = {
+                "type": "integer",
+                "minimum": 0,
+            }
+            schema["properties"]["material_defect_count"] = {
+                "type": "integer",
+                "minimum": 0,
+            }
             schema["required"] = list(dict.fromkeys([
                 *schema.get("required", []),
                 "overall_score",
                 "quality_label",
+                "defects",
+                "defect_count",
+                "material_defect_count",
             ]))
     response = request(
         "POST",

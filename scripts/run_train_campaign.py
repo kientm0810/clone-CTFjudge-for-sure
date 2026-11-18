@@ -81,7 +81,12 @@ def create_prompt(version: str, previous_versions: list[str]) -> None:
     base = base[:first_section] + note + base[first_section:]
     base = base.replace(
         "<!-- COMPARISON_PROMPT_END -->",
-        f"\nCalibration instruction for this batch: {guidance}\n<!-- COMPARISON_PROMPT_END -->",
+        "\nReturn defects as an array with exactly one short string per UNIQUE report-level "
+        "defect. Set defect_count equal to defects.length. Set material_defect_count to the "
+        "number of unsupported/noise/contradictory/privilege-misread defects. Do not omit "
+        "missing golden behaviors from defects. Code will derive the final label from these "
+        "counts, so count first and do not manipulate the count to reach a desired label.\n\n"
+        f"Calibration instruction for this batch: {guidance}\n<!-- COMPARISON_PROMPT_END -->",
         1,
     )
     version_dir = TRACKING / version

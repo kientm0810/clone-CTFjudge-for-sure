@@ -102,3 +102,36 @@ def test_similarity_report_has_no_ctfjudge_rubric() -> None:
     assert report["golden_chunks"][0]["chunk_id"] == "golden-0"
     assert "competency_matrix" not in report
     assert "overall_score" not in report
+
+
+@pytest.mark.parametrize(
+    ("defect_count", "material_count", "expected_label", "expected_score"),
+    [
+        (0, 0, "excellent", 0.92),
+        (2, 0, "good", 0.78),
+        (5, 1, "average", 0.60),
+        (7, 0, "weak", 0.35),
+        (3, 2, "weak", 0.35),
+    ],
+)
+def test_similarity_report_derives_label_from_structured_defects(
+    defect_count: int,
+    material_count: int,
+    expected_label: str,
+    expected_score: float,
+) -> None:
+    report = build_similarity_report(
+        {
+            "summary": "Structured audit",
+            "comparisons": [],
+            "overall_score": 0.99,
+            "quality_label": "excellent",
+            "defects": [f"defect-{index}" for index in range(defect_count)],
+            "defect_count": defect_count,
+            "material_defect_count": material_count,
+        }
+    )
+
+    assert report["quality_label"] == expected_label
+    assert report["summary_score"] == expected_score
+    assert report["defect_count"] == defect_count
