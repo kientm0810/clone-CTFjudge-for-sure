@@ -1,0 +1,65 @@
+[
+  {
+    "file": "L03_downloader_schtask_067_HE206804.docx",
+    "expected": "average",
+    "run_id": "2ce1dc10-014d-4056-a376-e2f73f6aefcb",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L03_downloader_schtask_064_HE173334.docx",
+    "expected": "average",
+    "run_id": "432e0d3e-9a14-45f8-8cb5-1b88c2d1c959",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L03_downloader_schtask_068_HE207687.docx",
+    "expected": "average",
+    "run_id": "8dc25bc9-326d-453d-85b1-c5b892aea3a2",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L03_downloader_schtask_069_HE179914.docx",
+    "expected": "average",
+    "run_id": "0e91a455-a346-4870-ae95-225e50680323",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L03_downloader_schtask_070_HE202234.docx",
+    "expected": "average",
+    "run_id": "bdc9421f-148c-4fa9-a4fa-bcd429b0a862",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L03_downloader_schtask_071_HE183264.docx",
+    "expected": "weak",
+    "run_id": "672b3a1b-de1d-43e6-b486-81a229c99454",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L03_downloader_schtask_072_HE195028.docx",
+    "expected": "weak",
+    "run_id": "f091f96a-67ab-4775-b66e-cfa5721ac93a",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L03_downloader_schtask_074_HE175064.docx",
+    "expected": "weak",
+    "run_id": "abd9e6b4-0ea2-4536-b707-f9306c329b1e",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L03_downloader_schtask_075_HE178422.docx",
+    "expected": "weak",
+    "run_id": "82813178-7a43-45de-9cb1-1f307a3cf156",
+    "status": "COMPLETED",
+    "error": null
+  }
+]
