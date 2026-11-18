@@ -84,8 +84,10 @@ def create_prompt(version: str, previous_versions: list[str]) -> None:
         "\nReturn defects as an array with exactly one short string per UNIQUE report-level "
         "defect. Set defect_count equal to defects.length. Set material_defect_count to the "
         "number of unsupported/noise/contradictory/privilege-misread defects. Do not omit "
-        "missing golden behaviors from defects. Code will derive the final label from these "
-        "counts, so count first and do not manipulate the count to reach a desired label.\n\n"
+        "missing golden behaviors from defects. NEVER count student identity, PID, timestamp, "
+        "filename, path, evidence-ID numbering, observation duration, network mode or another "
+        "environment/run-specific value as a defect when the student's own evidence is internally "
+        "consistent. Count first, then select overall_score and quality_label from the prompt bands.\n\n"
         f"Calibration instruction for this batch: {guidance}\n<!-- COMPARISON_PROMPT_END -->",
         1,
     )

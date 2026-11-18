@@ -90,22 +90,12 @@ def build_similarity_report(
     model_overall_score = value.get("overall_score")
     defect_count = _non_negative_int(value.get("defect_count"))
     material_defect_count = _non_negative_int(value.get("material_defect_count"))
-    if defect_count is not None:
-        if defect_count >= 7 or (material_defect_count or 0) >= 2:
-            quality_label, summary_score = "weak", 0.35
-        elif defect_count >= 3:
-            quality_label, summary_score = "average", 0.60
-        elif defect_count >= 1:
-            quality_label, summary_score = "good", 0.78
-        else:
-            quality_label, summary_score = "excellent", 0.92
-    else:
-        quality_label = value.get("quality_label")
-        summary_score = (
-            normalize_score(model_overall_score)
-            if model_overall_score is not None
-            else round(sum(scores) / len(scores), 3) if scores else 0.0
-        )
+    quality_label = value.get("quality_label")
+    summary_score = (
+        normalize_score(model_overall_score)
+        if model_overall_score is not None
+        else round(sum(scores) / len(scores), 3) if scores else 0.0
+    )
     vector_scores = [
         max(
             (normalize_score(match.get("similarity_score")) for match in item.get("matched_golden", [])),

@@ -104,34 +104,20 @@ def test_similarity_report_has_no_ctfjudge_rubric() -> None:
     assert "overall_score" not in report
 
 
-@pytest.mark.parametrize(
-    ("defect_count", "material_count", "expected_label", "expected_score"),
-    [
-        (0, 0, "excellent", 0.92),
-        (2, 0, "good", 0.78),
-        (5, 1, "average", 0.60),
-        (7, 0, "weak", 0.35),
-        (3, 2, "weak", 0.35),
-    ],
-)
-def test_similarity_report_derives_label_from_structured_defects(
-    defect_count: int,
-    material_count: int,
-    expected_label: str,
-    expected_score: float,
-) -> None:
+def test_similarity_report_exposes_structured_defects_without_overriding_model_score() -> None:
     report = build_similarity_report(
         {
             "summary": "Structured audit",
             "comparisons": [],
-            "overall_score": 0.99,
-            "quality_label": "excellent",
-            "defects": [f"defect-{index}" for index in range(defect_count)],
-            "defect_count": defect_count,
-            "material_defect_count": material_count,
+            "overall_score": 0.78,
+            "quality_label": "good",
+            "defects": ["missing behavior", "unresolved evidence"],
+            "defect_count": 2,
+            "material_defect_count": 1,
         }
     )
 
-    assert report["quality_label"] == expected_label
-    assert report["summary_score"] == expected_score
-    assert report["defect_count"] == defect_count
+    assert report["quality_label"] == "good"
+    assert report["summary_score"] == 0.78
+    assert report["defect_count"] == 2
+    assert report["material_defect_count"] == 1
