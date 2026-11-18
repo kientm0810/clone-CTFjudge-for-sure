@@ -1,0 +1,21 @@
+{
+  "version": "v007",
+  "lab": "L02_ransomware_sim",
+  "batch_index": 3,
+  "environment": "eval-l02-v007",
+  "workflow_id": "7dc20740-5a95-4631-ba88-cfaa8d1f1de4",
+  "golden_snapshot_id": "c92f7b83-58a7-4270-8c85-2da58ab5ea67",
+  "files": [
+    "L02_ransomware_sim_026_HE172095.docx",
+    "L02_ransomware_sim_027_HE181211.docx",
+    "L02_ransomware_sim_029_HE191421.docx",
+    "L02_ransomware_sim_030_HE184215.docx",
+    "L02_ransomware_sim_031_HE202307.docx",
+    "L02_ransomware_sim_032_HE193896.docx",
+    "L02_ransomware_sim_033_HE208727.docx",
+    "L02_ransomware_sim_036_HE191287.docx",
+    "L02_ransomware_sim_037_HE208651.docx",
+    "L02_ransomware_sim_038_HE176003.docx"
+  ],
+  "created_at": "2026-11-18T04:55:01.466958+00:00"
+}
