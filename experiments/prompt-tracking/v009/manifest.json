@@ -1,0 +1,21 @@
+{
+  "version": "v009",
+  "lab": "L03_downloader_schtask",
+  "batch_index": 5,
+  "environment": "eval-l03-v009",
+  "workflow_id": "747c350d-c503-464d-a2d9-ce7407642960",
+  "golden_snapshot_id": "134ef27a-2e53-4b79-a41f-a198d3aa7561",
+  "files": [
+    "L03_downloader_schtask_051_HE189049.docx",
+    "L03_downloader_schtask_052_HE196665.docx",
+    "L03_downloader_schtask_053_HE197448.docx",
+    "L03_downloader_schtask_054_HE207987.docx",
+    "L03_downloader_schtask_056_HE198892.docx",
+    "L03_downloader_schtask_057_HE188423.docx",
+    "L03_downloader_schtask_059_HE172231.docx",
+    "L03_downloader_schtask_060_HE193762.docx",
+    "L03_downloader_schtask_062_HE205077.docx",
+    "L03_downloader_schtask_063_HE197934.docx"
+  ],
+  "created_at": "2026-11-18T05:33:52.477706+00:00"
+}
