@@ -1,0 +1,21 @@
+{
+  "version": "v020",
+  "lab": "L08_clipboard_hijacker",
+  "batch_index": 16,
+  "environment": "eval-l08-v020",
+  "workflow_id": "d16952ab-2af7-4e59-b78a-da1d9b6b0d07",
+  "golden_snapshot_id": "6c789eab-cd6f-474e-a4d6-13ffe5aa1dda",
+  "files": [
+    "L08_clipboard_hijacker_189_HE176608.docx",
+    "L08_clipboard_hijacker_190_HE193409.docx",
+    "L08_clipboard_hijacker_191_HE200934.docx",
+    "L08_clipboard_hijacker_192_HE205030.docx",
+    "L08_clipboard_hijacker_193_HE199145.docx",
+    "L08_clipboard_hijacker_194_HE204124.docx",
+    "L08_clipboard_hijacker_196_HE205170.docx",
+    "L08_clipboard_hijacker_197_HE180346.docx",
+    "L08_clipboard_hijacker_198_HE207481.docx",
+    "L08_clipboard_hijacker_200_HE184369.docx"
+  ],
+  "created_at": "2026-11-18T08:56:19.666638+00:00"
+}

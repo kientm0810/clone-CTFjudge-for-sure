@@ -1,0 +1,72 @@
+[
+  {
+    "file": "L08_clipboard_hijacker_190_HE193409.docx",
+    "expected": "average",
+    "run_id": "0c0ab450-b8c5-4b7f-8c79-19e730f0e050",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L08_clipboard_hijacker_191_HE200934.docx",
+    "expected": "average",
+    "run_id": "4971801c-dd85-40ae-aeb6-85b3112089f1",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L08_clipboard_hijacker_189_HE176608.docx",
+    "expected": "average",
+    "run_id": "70710d71-bcc2-4a11-8eec-550828fb2a51",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L08_clipboard_hijacker_192_HE205030.docx",
+    "expected": "average",
+    "run_id": "00c44c24-55e3-4e5d-9ae2-fe19b9327575",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L08_clipboard_hijacker_193_HE199145.docx",
+    "expected": "average",
+    "run_id": "11bfc538-8a85-4be7-af10-eb0dc70d477d",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L08_clipboard_hijacker_194_HE204124.docx",
+    "expected": "average",
+    "run_id": "8ec9033e-8f1d-45e4-9c2c-fc4294328fbe",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L08_clipboard_hijacker_196_HE205170.docx",
+    "expected": "weak",
+    "run_id": "f524ce88-e7ca-40b3-b011-4fecb2661ffa",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L08_clipboard_hijacker_198_HE207481.docx",
+    "expected": "weak",
+    "run_id": "fe6acaa2-b0d4-4229-b84b-39367358b3f4",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L08_clipboard_hijacker_197_HE180346.docx",
+    "expected": "weak",
+    "run_id": "1b657199-e5e4-4c54-9aaa-a09820b3cce7",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L08_clipboard_hijacker_200_HE184369.docx",
+    "expected": "weak",
+    "run_id": "4f127956-911a-49d5-b2c4-45544e191a33",
+    "status": "COMPLETED",
+    "error": null
+  }
+]
