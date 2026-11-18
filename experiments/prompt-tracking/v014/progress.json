@@ -1,0 +1,65 @@
+[
+  {
+    "file": "L05_stealer_ftp_114_HE180781.docx",
+    "expected": "average",
+    "run_id": "32f3d72c-e11f-4917-bd33-a29f9f2c9985",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L05_stealer_ftp_116_HE172165.docx",
+    "expected": "average",
+    "run_id": "7799a367-ec7c-4965-ab24-d5b91b7bc129",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L05_stealer_ftp_118_HE194815.docx",
+    "expected": "average",
+    "run_id": "63497230-6dda-4d34-a833-6d44615125d6",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L05_stealer_ftp_117_HE186551.docx",
+    "expected": "average",
+    "run_id": "d6ed459f-a615-421f-91e6-c07559a16805",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L05_stealer_ftp_119_HE171299.docx",
+    "expected": "average",
+    "run_id": "14b3a193-0968-4d3b-bd25-b9763b407f5c",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L05_stealer_ftp_121_HE188561.docx",
+    "expected": "weak",
+    "run_id": "005e8f8e-e19e-4a45-ab4d-a7bd1ef0b652",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L05_stealer_ftp_124_HE176818.docx",
+    "expected": "weak",
+    "run_id": "992ce7f8-f803-4402-8d1e-27e60d3491e0",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L05_stealer_ftp_123_HE204367.docx",
+    "expected": "weak",
+    "run_id": "836eeae7-40ce-42d7-99a9-6616f321d994",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L05_stealer_ftp_125_HE185751.docx",
+    "expected": "weak",
+    "run_id": "934a6679-4b73-45ea-a087-800402318709",
+    "status": "COMPLETED",
+    "error": null
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "version": "v014",
+  "lab": "L05_stealer_ftp",
+  "batch_index": 10,
+  "environment": "eval-l05-v014",
+  "workflow_id": "3324708c-15b3-4b9c-9bf6-1f9852886420",
+  "golden_snapshot_id": "46bddfb6-6ea6-4f5b-b740-80fb87a171e1",
+  "files": [
+    "L05_stealer_ftp_114_HE180781.docx",
+    "L05_stealer_ftp_116_HE172165.docx",
+    "L05_stealer_ftp_117_HE186551.docx",
+    "L05_stealer_ftp_118_HE194815.docx",
+    "L05_stealer_ftp_119_HE171299.docx",
+    "L05_stealer_ftp_121_HE188561.docx",
+    "L05_stealer_ftp_123_HE204367.docx",
+    "L05_stealer_ftp_124_HE176818.docx",
+    "L05_stealer_ftp_125_HE185751.docx"
+  ],
+  "created_at": "2026-11-18T07:08:25.536482+00:00"
+}
