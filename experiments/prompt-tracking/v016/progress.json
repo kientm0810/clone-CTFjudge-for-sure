@@ -1,0 +1,16 @@
+[
+  {
+    "file": "L06_process_injection_144_HE172780.docx",
+    "expected": "average",
+    "run_id": "90522938-7db5-4c17-bad4-d14456f29cd4",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_148_HE194654.docx",
+    "expected": "weak",
+    "run_id": "2abba70d-477c-4842-ac28-932d0a9da034",
+    "status": "COMPLETED",
+    "error": null
+  }
+]

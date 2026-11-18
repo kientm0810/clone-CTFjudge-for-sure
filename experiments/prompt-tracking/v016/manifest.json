@@ -1,0 +1,20 @@
+{
+  "version": "v016",
+  "lab": "L06_process_injection",
+  "batch_index": 12,
+  "environment": "eval-l06-v016",
+  "workflow_id": "1b4c1e22-5c53-4542-8e0d-a2b1ffeec8bb",
+  "golden_snapshot_id": "676080f8-b9e9-403b-9755-918a4a555cd0",
+  "files": [
+    "L06_process_injection_140_HE178711.docx",
+    "L06_process_injection_141_HE189398.docx",
+    "L06_process_injection_142_HE195657.docx",
+    "L06_process_injection_143_HE182320.docx",
+    "L06_process_injection_144_HE172780.docx",
+    "L06_process_injection_146_HE172604.docx",
+    "L06_process_injection_147_HE202994.docx",
+    "L06_process_injection_148_HE194654.docx",
+    "L06_process_injection_150_HE184978.docx"
+  ],
+  "created_at": "2026-11-18T07:45:36.301061+00:00"
+}
