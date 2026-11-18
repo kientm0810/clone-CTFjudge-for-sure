@@ -1,0 +1,16 @@
+{
+  "prompt_source": "v014",
+  "split": "held-out-test",
+  "lab": "L07_service_persistence",
+  "environment": "test-v014-l07",
+  "workflow_id": "e4cd118b-f005-4319-91c3-b3c710ad5a29",
+  "golden_snapshot_id": "534d6370-7c74-4954-9f8c-6b6e68c2e599",
+  "files": [
+    "L07_service_persistence_155_HE209490.docx",
+    "L07_service_persistence_157_HE170486.docx",
+    "L07_service_persistence_161_HE189669.docx",
+    "L07_service_persistence_169_HE198750.docx",
+    "L07_service_persistence_172_HE195771.docx"
+  ],
+  "created_at": "2026-11-18T10:28:31.342852+00:00"
+}

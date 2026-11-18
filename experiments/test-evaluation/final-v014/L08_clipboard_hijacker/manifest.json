@@ -1,0 +1,16 @@
+{
+  "prompt_source": "v014",
+  "split": "held-out-test",
+  "lab": "L08_clipboard_hijacker",
+  "environment": "test-v014-l08",
+  "workflow_id": "407c0338-b8ee-43dd-ad4c-63123d24a348",
+  "golden_snapshot_id": "3681be94-a9bb-4c1c-a32e-6d51758d4a19",
+  "files": [
+    "L08_clipboard_hijacker_176_HE176305.docx",
+    "L08_clipboard_hijacker_186_HE177746.docx",
+    "L08_clipboard_hijacker_187_HE179509.docx",
+    "L08_clipboard_hijacker_195_HE186512.docx",
+    "L08_clipboard_hijacker_199_HE190191.docx"
+  ],
+  "created_at": "2026-11-18T10:37:25.566009+00:00"
+}

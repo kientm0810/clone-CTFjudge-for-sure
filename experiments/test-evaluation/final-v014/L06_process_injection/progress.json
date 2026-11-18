@@ -1,0 +1,44 @@
+[
+  {
+    "file": "L06_process_injection_127_HE174394.docx",
+    "expected": "excellent",
+    "run_id": "22d37afc-14e5-4234-876e-144b8af818ce",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_134_HE177963.docx",
+    "expected": "good",
+    "run_id": "469747fd-2870-4159-a51f-66754d002884",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_138_HE193411.docx",
+    "expected": "good",
+    "run_id": "5e61a1c2-8df0-4b5a-aea0-01adad1a9041",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_139_HE194566.docx",
+    "expected": "average",
+    "run_id": "86ffa03c-9b4e-4ab5-b253-8e36f92049c7",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_145_HE175256.docx",
+    "expected": "average",
+    "run_id": "8b108e04-7902-49cb-8cd0-2879e3dc7c15",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L06_process_injection_149_HE202272.docx",
+    "expected": "weak",
+    "run_id": "16cfed03-be8a-467e-a62e-40ee2ea99aba",
+    "status": "COMPLETED",
+    "error": null
+  }
+]

@@ -1,32 +1,32 @@
 {
   "prompt_source": "v014",
   "split": "held-out-test",
-  "total": 12,
-  "completed": 12,
+  "total": 40,
+  "completed": 40,
   "failed": 0,
-  "accuracy": 0.3333,
+  "accuracy": 0.3,
   "confusion": {
     "excellent": {
       "excellent": 0,
-      "good": 2,
-      "average": 0,
+      "good": 6,
+      "average": 1,
       "weak": 0
     },
     "good": {
       "excellent": 0,
-      "good": 3,
-      "average": 0,
-      "weak": 1
+      "good": 7,
+      "average": 4,
+      "weak": 3
     },
     "average": {
       "excellent": 1,
-      "good": 1,
-      "average": 1,
+      "good": 5,
+      "average": 5,
       "weak": 1
     },
     "weak": {
       "excellent": 0,
-      "good": 2,
+      "good": 7,
       "average": 0,
       "weak": 0
     }
@@ -43,7 +43,37 @@
       "completed": 6,
       "failed": 0,
       "accuracy": 0.3333
+    },
+    "L04_http_beacon": {
+      "total": 6,
+      "completed": 6,
+      "failed": 0,
+      "accuracy": 0.3333
+    },
+    "L05_stealer_ftp": {
+      "total": 6,
+      "completed": 6,
+      "failed": 0,
+      "accuracy": 0.5
+    },
+    "L06_process_injection": {
+      "total": 6,
+      "completed": 6,
+      "failed": 0,
+      "accuracy": 0.1667
+    },
+    "L07_service_persistence": {
+      "total": 5,
+      "completed": 5,
+      "failed": 0,
+      "accuracy": 0.4
+    },
+    "L08_clipboard_hijacker": {
+      "total": 5,
+      "completed": 5,
+      "failed": 0,
+      "accuracy": 0.0
     }
   },
-  "created_at": "2026-11-18T09:41:22.686998+00:00"
+  "created_at": "2026-11-18T10:37:25.577007+00:00"
 }

@@ -1,0 +1,37 @@
+[
+  {
+    "file": "L08_clipboard_hijacker_176_HE176305.docx",
+    "expected": "excellent",
+    "run_id": "b6c0432c-1663-47ac-a73d-7fd68521403d",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L08_clipboard_hijacker_186_HE177746.docx",
+    "expected": "good",
+    "run_id": "800e1341-c761-4379-895c-e897958633ca",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L08_clipboard_hijacker_195_HE186512.docx",
+    "expected": "average",
+    "run_id": "844ff9e1-71fe-4e80-ae4b-c460c021744c",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L08_clipboard_hijacker_187_HE179509.docx",
+    "expected": "good",
+    "run_id": "e4d816cc-7d12-4523-8b24-4532689e968c",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L08_clipboard_hijacker_199_HE190191.docx",
+    "expected": "weak",
+    "run_id": "6dcca1f2-2fbd-4d93-a30a-920f6e05317b",
+    "status": "COMPLETED",
+    "error": null
+  }
+]

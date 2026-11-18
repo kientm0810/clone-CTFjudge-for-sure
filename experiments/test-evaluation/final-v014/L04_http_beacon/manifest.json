@@ -1,0 +1,17 @@
+{
+  "prompt_source": "v014",
+  "split": "held-out-test",
+  "lab": "L04_http_beacon",
+  "environment": "test-v014-l04",
+  "workflow_id": "6e58a04a-069b-47b7-9626-79681dd1a1e1",
+  "golden_snapshot_id": "e65238e0-b473-4406-8ffb-63abd7c06f18",
+  "files": [
+    "L04_http_beacon_078_HE197003.docx",
+    "L04_http_beacon_081_HE207846.docx",
+    "L04_http_beacon_087_HE195495.docx",
+    "L04_http_beacon_089_HE191059.docx",
+    "L04_http_beacon_090_HE195813.docx",
+    "L04_http_beacon_098_HE200962.docx"
+  ],
+  "created_at": "2026-11-18T09:53:34.374519+00:00"
+}

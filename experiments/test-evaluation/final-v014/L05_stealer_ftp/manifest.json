@@ -1,0 +1,17 @@
+{
+  "prompt_source": "v014",
+  "split": "held-out-test",
+  "lab": "L05_stealer_ftp",
+  "environment": "test-v014-l05",
+  "workflow_id": "aea68cc3-64e9-4db1-95d1-55b94f811e57",
+  "golden_snapshot_id": "bfcfa7cc-d9dc-4c31-9e72-874147046d49",
+  "files": [
+    "L05_stealer_ftp_101_HE178249.docx",
+    "L05_stealer_ftp_107_HE192257.docx",
+    "L05_stealer_ftp_111_HE186514.docx",
+    "L05_stealer_ftp_115_HE175480.docx",
+    "L05_stealer_ftp_120_HE201494.docx",
+    "L05_stealer_ftp_122_HE176005.docx"
+  ],
+  "created_at": "2026-11-18T10:04:45.229431+00:00"
+}

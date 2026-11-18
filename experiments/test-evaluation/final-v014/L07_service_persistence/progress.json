@@ -1,0 +1,37 @@
+[
+  {
+    "file": "L07_service_persistence_155_HE209490.docx",
+    "expected": "excellent",
+    "run_id": "9d1e69d8-138f-4264-8cf6-1d63d09cad2b",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L07_service_persistence_157_HE170486.docx",
+    "expected": "good",
+    "run_id": "91dffe46-7867-4bac-b671-419d15bae3bd",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L07_service_persistence_161_HE189669.docx",
+    "expected": "good",
+    "run_id": "15a526bf-91b5-42d8-8b99-23c9e84b99db",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L07_service_persistence_169_HE198750.docx",
+    "expected": "average",
+    "run_id": "18b64205-721a-4928-aabb-359dad8554e5",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L07_service_persistence_172_HE195771.docx",
+    "expected": "weak",
+    "run_id": "a5b135d7-95ff-4562-99c6-e5d3f7a65194",
+    "status": "COMPLETED",
+    "error": null
+  }
+]

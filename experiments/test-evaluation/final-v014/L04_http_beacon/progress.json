@@ -1,16 +1,9 @@
 [
   {
-    "file": "L04_http_beacon_078_HE197003.docx",
-    "expected": "excellent",
-    "run_id": "4d7f20d6-094a-4b71-b2a7-9a74e75e10e3",
-    "status": "COMPLETED",
-    "error": null
-  },
-  {
     "file": "L04_http_beacon_081_HE207846.docx",
     "expected": "good",
-    "run_id": "5ca3adc9-8302-4713-ac60-418686363a0d",
-    "status": "FAILED",
-    "error": "Node 'golden-search' failed: Expression '{{ steps.student-parser.output.chunks }}' cannot find 'chunks'"
+    "run_id": "a25a95f4-de6e-4118-b060-40ccfd5c01f2",
+    "status": "COMPLETED",
+    "error": null
   }
 ]

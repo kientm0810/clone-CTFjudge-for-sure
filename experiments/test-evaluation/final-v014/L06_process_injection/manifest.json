@@ -1,0 +1,17 @@
+{
+  "prompt_source": "v014",
+  "split": "held-out-test",
+  "lab": "L06_process_injection",
+  "environment": "test-v014-l06",
+  "workflow_id": "9cb063f5-3f93-4f70-a7a3-c779332f4ff3",
+  "golden_snapshot_id": "4a11e043-5007-4099-969d-cd3919073aa1",
+  "files": [
+    "L06_process_injection_127_HE174394.docx",
+    "L06_process_injection_134_HE177963.docx",
+    "L06_process_injection_138_HE193411.docx",
+    "L06_process_injection_139_HE194566.docx",
+    "L06_process_injection_145_HE175256.docx",
+    "L06_process_injection_149_HE202272.docx"
+  ],
+  "created_at": "2026-11-18T10:19:51.968437+00:00"
+}
