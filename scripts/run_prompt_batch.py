@@ -281,6 +281,32 @@ def predicted_label(score: float) -> str:
     return "weak"
 
 
+def summarize_run_metrics(detail: dict) -> dict:
+    node_runs = detail.get("node_runs") or []
+    input_tokens = 0
+    output_tokens = 0
+    agent_seconds = 0.0
+    node_latencies: dict[str, float] = {}
+    for node in node_runs:
+        progress = node.get("progress") or {}
+        elapsed = float(progress.get("elapsed_seconds") or 0)
+        node_latencies[str(node.get("node_id", "unknown"))] = round(elapsed, 4)
+        if node.get("node_type") == "agent":
+            input_tokens += int(progress.get("prompt_tokens") or 0)
+            output_tokens += int(progress.get("generated_tokens") or 0)
+            agent_seconds += elapsed
+    latency_seconds = sum(node_latencies.values())
+    return {
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "total_tokens": input_tokens + output_tokens,
+        "latency_seconds": round(latency_seconds, 4),
+        "agent_seconds": round(agent_seconds, 4),
+        "inference_tokens_per_minute": round(output_tokens / agent_seconds * 60, 2) if agent_seconds else 0,
+        "node_latencies": node_latencies,
+    }
+
+
 def write_outputs(api_url: str, version_dir: Path, runs: dict[str, dict], details: dict[str, dict]) -> None:
     reports = version_dir / "reports"
     reports.mkdir(parents=True, exist_ok=True)
@@ -294,6 +320,7 @@ def write_outputs(api_url: str, version_dir: Path, runs: dict[str, dict], detail
             "run_id": run_id,
             "status": detail["status"],
             "error": detail.get("error"),
+            **summarize_run_metrics(detail),
         }
         if detail["status"] == "COMPLETED":
             report = detail["result"]["outputs"]["report"]

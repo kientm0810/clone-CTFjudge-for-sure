@@ -1,0 +1,31 @@
+{
+  "completed": 6,
+  "failed": 0,
+  "accuracy": 0.3333,
+  "confusion": {
+    "excellent": {
+      "excellent": 0,
+      "good": 1,
+      "average": 0,
+      "weak": 0
+    },
+    "good": {
+      "excellent": 0,
+      "good": 1,
+      "average": 0,
+      "weak": 1
+    },
+    "average": {
+      "excellent": 0,
+      "good": 0,
+      "average": 1,
+      "weak": 1
+    },
+    "weak": {
+      "excellent": 0,
+      "good": 1,
+      "average": 0,
+      "weak": 0
+    }
+  }
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "file": "L02_ransomware_sim_028_HE182170.docx",
+    "expected": "excellent",
+    "run_id": "60fd9d04-2e50-480b-8d55-22d67e1d1dad",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L02_ransomware_sim_034_HE180490.docx",
+    "expected": "good",
+    "run_id": "cce84dd0-fff6-4c49-9123-321c9a263fff",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L02_ransomware_sim_040_HE193380.docx",
+    "expected": "average",
+    "run_id": "47b4462e-2809-4aca-bc1a-fc7252d4257e",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L02_ransomware_sim_035_HE192523.docx",
+    "expected": "good",
+    "run_id": "ad4c5075-0407-4d16-978e-041abff9c117",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L02_ransomware_sim_044_HE203689.docx",
+    "expected": "average",
+    "run_id": "f4e64138-bef1-4c41-8c74-be02cba9c004",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L02_ransomware_sim_050_HE187752.docx",
+    "expected": "weak",
+    "run_id": "43c25edc-2a06-4ebd-aa7f-c5b2bb8cf9f1",
+    "status": "COMPLETED",
+    "error": null
+  }
+]

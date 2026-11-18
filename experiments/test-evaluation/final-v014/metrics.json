@@ -1,0 +1,49 @@
+{
+  "prompt_source": "v014",
+  "split": "held-out-test",
+  "total": 12,
+  "completed": 12,
+  "failed": 0,
+  "accuracy": 0.3333,
+  "confusion": {
+    "excellent": {
+      "excellent": 0,
+      "good": 2,
+      "average": 0,
+      "weak": 0
+    },
+    "good": {
+      "excellent": 0,
+      "good": 3,
+      "average": 0,
+      "weak": 1
+    },
+    "average": {
+      "excellent": 1,
+      "good": 1,
+      "average": 1,
+      "weak": 1
+    },
+    "weak": {
+      "excellent": 0,
+      "good": 2,
+      "average": 0,
+      "weak": 0
+    }
+  },
+  "by_lab": {
+    "L02_ransomware_sim": {
+      "total": 6,
+      "completed": 6,
+      "failed": 0,
+      "accuracy": 0.3333
+    },
+    "L03_downloader_schtask": {
+      "total": 6,
+      "completed": 6,
+      "failed": 0,
+      "accuracy": 0.3333
+    }
+  },
+  "created_at": "2026-11-18T09:41:22.686998+00:00"
+}

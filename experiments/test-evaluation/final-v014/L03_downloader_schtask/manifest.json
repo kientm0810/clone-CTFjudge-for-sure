@@ -1,0 +1,17 @@
+{
+  "prompt_source": "v014",
+  "split": "held-out-test",
+  "lab": "L03_downloader_schtask",
+  "environment": "test-v014-l03",
+  "workflow_id": "ffe7724f-4c33-4c88-a886-60e56aca24b5",
+  "golden_snapshot_id": "f8c6ed59-fadc-4398-af14-d895ef8ab524",
+  "files": [
+    "L03_downloader_schtask_055_HE191305.docx",
+    "L03_downloader_schtask_058_HE173152.docx",
+    "L03_downloader_schtask_061_HE194805.docx",
+    "L03_downloader_schtask_065_HE187270.docx",
+    "L03_downloader_schtask_066_HE187302.docx",
+    "L03_downloader_schtask_073_HE187552.docx"
+  ],
+  "created_at": "2026-11-18T09:41:22.685997+00:00"
+}

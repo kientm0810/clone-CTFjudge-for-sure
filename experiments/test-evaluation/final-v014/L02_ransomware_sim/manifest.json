@@ -1,0 +1,17 @@
+{
+  "prompt_source": "v014",
+  "split": "held-out-test",
+  "lab": "L02_ransomware_sim",
+  "environment": "test-v014-l02",
+  "workflow_id": "85f0266f-1605-4398-a356-afd4f5d34caf",
+  "golden_snapshot_id": "8d2ec93d-b3c3-4424-b070-50e9110f4b1c",
+  "files": [
+    "L02_ransomware_sim_028_HE182170.docx",
+    "L02_ransomware_sim_034_HE180490.docx",
+    "L02_ransomware_sim_035_HE192523.docx",
+    "L02_ransomware_sim_040_HE193380.docx",
+    "L02_ransomware_sim_044_HE203689.docx",
+    "L02_ransomware_sim_050_HE187752.docx"
+  ],
+  "created_at": "2026-11-18T09:26:31.862623+00:00"
+}
