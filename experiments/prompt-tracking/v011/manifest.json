@@ -1,0 +1,21 @@
+{
+  "version": "v011",
+  "lab": "L04_http_beacon",
+  "batch_index": 7,
+  "environment": "eval-l04-v011",
+  "workflow_id": "c6d9d4d1-349f-4e3e-ad11-227df5e4344d",
+  "golden_snapshot_id": "9fd77963-5f00-4d4b-962a-2f211b0a3468",
+  "files": [
+    "L04_http_beacon_076_HE184865.docx",
+    "L04_http_beacon_077_HE174789.docx",
+    "L04_http_beacon_079_HE183947.docx",
+    "L04_http_beacon_080_HE195982.docx",
+    "L04_http_beacon_082_HE182735.docx",
+    "L04_http_beacon_083_HE186200.docx",
+    "L04_http_beacon_084_HE178547.docx",
+    "L04_http_beacon_085_HE183645.docx",
+    "L04_http_beacon_086_HE178228.docx",
+    "L04_http_beacon_088_HE180236.docx"
+  ],
+  "created_at": "2026-11-18T06:10:17.201784+00:00"
+}

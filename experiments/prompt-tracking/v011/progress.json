@@ -1,0 +1,72 @@
+[
+  {
+    "file": "L04_http_beacon_076_HE184865.docx",
+    "expected": "excellent",
+    "run_id": "85e9dc19-8a09-4a2d-8ba0-45a22d416a27",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L04_http_beacon_077_HE174789.docx",
+    "expected": "excellent",
+    "run_id": "ebcd60ce-adaa-4c31-9d48-f83d6c1eed62",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L04_http_beacon_079_HE183947.docx",
+    "expected": "excellent",
+    "run_id": "90883197-321b-4d0d-8bcc-c1b77d55b9c4",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L04_http_beacon_080_HE195982.docx",
+    "expected": "excellent",
+    "run_id": "000817b9-5d23-4bc4-8795-74a64e0f1f35",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L04_http_beacon_082_HE182735.docx",
+    "expected": "good",
+    "run_id": "00e051a4-2129-4134-b1af-30286dc9278f",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L04_http_beacon_083_HE186200.docx",
+    "expected": "good",
+    "run_id": "b01c15c1-024b-4d2e-932e-f74b87169aa4",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L04_http_beacon_084_HE178547.docx",
+    "expected": "good",
+    "run_id": "cb8df71f-3721-4fd6-8314-dc12516f132b",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L04_http_beacon_085_HE183645.docx",
+    "expected": "good",
+    "run_id": "75becb35-6807-428b-a119-5e5963d22724",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L04_http_beacon_086_HE178228.docx",
+    "expected": "good",
+    "run_id": "b45a53ff-bc6e-4d69-b681-40bb4ea43568",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L04_http_beacon_088_HE180236.docx",
+    "expected": "good",
+    "run_id": "8df7219b-62d8-4f94-9a88-49ee533370fc",
+    "status": "COMPLETED",
+    "error": null
+  }
+]
