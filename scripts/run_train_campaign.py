@@ -14,17 +14,22 @@ TRACKING = ROOT / "experiments" / "prompt-tracking"
 LABEL_RANK = {"weak": 0, "average": 1, "good": 2, "excellent": 3}
 
 
-def calibration(previous_version: str) -> tuple[str, dict]:
-    metrics = json.loads(
-        (TRACKING / previous_version / "metrics.json").read_text(encoding="utf-8")
-    )
-    rows = [
-        json.loads(line)
-        for line in (TRACKING / previous_version / "results.jsonl")
-        .read_text(encoding="utf-8")
-        .splitlines()
-        if line.strip()
-    ]
+def calibration(previous_versions: list[str]) -> tuple[str, dict]:
+    metrics_by_version = {
+        version: json.loads(
+            (TRACKING / version / "metrics.json").read_text(encoding="utf-8")
+        )
+        for version in previous_versions
+    }
+    rows = []
+    for version in previous_versions:
+        rows.extend(
+            json.loads(line)
+            for line in (TRACKING / version / "results.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+            if line.strip()
+        )
     completed = [row for row in rows if row["status"] == "COMPLETED"]
     drift = (
         sum(LABEL_RANK[row["predicted"]] - LABEL_RANK[row["expected"]] for row in completed)
@@ -50,16 +55,25 @@ def calibration(previous_version: str) -> tuple[str, dict]:
             f"The previous train batch had stable label direction (mean drift {drift:+.2f}). "
             "Keep the current evidence audit and apply all thresholds consistently."
         )
-    return guidance, metrics
+    aggregate = {
+        "versions": previous_versions,
+        "completed": sum(item["completed"] for item in metrics_by_version.values()),
+        "failed": sum(item["failed"] for item in metrics_by_version.values()),
+        "accuracy": (
+            sum(item["accuracy"] * item["completed"] for item in metrics_by_version.values())
+            / max(1, sum(item["completed"] for item in metrics_by_version.values()))
+        ),
+    }
+    return guidance, aggregate
 
 
-def create_prompt(version: str, previous_version: str) -> None:
-    guidance, metrics = calibration(previous_version)
+def create_prompt(version: str, previous_versions: list[str]) -> None:
+    guidance, metrics = calibration(previous_versions)
     base = (TRACKING / "v007" / "prompt.md").read_text(encoding="utf-8")
     base = base.replace("# Prompt v007 — lossless evidence audit across a new lab", f"# Prompt {version} — calibrated train campaign", 1)
     note = (
         "\n## Calibration from the previous train batch\n\n"
-        f"Source: `{previous_version}`; completed {metrics['completed']}, failed "
+        f"Sources: `{', '.join(previous_versions)}`; completed {metrics['completed']}, failed "
         f"{metrics['failed']}, exact-label accuracy {metrics['accuracy']:.1%}.\n\n"
         f"{guidance}\n"
     )
@@ -113,19 +127,24 @@ def main() -> int:
     parser.add_argument("--commit-each", action="store_true")
     args = parser.parse_args()
 
-    previous_version = f"v{args.start_batch + 3:03d}"
     for batch_index in range(args.start_batch, args.end_batch + 1):
         version = f"v{batch_index + 4:03d}"
         if (TRACKING / version / "metrics.json").exists():
             print(f"SKIP {version}: already completed", flush=True)
-            previous_version = version
             continue
-        create_prompt(version, previous_version)
+        version_number = int(version[1:])
+        candidates = [f"v{version_number - 2:03d}", f"v{version_number - 1:03d}"]
+        previous_versions = [
+            item for item in candidates
+            if (TRACKING / item / "metrics.json").exists()
+        ]
+        if not previous_versions:
+            raise RuntimeError(f"No completed calibration batch exists before {version}")
+        create_prompt(version, previous_versions)
         print(f"START {version}: train batch {batch_index}", flush=True)
         run_batch(version, batch_index, args.provider_reference)
         if args.commit_each:
             commit_version(version)
-        previous_version = version
     return 0
 
 
