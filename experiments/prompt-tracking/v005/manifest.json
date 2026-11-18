@@ -1,0 +1,21 @@
+{
+  "version": "v005",
+  "lab": "L01_keylogger_ads",
+  "batch_index": 1,
+  "environment": "eval-l01-v005",
+  "workflow_id": "a2406e30-c088-4281-a0ec-a9b255964004",
+  "golden_snapshot_id": "435fb9ff-013e-454d-81dc-c4089ce74a78",
+  "files": [
+    "L01_keylogger_ads_011_HE183025.docx",
+    "L01_keylogger_ads_012_HE186252.docx",
+    "L01_keylogger_ads_013_HE182411.docx",
+    "L01_keylogger_ads_014_HE194768.docx",
+    "L01_keylogger_ads_015_HE183914.docx",
+    "L01_keylogger_ads_016_HE196831.docx",
+    "L01_keylogger_ads_017_HE194745.docx",
+    "L01_keylogger_ads_018_HE193923.docx",
+    "L01_keylogger_ads_019_HE205688.docx",
+    "L01_keylogger_ads_020_HE199387.docx"
+  ],
+  "created_at": "2026-11-18T04:26:28.120039+00:00"
+}

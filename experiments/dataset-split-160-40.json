@@ -1,0 +1,1255 @@
+{
+  "seed": "ctfjudge-split-v1",
+  "strategy": "L01 is train-only because it was used before the split. L02-L06 contribute 6 stratified test files; L07-L08 contribute 5 each.",
+  "train": [
+    {
+      "file": "L01_keylogger_ads_001_HE178117.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L01_keylogger_ads_002_HE192770.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L01_keylogger_ads_003_HE209516.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L01_keylogger_ads_004_HE207845.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L01_keylogger_ads_005_HE204080.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L01_keylogger_ads_006_HE170007.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "good"
+    },
+    {
+      "file": "L01_keylogger_ads_007_HE171186.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "good"
+    },
+    {
+      "file": "L01_keylogger_ads_008_HE183164.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "good"
+    },
+    {
+      "file": "L01_keylogger_ads_009_HE183049.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "good"
+    },
+    {
+      "file": "L01_keylogger_ads_010_HE173376.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "good"
+    },
+    {
+      "file": "L01_keylogger_ads_011_HE183025.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "good"
+    },
+    {
+      "file": "L01_keylogger_ads_012_HE186252.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "good"
+    },
+    {
+      "file": "L01_keylogger_ads_013_HE182411.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "good"
+    },
+    {
+      "file": "L01_keylogger_ads_014_HE194768.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "average"
+    },
+    {
+      "file": "L01_keylogger_ads_015_HE183914.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "average"
+    },
+    {
+      "file": "L01_keylogger_ads_016_HE196831.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "average"
+    },
+    {
+      "file": "L01_keylogger_ads_017_HE194745.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "average"
+    },
+    {
+      "file": "L01_keylogger_ads_018_HE193923.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "average"
+    },
+    {
+      "file": "L01_keylogger_ads_019_HE205688.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "average"
+    },
+    {
+      "file": "L01_keylogger_ads_020_HE199387.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "average"
+    },
+    {
+      "file": "L01_keylogger_ads_021_HE197849.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L01_keylogger_ads_022_HE203018.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L01_keylogger_ads_023_HE196942.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L01_keylogger_ads_024_HE183180.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L01_keylogger_ads_025_HE197758.docx",
+      "lab_id": "L01_keylogger_ads",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L02_ransomware_sim_026_HE172095.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L02_ransomware_sim_027_HE181211.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L02_ransomware_sim_029_HE191421.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L02_ransomware_sim_030_HE184215.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L02_ransomware_sim_031_HE202307.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "good"
+    },
+    {
+      "file": "L02_ransomware_sim_032_HE193896.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "good"
+    },
+    {
+      "file": "L02_ransomware_sim_033_HE208727.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "good"
+    },
+    {
+      "file": "L02_ransomware_sim_036_HE191287.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "good"
+    },
+    {
+      "file": "L02_ransomware_sim_037_HE208651.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "good"
+    },
+    {
+      "file": "L02_ransomware_sim_038_HE176003.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "good"
+    },
+    {
+      "file": "L02_ransomware_sim_039_HE173195.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "average"
+    },
+    {
+      "file": "L02_ransomware_sim_041_HE186318.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "average"
+    },
+    {
+      "file": "L02_ransomware_sim_042_HE183657.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "average"
+    },
+    {
+      "file": "L02_ransomware_sim_043_HE206060.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "average"
+    },
+    {
+      "file": "L02_ransomware_sim_045_HE191341.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "average"
+    },
+    {
+      "file": "L02_ransomware_sim_046_HE188449.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L02_ransomware_sim_047_HE209351.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L02_ransomware_sim_048_HE198279.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L02_ransomware_sim_049_HE175300.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L03_downloader_schtask_051_HE189049.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L03_downloader_schtask_052_HE196665.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L03_downloader_schtask_053_HE197448.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L03_downloader_schtask_054_HE207987.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L03_downloader_schtask_056_HE198892.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "good"
+    },
+    {
+      "file": "L03_downloader_schtask_057_HE188423.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "good"
+    },
+    {
+      "file": "L03_downloader_schtask_059_HE172231.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "good"
+    },
+    {
+      "file": "L03_downloader_schtask_060_HE193762.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "good"
+    },
+    {
+      "file": "L03_downloader_schtask_062_HE205077.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "good"
+    },
+    {
+      "file": "L03_downloader_schtask_063_HE197934.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "good"
+    },
+    {
+      "file": "L03_downloader_schtask_064_HE173334.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "average"
+    },
+    {
+      "file": "L03_downloader_schtask_067_HE206804.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "average"
+    },
+    {
+      "file": "L03_downloader_schtask_068_HE207687.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "average"
+    },
+    {
+      "file": "L03_downloader_schtask_069_HE179914.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "average"
+    },
+    {
+      "file": "L03_downloader_schtask_070_HE202234.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "average"
+    },
+    {
+      "file": "L03_downloader_schtask_071_HE183264.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L03_downloader_schtask_072_HE195028.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L03_downloader_schtask_074_HE175064.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L03_downloader_schtask_075_HE178422.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L04_http_beacon_076_HE184865.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L04_http_beacon_077_HE174789.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L04_http_beacon_079_HE183947.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L04_http_beacon_080_HE195982.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L04_http_beacon_082_HE182735.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "good"
+    },
+    {
+      "file": "L04_http_beacon_083_HE186200.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "good"
+    },
+    {
+      "file": "L04_http_beacon_084_HE178547.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "good"
+    },
+    {
+      "file": "L04_http_beacon_085_HE183645.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "good"
+    },
+    {
+      "file": "L04_http_beacon_086_HE178228.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "good"
+    },
+    {
+      "file": "L04_http_beacon_088_HE180236.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "good"
+    },
+    {
+      "file": "L04_http_beacon_091_HE207519.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "average"
+    },
+    {
+      "file": "L04_http_beacon_092_HE202603.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "average"
+    },
+    {
+      "file": "L04_http_beacon_093_HE175822.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "average"
+    },
+    {
+      "file": "L04_http_beacon_094_HE194956.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "average"
+    },
+    {
+      "file": "L04_http_beacon_095_HE172285.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "average"
+    },
+    {
+      "file": "L04_http_beacon_096_HE181572.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L04_http_beacon_097_HE179410.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L04_http_beacon_099_HE183772.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L04_http_beacon_100_HE186439.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L05_stealer_ftp_102_HE186296.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L05_stealer_ftp_103_HE176262.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L05_stealer_ftp_104_HE205417.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L05_stealer_ftp_105_HE198585.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L05_stealer_ftp_106_HE174246.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "good"
+    },
+    {
+      "file": "L05_stealer_ftp_108_HE196195.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "good"
+    },
+    {
+      "file": "L05_stealer_ftp_109_HE208965.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "good"
+    },
+    {
+      "file": "L05_stealer_ftp_110_HE204483.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "good"
+    },
+    {
+      "file": "L05_stealer_ftp_112_HE202663.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "good"
+    },
+    {
+      "file": "L05_stealer_ftp_113_HE209010.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "good"
+    },
+    {
+      "file": "L05_stealer_ftp_114_HE180781.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "average"
+    },
+    {
+      "file": "L05_stealer_ftp_116_HE172165.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "average"
+    },
+    {
+      "file": "L05_stealer_ftp_117_HE186551.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "average"
+    },
+    {
+      "file": "L05_stealer_ftp_118_HE194815.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "average"
+    },
+    {
+      "file": "L05_stealer_ftp_119_HE171299.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "average"
+    },
+    {
+      "file": "L05_stealer_ftp_121_HE188561.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L05_stealer_ftp_123_HE204367.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L05_stealer_ftp_124_HE176818.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L05_stealer_ftp_125_HE185751.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L06_process_injection_126_HE187730.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L06_process_injection_128_HE187916.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L06_process_injection_129_HE203681.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L06_process_injection_130_HE207518.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L06_process_injection_131_HE204699.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "good"
+    },
+    {
+      "file": "L06_process_injection_132_HE172801.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "good"
+    },
+    {
+      "file": "L06_process_injection_133_HE195548.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "good"
+    },
+    {
+      "file": "L06_process_injection_135_HE191977.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "good"
+    },
+    {
+      "file": "L06_process_injection_136_HE203303.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "good"
+    },
+    {
+      "file": "L06_process_injection_137_HE193152.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "good"
+    },
+    {
+      "file": "L06_process_injection_140_HE178711.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "average"
+    },
+    {
+      "file": "L06_process_injection_141_HE189398.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "average"
+    },
+    {
+      "file": "L06_process_injection_142_HE195657.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "average"
+    },
+    {
+      "file": "L06_process_injection_143_HE182320.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "average"
+    },
+    {
+      "file": "L06_process_injection_144_HE172780.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "average"
+    },
+    {
+      "file": "L06_process_injection_146_HE172604.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L06_process_injection_147_HE202994.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L06_process_injection_148_HE194654.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L06_process_injection_150_HE184978.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L07_service_persistence_151_HE196053.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L07_service_persistence_152_HE181416.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L07_service_persistence_153_HE196785.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L07_service_persistence_154_HE187269.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L07_service_persistence_156_HE192489.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "good"
+    },
+    {
+      "file": "L07_service_persistence_158_HE209235.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "good"
+    },
+    {
+      "file": "L07_service_persistence_159_HE188470.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "good"
+    },
+    {
+      "file": "L07_service_persistence_160_HE189630.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "good"
+    },
+    {
+      "file": "L07_service_persistence_162_HE208183.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "good"
+    },
+    {
+      "file": "L07_service_persistence_163_HE204665.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "good"
+    },
+    {
+      "file": "L07_service_persistence_164_HE208019.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "average"
+    },
+    {
+      "file": "L07_service_persistence_165_HE178088.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "average"
+    },
+    {
+      "file": "L07_service_persistence_166_HE175356.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "average"
+    },
+    {
+      "file": "L07_service_persistence_167_HE205297.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "average"
+    },
+    {
+      "file": "L07_service_persistence_168_HE183631.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "average"
+    },
+    {
+      "file": "L07_service_persistence_170_HE173968.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "average"
+    },
+    {
+      "file": "L07_service_persistence_171_HE179665.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L07_service_persistence_173_HE186658.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L07_service_persistence_174_HE205891.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L07_service_persistence_175_HE184217.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L08_clipboard_hijacker_177_HE186610.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L08_clipboard_hijacker_178_HE197931.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L08_clipboard_hijacker_179_HE178465.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L08_clipboard_hijacker_180_HE191998.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L08_clipboard_hijacker_181_HE193146.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "good"
+    },
+    {
+      "file": "L08_clipboard_hijacker_182_HE185237.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "good"
+    },
+    {
+      "file": "L08_clipboard_hijacker_183_HE194946.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "good"
+    },
+    {
+      "file": "L08_clipboard_hijacker_184_HE195460.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "good"
+    },
+    {
+      "file": "L08_clipboard_hijacker_185_HE199707.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "good"
+    },
+    {
+      "file": "L08_clipboard_hijacker_188_HE181152.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "good"
+    },
+    {
+      "file": "L08_clipboard_hijacker_189_HE176608.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "average"
+    },
+    {
+      "file": "L08_clipboard_hijacker_190_HE193409.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "average"
+    },
+    {
+      "file": "L08_clipboard_hijacker_191_HE200934.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "average"
+    },
+    {
+      "file": "L08_clipboard_hijacker_192_HE205030.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "average"
+    },
+    {
+      "file": "L08_clipboard_hijacker_193_HE199145.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "average"
+    },
+    {
+      "file": "L08_clipboard_hijacker_194_HE204124.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "average"
+    },
+    {
+      "file": "L08_clipboard_hijacker_196_HE205170.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L08_clipboard_hijacker_197_HE180346.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L08_clipboard_hijacker_198_HE207481.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L08_clipboard_hijacker_200_HE184369.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "weak"
+    }
+  ],
+  "test": [
+    {
+      "file": "L02_ransomware_sim_028_HE182170.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L02_ransomware_sim_034_HE180490.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "good"
+    },
+    {
+      "file": "L02_ransomware_sim_035_HE192523.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "good"
+    },
+    {
+      "file": "L02_ransomware_sim_040_HE193380.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "average"
+    },
+    {
+      "file": "L02_ransomware_sim_044_HE203689.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "average"
+    },
+    {
+      "file": "L02_ransomware_sim_050_HE187752.docx",
+      "lab_id": "L02_ransomware_sim",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L03_downloader_schtask_055_HE191305.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L03_downloader_schtask_058_HE173152.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "good"
+    },
+    {
+      "file": "L03_downloader_schtask_061_HE194805.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "good"
+    },
+    {
+      "file": "L03_downloader_schtask_065_HE187270.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "average"
+    },
+    {
+      "file": "L03_downloader_schtask_066_HE187302.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "average"
+    },
+    {
+      "file": "L03_downloader_schtask_073_HE187552.docx",
+      "lab_id": "L03_downloader_schtask",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L04_http_beacon_078_HE197003.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L04_http_beacon_081_HE207846.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "good"
+    },
+    {
+      "file": "L04_http_beacon_087_HE195495.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "good"
+    },
+    {
+      "file": "L04_http_beacon_089_HE191059.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "average"
+    },
+    {
+      "file": "L04_http_beacon_090_HE195813.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "average"
+    },
+    {
+      "file": "L04_http_beacon_098_HE200962.docx",
+      "lab_id": "L04_http_beacon",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L05_stealer_ftp_101_HE178249.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L05_stealer_ftp_107_HE192257.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "good"
+    },
+    {
+      "file": "L05_stealer_ftp_111_HE186514.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "good"
+    },
+    {
+      "file": "L05_stealer_ftp_115_HE175480.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "average"
+    },
+    {
+      "file": "L05_stealer_ftp_120_HE201494.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "average"
+    },
+    {
+      "file": "L05_stealer_ftp_122_HE176005.docx",
+      "lab_id": "L05_stealer_ftp",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L06_process_injection_127_HE174394.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L06_process_injection_134_HE177963.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "good"
+    },
+    {
+      "file": "L06_process_injection_138_HE193411.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "good"
+    },
+    {
+      "file": "L06_process_injection_139_HE194566.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "average"
+    },
+    {
+      "file": "L06_process_injection_145_HE175256.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "average"
+    },
+    {
+      "file": "L06_process_injection_149_HE202272.docx",
+      "lab_id": "L06_process_injection",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L07_service_persistence_155_HE209490.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L07_service_persistence_157_HE170486.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "good"
+    },
+    {
+      "file": "L07_service_persistence_161_HE189669.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "good"
+    },
+    {
+      "file": "L07_service_persistence_169_HE198750.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "average"
+    },
+    {
+      "file": "L07_service_persistence_172_HE195771.docx",
+      "lab_id": "L07_service_persistence",
+      "quality_level": "weak"
+    },
+    {
+      "file": "L08_clipboard_hijacker_176_HE176305.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "excellent"
+    },
+    {
+      "file": "L08_clipboard_hijacker_186_HE177746.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "good"
+    },
+    {
+      "file": "L08_clipboard_hijacker_187_HE179509.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "good"
+    },
+    {
+      "file": "L08_clipboard_hijacker_195_HE186512.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "average"
+    },
+    {
+      "file": "L08_clipboard_hijacker_199_HE190191.docx",
+      "lab_id": "L08_clipboard_hijacker",
+      "quality_level": "weak"
+    }
+  ],
+  "train_batches": [
+    {
+      "lab_id": "L01_keylogger_ads",
+      "files": [
+        "L01_keylogger_ads_001_HE178117.docx",
+        "L01_keylogger_ads_002_HE192770.docx",
+        "L01_keylogger_ads_003_HE209516.docx",
+        "L01_keylogger_ads_004_HE207845.docx",
+        "L01_keylogger_ads_005_HE204080.docx",
+        "L01_keylogger_ads_006_HE170007.docx",
+        "L01_keylogger_ads_007_HE171186.docx",
+        "L01_keylogger_ads_008_HE183164.docx",
+        "L01_keylogger_ads_009_HE183049.docx",
+        "L01_keylogger_ads_010_HE173376.docx"
+      ]
+    },
+    {
+      "lab_id": "L01_keylogger_ads",
+      "files": [
+        "L01_keylogger_ads_011_HE183025.docx",
+        "L01_keylogger_ads_012_HE186252.docx",
+        "L01_keylogger_ads_013_HE182411.docx",
+        "L01_keylogger_ads_014_HE194768.docx",
+        "L01_keylogger_ads_015_HE183914.docx",
+        "L01_keylogger_ads_016_HE196831.docx",
+        "L01_keylogger_ads_017_HE194745.docx",
+        "L01_keylogger_ads_018_HE193923.docx",
+        "L01_keylogger_ads_019_HE205688.docx",
+        "L01_keylogger_ads_020_HE199387.docx"
+      ]
+    },
+    {
+      "lab_id": "L01_keylogger_ads",
+      "files": [
+        "L01_keylogger_ads_021_HE197849.docx",
+        "L01_keylogger_ads_022_HE203018.docx",
+        "L01_keylogger_ads_023_HE196942.docx",
+        "L01_keylogger_ads_024_HE183180.docx",
+        "L01_keylogger_ads_025_HE197758.docx"
+      ]
+    },
+    {
+      "lab_id": "L02_ransomware_sim",
+      "files": [
+        "L02_ransomware_sim_026_HE172095.docx",
+        "L02_ransomware_sim_027_HE181211.docx",
+        "L02_ransomware_sim_029_HE191421.docx",
+        "L02_ransomware_sim_030_HE184215.docx",
+        "L02_ransomware_sim_031_HE202307.docx",
+        "L02_ransomware_sim_032_HE193896.docx",
+        "L02_ransomware_sim_033_HE208727.docx",
+        "L02_ransomware_sim_036_HE191287.docx",
+        "L02_ransomware_sim_037_HE208651.docx",
+        "L02_ransomware_sim_038_HE176003.docx"
+      ]
+    },
+    {
+      "lab_id": "L02_ransomware_sim",
+      "files": [
+        "L02_ransomware_sim_039_HE173195.docx",
+        "L02_ransomware_sim_041_HE186318.docx",
+        "L02_ransomware_sim_042_HE183657.docx",
+        "L02_ransomware_sim_043_HE206060.docx",
+        "L02_ransomware_sim_045_HE191341.docx",
+        "L02_ransomware_sim_046_HE188449.docx",
+        "L02_ransomware_sim_047_HE209351.docx",
+        "L02_ransomware_sim_048_HE198279.docx",
+        "L02_ransomware_sim_049_HE175300.docx"
+      ]
+    },
+    {
+      "lab_id": "L03_downloader_schtask",
+      "files": [
+        "L03_downloader_schtask_051_HE189049.docx",
+        "L03_downloader_schtask_052_HE196665.docx",
+        "L03_downloader_schtask_053_HE197448.docx",
+        "L03_downloader_schtask_054_HE207987.docx",
+        "L03_downloader_schtask_056_HE198892.docx",
+        "L03_downloader_schtask_057_HE188423.docx",
+        "L03_downloader_schtask_059_HE172231.docx",
+        "L03_downloader_schtask_060_HE193762.docx",
+        "L03_downloader_schtask_062_HE205077.docx",
+        "L03_downloader_schtask_063_HE197934.docx"
+      ]
+    },
+    {
+      "lab_id": "L03_downloader_schtask",
+      "files": [
+        "L03_downloader_schtask_064_HE173334.docx",
+        "L03_downloader_schtask_067_HE206804.docx",
+        "L03_downloader_schtask_068_HE207687.docx",
+        "L03_downloader_schtask_069_HE179914.docx",
+        "L03_downloader_schtask_070_HE202234.docx",
+        "L03_downloader_schtask_071_HE183264.docx",
+        "L03_downloader_schtask_072_HE195028.docx",
+        "L03_downloader_schtask_074_HE175064.docx",
+        "L03_downloader_schtask_075_HE178422.docx"
+      ]
+    },
+    {
+      "lab_id": "L04_http_beacon",
+      "files": [
+        "L04_http_beacon_076_HE184865.docx",
+        "L04_http_beacon_077_HE174789.docx",
+        "L04_http_beacon_079_HE183947.docx",
+        "L04_http_beacon_080_HE195982.docx",
+        "L04_http_beacon_082_HE182735.docx",
+        "L04_http_beacon_083_HE186200.docx",
+        "L04_http_beacon_084_HE178547.docx",
+        "L04_http_beacon_085_HE183645.docx",
+        "L04_http_beacon_086_HE178228.docx",
+        "L04_http_beacon_088_HE180236.docx"
+      ]
+    },
+    {
+      "lab_id": "L04_http_beacon",
+      "files": [
+        "L04_http_beacon_091_HE207519.docx",
+        "L04_http_beacon_092_HE202603.docx",
+        "L04_http_beacon_093_HE175822.docx",
+        "L04_http_beacon_094_HE194956.docx",
+        "L04_http_beacon_095_HE172285.docx",
+        "L04_http_beacon_096_HE181572.docx",
+        "L04_http_beacon_097_HE179410.docx",
+        "L04_http_beacon_099_HE183772.docx",
+        "L04_http_beacon_100_HE186439.docx"
+      ]
+    },
+    {
+      "lab_id": "L05_stealer_ftp",
+      "files": [
+        "L05_stealer_ftp_102_HE186296.docx",
+        "L05_stealer_ftp_103_HE176262.docx",
+        "L05_stealer_ftp_104_HE205417.docx",
+        "L05_stealer_ftp_105_HE198585.docx",
+        "L05_stealer_ftp_106_HE174246.docx",
+        "L05_stealer_ftp_108_HE196195.docx",
+        "L05_stealer_ftp_109_HE208965.docx",
+        "L05_stealer_ftp_110_HE204483.docx",
+        "L05_stealer_ftp_112_HE202663.docx",
+        "L05_stealer_ftp_113_HE209010.docx"
+      ]
+    },
+    {
+      "lab_id": "L05_stealer_ftp",
+      "files": [
+        "L05_stealer_ftp_114_HE180781.docx",
+        "L05_stealer_ftp_116_HE172165.docx",
+        "L05_stealer_ftp_117_HE186551.docx",
+        "L05_stealer_ftp_118_HE194815.docx",
+        "L05_stealer_ftp_119_HE171299.docx",
+        "L05_stealer_ftp_121_HE188561.docx",
+        "L05_stealer_ftp_123_HE204367.docx",
+        "L05_stealer_ftp_124_HE176818.docx",
+        "L05_stealer_ftp_125_HE185751.docx"
+      ]
+    },
+    {
+      "lab_id": "L06_process_injection",
+      "files": [
+        "L06_process_injection_126_HE187730.docx",
+        "L06_process_injection_128_HE187916.docx",
+        "L06_process_injection_129_HE203681.docx",
+        "L06_process_injection_130_HE207518.docx",
+        "L06_process_injection_131_HE204699.docx",
+        "L06_process_injection_132_HE172801.docx",
+        "L06_process_injection_133_HE195548.docx",
+        "L06_process_injection_135_HE191977.docx",
+        "L06_process_injection_136_HE203303.docx",
+        "L06_process_injection_137_HE193152.docx"
+      ]
+    },
+    {
+      "lab_id": "L06_process_injection",
+      "files": [
+        "L06_process_injection_140_HE178711.docx",
+        "L06_process_injection_141_HE189398.docx",
+        "L06_process_injection_142_HE195657.docx",
+        "L06_process_injection_143_HE182320.docx",
+        "L06_process_injection_144_HE172780.docx",
+        "L06_process_injection_146_HE172604.docx",
+        "L06_process_injection_147_HE202994.docx",
+        "L06_process_injection_148_HE194654.docx",
+        "L06_process_injection_150_HE184978.docx"
+      ]
+    },
+    {
+      "lab_id": "L07_service_persistence",
+      "files": [
+        "L07_service_persistence_151_HE196053.docx",
+        "L07_service_persistence_152_HE181416.docx",
+        "L07_service_persistence_153_HE196785.docx",
+        "L07_service_persistence_154_HE187269.docx",
+        "L07_service_persistence_156_HE192489.docx",
+        "L07_service_persistence_158_HE209235.docx",
+        "L07_service_persistence_159_HE188470.docx",
+        "L07_service_persistence_160_HE189630.docx",
+        "L07_service_persistence_162_HE208183.docx",
+        "L07_service_persistence_163_HE204665.docx"
+      ]
+    },
+    {
+      "lab_id": "L07_service_persistence",
+      "files": [
+        "L07_service_persistence_164_HE208019.docx",
+        "L07_service_persistence_165_HE178088.docx",
+        "L07_service_persistence_166_HE175356.docx",
+        "L07_service_persistence_167_HE205297.docx",
+        "L07_service_persistence_168_HE183631.docx",
+        "L07_service_persistence_170_HE173968.docx",
+        "L07_service_persistence_171_HE179665.docx",
+        "L07_service_persistence_173_HE186658.docx",
+        "L07_service_persistence_174_HE205891.docx",
+        "L07_service_persistence_175_HE184217.docx"
+      ]
+    },
+    {
+      "lab_id": "L08_clipboard_hijacker",
+      "files": [
+        "L08_clipboard_hijacker_177_HE186610.docx",
+        "L08_clipboard_hijacker_178_HE197931.docx",
+        "L08_clipboard_hijacker_179_HE178465.docx",
+        "L08_clipboard_hijacker_180_HE191998.docx",
+        "L08_clipboard_hijacker_181_HE193146.docx",
+        "L08_clipboard_hijacker_182_HE185237.docx",
+        "L08_clipboard_hijacker_183_HE194946.docx",
+        "L08_clipboard_hijacker_184_HE195460.docx",
+        "L08_clipboard_hijacker_185_HE199707.docx",
+        "L08_clipboard_hijacker_188_HE181152.docx"
+      ]
+    },
+    {
+      "lab_id": "L08_clipboard_hijacker",
+      "files": [
+        "L08_clipboard_hijacker_189_HE176608.docx",
+        "L08_clipboard_hijacker_190_HE193409.docx",
+        "L08_clipboard_hijacker_191_HE200934.docx",
+        "L08_clipboard_hijacker_192_HE205030.docx",
+        "L08_clipboard_hijacker_193_HE199145.docx",
+        "L08_clipboard_hijacker_194_HE204124.docx",
+        "L08_clipboard_hijacker_196_HE205170.docx",
+        "L08_clipboard_hijacker_197_HE180346.docx",
+        "L08_clipboard_hijacker_198_HE207481.docx",
+        "L08_clipboard_hijacker_200_HE184369.docx"
+      ]
+    }
+  ]
+}

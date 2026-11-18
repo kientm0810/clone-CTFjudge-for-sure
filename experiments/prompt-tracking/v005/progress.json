@@ -1,0 +1,16 @@
+[
+  {
+    "file": "L01_keylogger_ads_013_HE182411.docx",
+    "expected": "good",
+    "run_id": "cceeae2d-984f-4171-9f32-4d86e3243dd2",
+    "status": "COMPLETED",
+    "error": null
+  },
+  {
+    "file": "L01_keylogger_ads_012_HE186252.docx",
+    "expected": "good",
+    "run_id": "280cce5f-5acf-424b-9097-8038584327b5",
+    "status": "COMPLETED",
+    "error": null
+  }
+]
