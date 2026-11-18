@@ -1,0 +1,21 @@
+{
+  "version": "v018",
+  "lab": "L07_service_persistence",
+  "batch_index": 14,
+  "environment": "eval-l07-v018",
+  "workflow_id": "989a010b-c432-4a66-9323-f016f09d21bb",
+  "golden_snapshot_id": "7400a939-cda9-4c50-8af5-05258287e06b",
+  "files": [
+    "L07_service_persistence_164_HE208019.docx",
+    "L07_service_persistence_165_HE178088.docx",
+    "L07_service_persistence_166_HE175356.docx",
+    "L07_service_persistence_167_HE205297.docx",
+    "L07_service_persistence_168_HE183631.docx",
+    "L07_service_persistence_170_HE173968.docx",
+    "L07_service_persistence_171_HE179665.docx",
+    "L07_service_persistence_173_HE186658.docx",
+    "L07_service_persistence_174_HE205891.docx",
+    "L07_service_persistence_175_HE184217.docx"
+  ],
+  "created_at": "2026-11-18T08:20:58.232510+00:00"
+}
